@@ -1,0 +1,967 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE ini}
+
+0000: NOP
+
+script_name "Random Events Project"
+
+// By ArtemQa146
+
+const
+    Event_1 = 31@
+    Event_2 = 30@
+    Event_3 = 29@
+    Event_4 = 28@
+    Event_5 = 27@
+    Event_6 = 26@
+    Event_7 = 25@
+    Event_8 = 24@
+    Event_9 = 23@
+    Event_10 = 22@
+    Event_11 = 21@
+    Event_12 = 20@
+    Event_13 = 19@
+    Event_14 = 18@
+    Volume = 17@
+    Event_15 = 16@
+    Event_16 = 15@
+    Event_17 = 14@
+    radius_start = 100.0
+end
+
+08C3: clear Event_1 bit 1
+08C3: clear Event_1 bit 2
+08C3: clear Event_1 bit 3
+08C3: clear Event_2 bit 1
+08C3: clear Event_2 bit 2
+08C3: clear Event_2 bit 3
+08C3: clear Event_3 bit 1
+08C3: clear Event_3 bit 2
+08C3: clear Event_4 bit 1
+08C3: clear Event_5 bit 1
+08C3: clear Event_6 bit 1
+08C3: clear Event_6 bit 2
+08C3: clear Event_6 bit 3
+08C3: clear Event_7 bit 1
+08C3: clear Event_8 bit 1
+08C3: clear Event_9 bit 1
+08C3: clear Event_10 bit 1
+08C3: clear Event_10 bit 2
+08C3: clear Event_10 bit 3
+08C3: clear Event_11 bit 1
+08C3: clear Event_12 bit 1
+08C3: clear Event_12 bit 3
+08C3: clear Event_13 bit 1
+08C3: clear Event_14 bit 1
+08C3: clear Event_15 bit 1
+08C3: clear Event_16 bit 1
+08C3: clear Event_17 bit 1
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Settings.ini" section "Settings" key "Progress mode"
+if
+    0@ == 1
+then
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_1_1"
+    if 0@ > 0
+    then 08BD: set Event_1 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_1_2"
+    if 0@ > 0
+    then 08BD: set Event_1 bit 2
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_2_1"
+    if 0@ > 0
+    then 08BD: set Event_2 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_2_2"
+    if 0@ > 0
+    then 08BD: set Event_2 bit 2
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_3_1"
+    if 0@ > 0
+    then 08BD: set Event_3 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_3_2"
+    if 0@ > 0
+    then 08BD: set Event_3 bit 2
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_4_1"
+    if 0@ > 0
+    then 08BD: set Event_4 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_5_1"
+    if 0@ > 0
+    then 08BD: set Event_5 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_6_1"
+    if 0@ > 0
+    then 08BD: set Event_6 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_6_2"
+    if 0@ > 0
+    then 08BD: set Event_6 bit 2
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_7_1"
+    if 0@ > 0
+    then 08BD: set Event_7 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_8_1"
+    if 0@ > 0
+    then 08BD: set Event_8 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_9_1"
+    if 0@ > 0
+    then 08BD: set Event_9 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_10_1"
+    if 0@ > 0
+    then 08BD: set Event_10 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_10_2"
+    if 0@ > 0
+    then 08BD: set Event_10 bit 2
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_10_3"
+    if 0@ > 0
+    then 08BD: set Event_10 bit 3
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_11_1"
+    if 0@ > 0
+    then 08BD: set Event_11 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_12_1"
+    if 0@ > 0
+    then 08BD: set Event_12 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_13_1"
+    if 0@ > 0
+    then 08BD: set Event_13 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_14_1"
+    if 0@ > 0
+    then 08BD: set Event_14 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_15_1"
+    if 0@ > 0
+    then 08BD: set Event_15 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_16_1"
+    if 0@ > 0
+    then 08BD: set Event_16 bit 1
+    end
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_17_1"
+    if 0@ > 0
+    then 08BD: set Event_17 bit 1
+    end
+end
+
+0AF2: Volume = read_float_from_ini_file "cleo\Settings.ini" section "Settings" key "Volume"
+
+
+while true
+wait 100
+    if and
+        $ONMISSION == 0
+        $ACTIVE_INTERIOR == 0
+        player.Defined(0)
+    then
+        if
+            010F:   player $PLAYER_CHAR wanted_level > 0
+        then
+            continue
+        end
+        
+        gosub @Reward_1_2
+        if or
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 2337.2639 -1363.198 24.014 radius radius_start
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -2405.2415 945.4985 45.419 radius radius_start
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA1"
+            if and
+                not locate_char_distance_to_coordinates $player_actor pos 2337.2639 -1363.198 24.014 radius 30.0
+                not locate_char_distance_to_coordinates $player_actor pos -2405.2415 945.4985 45.419 radius 30.0
+                1@ == 0
+            then
+                if and
+                    $INTRO_TOTAL_PASSED_MISSIONS >= 1
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 2337.2639 -1363.198 24.014 radius radius_start
+                then
+                    if
+                        08B7:   test Event_1 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos -2405.2415 945.4985 45.419 radius radius_start
+                then
+                    if
+                        08B7:   test Event_1 bit 2
+                    then
+                        continue
+                    else
+                        1@ = 2
+                    end
+                end
+                0A92: stream_custom_script "REPQA1.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA1"
+                until 0@ == 0
+                0AD3: 2@v = string_format "Event_1_%d" 1@
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key 2@v
+                if 0@ > 0
+                then 08BD: set Event_1 bit 1@
+                end
+                if and
+                    08B7:   test Event_1 bit 1
+                    08B7:   test Event_1 bit 2
+                then
+                    08BD: set Event_1 bit 3
+                end
+                continue
+            end
+        end
+        if or
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 2399.4514 -2011.0144 13.5537 radius radius_start
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -2636.5869 799.5732 49.9767 radius radius_start
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA2"
+            if and
+                not locate_char_distance_to_coordinates $player_actor pos 2399.4514 -2011.0144 13.5537 radius 30.0
+                not locate_char_distance_to_coordinates $player_actor pos -2636.5869 799.5732 49.9767 radius 30.0
+                1@ == 0
+            then
+            
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 2399.4514 -2011.0144 13.5537 radius radius_start
+                then
+                    if
+                        08B7:   test Event_2 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos -2636.5869 799.5732 49.9767 radius radius_start
+                then
+                    if
+                        08B7:   test Event_2 bit 2
+                    then
+                        continue
+                    else
+                        1@ = 2
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA2.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA2"
+                until 0@ == 0
+                0AD3: 2@v = string_format "Event_2_%d" 1@
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key 2@v
+                if 0@ > 0
+                then 08BD: set Event_2 bit 1@
+                end
+                if and
+                    08B7:   test Event_2 bit 1
+                    08B7:   test Event_2 bit 2
+                then
+                    08BD: set Event_2 bit 3
+                end
+                continue
+            end
+        end
+        
+        if or
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -2754.5991 167.3269 7.0401 radius radius_start
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 2092.5002 -1865.9554 13.5469 radius radius_start
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA3"
+            if and
+                not locate_char_distance_to_coordinates $player_actor pos -2754.5991 167.3269 7.0401 radius 30.0
+                not locate_char_distance_to_coordinates $player_actor pos 2092.5002 -1865.9554 13.5469 radius 30.0
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos -2754.5991 167.3269 7.0401 radius radius_start
+                then
+                    if
+                        08B7:   test Event_3 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+                if and
+                    $CRASH_SF_TOTAL_PASSED_MISSIONS >= 1
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 2092.5002 -1865.9554 13.5469 radius radius_start
+                then
+                    if
+                        08B7:   test Event_3 bit 2
+                    then
+                        continue
+                    else
+                        1@ = 2
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA3.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA3"
+                until 0@ == 0
+                0AD3: 2@v = string_format "Event_3_%d" 1@
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key 2@v
+                if 0@ > 0
+                then 08BD: set Event_3 bit 1@
+                end
+                continue
+            end
+        end
+        
+        if and
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 341.933 -336.7039 10.5413 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos 341.933 -336.7039 10.5413 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA4"
+            0E40: get_current_hour 2@
+            if and
+                2@ > 0
+                2@ < 5
+                1@ == 0
+                not locate_char_distance_to_coordinates $player_actor pos 341.933 -336.7039 10.5413 radius 60.0
+            then
+                if
+                    08B7:   test Event_4 bit 1
+                then
+                    continue
+                else
+                    1@ = 1
+                end
+
+
+                0A92: stream_custom_script "REPQA4.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA4"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_4_1"
+                if 0@ > 0
+                then 08BD: set Event_4 bit 1
+                end
+                continue
+            end
+        end
+        
+        if and
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 1054.5536 -1417.7639 13.5456 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos 1054.5536 -1417.7639 13.5456 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA5"
+            if
+                1@ == 0
+            then
+                if
+                    08B7:   test Event_5 bit 1
+                then
+                    continue
+                else
+                    1@ = 1
+                end
+
+
+                0A92: stream_custom_script "REPQA5.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA5"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_5_1"
+                if 0@ > 0
+                then 08BD: set Event_5 bit 1
+                end
+                continue
+            end
+        end
+        
+        if or
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 1533.3998 -896.3815 61.1226 radius radius_start
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 2269.8726 1595.5781 100.3452 radius radius_start
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA6"
+            if and
+                1@ == 0
+                not locate_char_distance_to_coordinates $player_actor pos 1533.3998 -896.3815 61.1226 radius 30.0
+                not locate_char_distance_to_coordinates $player_actor pos 2269.8726 1595.5781 100.3452 radius 30.0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 1533.3998 -896.3815 61.1226 radius radius_start
+                then
+                    if
+                        08B7:   test Event_6 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+                if and
+                    $HEIST_TOTAL_PASSED_MISSIONS >= 6
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 2269.8726 1595.5781 100.3452 radius radius_start
+                then
+                    if
+                        08B7:   test Event_6 bit 2
+                    then
+                        continue
+                    else
+                        1@ = 2
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA6.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA6"
+                until 0@ == 0
+                if
+                    1@ == 1
+                then
+                    0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_6_1"
+                    if 0@ == 1
+                    then 08BD: set Event_6 bit 3
+                    end
+                end
+                0AD3: 2@v = string_format "Event_6_%d" 1@
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key 2@v
+                if 0@ > 0
+                then 08BD: set Event_6 bit 1@
+                end
+                continue
+            end
+        end
+        
+        if and
+            $TORENO_TOTAL_PASSED_MISSIONS > 0 // Monster
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -520.7468 1964.6771 60.3736 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos -520.7468 1964.6771 60.3736 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA7" 
+            if
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos -520.7468 1964.6771 60.3736 radius radius_start
+                then
+                    if
+                        08B7:   test Event_7 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA7.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA7"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_7_1"
+                if 0@ > 0
+                then 08BD: set Event_7 bit 1@
+                end
+                continue
+            end
+        end
+        
+        if and
+            $TORENO_TOTAL_PASSED_MISSIONS > 0 // Monster
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -1509.3616 1975.7568 48.4171 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos -1509.3616 1975.7568 48.4171 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA8"
+            if
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos -1509.3616 1975.7568 48.4171 radius radius_start
+                then
+                    if
+                        08B7:   test Event_8 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA8.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA8"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_8_1"
+                if 0@ > 0
+                then 08BD: set Event_8 bit 1@
+                end
+                continue
+            end
+        end
+        
+        if and
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 877.9786 -1378.6016 25.2025 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos 877.9786 -1378.6016 25.2025 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA9"
+            if
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 877.9786 -1378.6016 25.2025 radius radius_start
+                then
+                    if
+                        08B7:   test Event_9 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA9.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA9"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_9_1"
+                if 0@ > 0
+                then 08BD: set Event_9 bit 1@
+                end
+                continue
+            end
+        end
+
+        if or
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 2070.6904 -1549.7566 13.4294 radius radius_start
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 1968.6388 -1306.5603 23.9244 radius radius_start
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 446.8353 -1285.8317 15.2792 radius radius_start
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA10"
+            if and
+                $SWEET_TOTAL_PASSED_MISSIONS >= 8 // Doberman
+                1@ == 0
+                not locate_char_distance_to_coordinates $player_actor pos 2070.6904 -1549.7566 13.4294 radius 30.0
+                not locate_char_distance_to_coordinates $player_actor pos 1968.6388 -1306.5603 23.9244 radius 30.0
+                not locate_char_distance_to_coordinates $player_actor pos 446.8353 -1285.8317 15.2792 radius 30.0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 2070.6904 -1549.7566 13.4294 radius radius_start
+                then
+                    if
+                        08B7:   test Event_10 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+                
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 1968.6388 -1306.5603 23.9244 radius radius_start
+                then
+                    if
+                        08B7:   test Event_10 bit 2
+                    then
+                        continue
+                    else
+                        1@ = 2
+                    end
+                end
+                
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 446.8353 -1285.8317 15.2792 radius radius_start
+                then
+                    if
+                        08B7:   test Event_10 bit 3
+                    then
+                        continue
+                    else
+                        1@ = 3
+                    end
+                end
+                
+                0A92: stream_custom_script "REPQA10.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA10"
+                until 0@ == 0
+                0AD3: 2@v = string_format "Event_10_%d" 1@
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key 2@v
+                if 0@ > 0
+                then 08BD: set Event_10 bit 1@
+                end
+                if and
+                    08B7:   test Event_10 bit 1
+                    08B7:   test Event_10 bit 2
+                    08B7:   test Event_10 bit 3
+                then
+                    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_10_1"
+                    0AF0: 1@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_10_2"
+                    0AF0: 2@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_10_3"
+                    if and
+                        0@ == 1
+                        1@ == 1
+                        2@ == 1
+                    then
+                        0394: play_music 1
+                        0ADF: add_text_label "REPQA10" text "HOMIES ARE SAVED!~n~~w~RESPECT +~1~"
+                        1@ = 10
+                        01E3: show_text_1number_styled GXT "REPQA10" number 1@ time 5000 style 1 // MISSION PASSED!~n~~w~RESPECT +
+                        0AE0: remove_text_label "REPQA10"
+                        0998: add_respect 10
+                    end
+                end
+                continue
+            end
+        end
+        
+        if and
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 1583.1021 -1882.9791 27.1461 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos 1583.1021 -1882.9791 27.1461 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA11"
+            if
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 1583.1021 -1882.9791 27.1461 radius radius_start
+                then
+                    if
+                        08B7:   test Event_11 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA11.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA11"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_11_1"
+                if 0@ > 0
+                then 08BD: set Event_11 bit 1@
+                end
+                continue
+            end
+        end
+        
+        gosub @Reward_12
+        if and
+            $TORENO_TOTAL_PASSED_MISSIONS > 0 // Monster
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 22.7269 -2660.1702 40.5369 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos 22.7269 -2660.1702 40.5369 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA12"
+            if
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 22.7269 -2660.1702 40.5369 radius radius_start
+                then
+                    if
+                        08B7:   test Event_12 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA12.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA12"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_12_1"
+                if 0@ > 0
+                then 08BD: set Event_12 bit 1@
+                end
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_12_1"
+                if
+                    0@ == 1
+                then
+                    08BD: set Event_12 bit 3
+                    timerb = 0
+                end
+                continue
+            end
+        end
+        
+        if and
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 2271.1575 -2212.0 13.5469 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos 2271.1575 -2212.0 13.5469 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA13"
+            if
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 2271.1575 -2212.0 13.5469 radius radius_start
+                then
+                    if
+                        08B7:   test Event_13 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA13.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA13"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_13_1"
+                if 0@ > 0
+                then 08BD: set Event_13 bit 1@
+                end
+                continue
+            end
+        end
+        
+        if and
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 1829.3181 -1684.6234 13.5469 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos 1829.3181 -1684.6234 13.5469 radius 30.0
+            $OG_LOC_TOTAL_PASSED_MISSIONS > 2
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA14"
+            if
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 1829.3181 -1684.6234 13.5469 radius radius_start
+                then
+                    if
+                        08B7:   test Event_14 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA14.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA14"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_14_1"
+                if 0@ > 0
+                then 08BD: set Event_14 bit 1@
+                end
+                continue
+            end
+        end
+        
+        if and
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -2555.0203 179.4592 5.2169 radius radius_start
+            not locate_char_distance_to_coordinates $player_actor pos -2555.0203 179.4592 5.2169 radius 30.0
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA15"
+            if
+                1@ == 0
+            then
+                0E40: get_current_hour 2@
+                if or
+                    2@ >= 22
+                    2@ <= 4
+                then
+
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos -2555.0203 179.4592 5.2169 radius radius_start
+                    then
+                        if
+                            08B7:   test Event_15 bit 1
+                        then
+                            continue
+                        else
+                            1@ = 1
+                        end
+                    end
+
+                    0A92: stream_custom_script "REPQA15.qa" 1@ Volume
+                    repeat
+                    wait 1000
+                    0AAA: 0@ = get_script_struct_named "REPQA15"
+                    until 0@ == 0
+                    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_15_1"
+                    if 0@ > 0
+                    then 08BD: set Event_15 bit 1@
+                    end
+                    continue
+                end
+            end
+        end
+        
+        
+        if and
+            $INTRO_TOTAL_PASSED_MISSIONS >= 1
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 340.3085 -1397.4178 14.3922 radius radius_start
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA16"
+            0E40: get_current_hour 2@
+            if and
+                2@ > 8
+                2@ < 15
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 340.3085 -1397.4178 14.3922 radius radius_start
+                then
+                    if
+                        08B7:   test Event_16 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA16.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA16"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_16_1"
+                if 0@ > 0
+                then 08BD: set Event_16 bit 1@
+                end
+                continue
+            end
+        end
+        
+        if and
+            $SWEET_TOTAL_PASSED_MISSIONS >= 5
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -673.0827 217.6315 19.0757 radius radius_start
+        then
+            0AAA: 1@ = get_script_struct_named "REPQA17"
+            if
+                1@ == 0
+            then
+
+                if
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos -673.0827 217.6315 19.0757 radius radius_start
+                then
+                    if
+                        08B7:   test Event_17 bit 1
+                    then
+                        continue
+                    else
+                        1@ = 1
+                    end
+                end
+
+                0A92: stream_custom_script "REPQA17.qa" 1@ Volume
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "REPQA17"
+                until 0@ == 0
+                0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Event_17_1"
+                if 0@ > 0
+                then 08BD: set Event_17 bit 1@
+                end
+                continue
+            end
+        end
+        
+        
+        // Награды
+        if
+            08B7:   test Event_6 bit 3
+        then
+            0AAA: 1@ = get_script_struct_named "PREQA6"
+            if and
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 2492.7634 -1680.9913 13.3376 radius 50.0
+                not locate_char_distance_to_coordinates $player_actor pos 2492.7634 -1680.9913 13.3376 radius 15.0
+                1@ == 0
+            then
+                0A92: stream_custom_script "PREQA6.qa"
+                repeat
+                wait 1000
+                0AAA: 0@ = get_script_struct_named "PREQA6"
+                until 0@ == 0
+                0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_6_1"
+                if 0@ == 0
+                then 08C3: clear Event_6 bit 3
+                end
+            end
+        end
+    end
+end
+
+:Reward_1_2
+if and
+    08B7:   test Event_1 bit 3
+    08B7:   test Event_2 bit 3
+then
+    0AF0: 0@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_1_1"
+    wait 250 // Cистема антифризон на ссд
+    0AF0: 1@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_1_2"
+    wait 250
+    0AF0: 2@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_2_1"
+    wait 250
+    0AF0: 3@ = read_int_from_ini_file "cleo\Progress.ini" section "Progress" key "Present_2_2"
+    if and
+        0@ == 1
+        1@ == 1
+        2@ == 1
+        3@ == 1
+    then
+        0394: play_music 1
+        1@ = 2
+        01E3: show_text_1number_styled GXT "RQ0_1" number 1@ time 5000 style 1 // MISSION PASSED!~n~~w~RESPECT +
+        0998: add_respect 2
+        08C3: clear Event_1 bit 3
+        08C3: clear Event_2 bit 3
+    else
+        08C3: clear Event_1 bit 3
+        08C3: clear Event_2 bit 3
+    end
+end
+return
+
+:Reward_12
+if 
+    08B7:   test Event_12 bit 3
+then
+    if
+        timerb > 60000
+    then
+        03E5: show_text_box "RQ0_2"
+        08C3: clear Event_12 bit 3
+        0109: player $PLAYER_CHAR money += 700
+    end
+end
+return

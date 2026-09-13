@@ -1,0 +1,369 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "REPQA16"
+
+// By ArtemQa146
+
+
+const
+    sound = 24@
+    Progress = 25@
+    Car_K = 23@
+    Blip = 22@
+    Win = 21@
+    Volume_1 = 20@
+    timer_local = 26@
+    Radius_out = 150.0
+    Timeout = 200000
+end
+
+0087: Volume_1 = 1@ // (float)
+
+Progress = 0
+Win = 0
+
+if
+    0@ == 1
+then
+
+    0E2A: add_cleo_blip 37 position 340.3085 -1397.4178 is_short 1 RGBA 255 255 255 255 store_to Blip
+    
+    Progress = 0
+    gosub @Coords
+
+    wait 300
+
+    repeat
+    wait 0
+    if
+        not Progress == 6
+    then
+    
+        if or
+            Progress == 2
+            Progress == 1
+            Progress == 0
+        then
+            gosub @Coords
+            if
+                not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
+            then
+                break
+            end
+        end
+    
+        if and
+            Progress == 0
+            80DF:   not actor $PLAYER_ACTOR driving
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 340.3085 -1397.4178 14.3922 radius 10.0
+        then
+            if
+                0102:   actor $PLAYER_ACTOR in_sphere 340.3085 -1397.4178 14.3922 radius 0.6 0.6  1.0 sphere 1 stopped_on_foot
+            then
+
+                Progress = 1
+                01B4: set_player $PLAYER_CHAR can_move 0
+                016A: fade 0 time 500
+                01F7: set_player $PLAYER_CHAR ignored_by_cops 1
+                03BF: set_player $PLAYER_CHAR ignored_by_everyone 1
+                wait 500
+
+                08C7: put_actor $PLAYER_ACTOR at 340.1085 -1397.4178 14.3922 dont_warp_gang
+                0173: set_actor $PLAYER_ACTOR Z_angle_to 117.8335
+                0E24: fix_char $PLAYER_ACTOR ground 1 brightness 0 and_fade_in 0
+
+                0729: AS_actor $PLAYER_ACTOR hold_cellphone 1
+
+
+                repeat
+                wait 0
+                model.Load(414)
+                until model.Available(414)
+
+                038B: load_requested_models
+                00A5: Car_K = create_car 414 at 342.0027 -1355.6632 14.5079
+                0175: set_car Car_K Z_angle_to 190.0
+                0224: set_car Car_K health_to 1000
+                model.Destroy(414)
+                
+                04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset -2.8 1.8 0.3
+                04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.0 0.2 0.0
+                015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+
+                wait 1500
+                016A: fade 1 time 1000
+                0581: enable_radar 0
+                0826: enable_hud 0
+                02A3: enable_widescreen 1
+                
+                wait 2000
+
+                0AAC: sound = load_audio_stream "V\R16.mp3"
+                0AAD: set_audio_stream sound state 1
+                0ABC: set_audio_stream sound volume Volume_1
+                timera = 0
+                0E2B: remove_cleo_blip Blip
+                0E2A: add_cleo_blip 56 position 342.0027 -1355.6632 is_short 0 RGBA 0 255 0 255 store_to Blip
+                
+                00BC: show_text_highpriority GXT 'RQ16_1' time 4000 flag 1  // ~s~Come back between 9:00 and 17:00
+                
+                wait 2000
+                
+                0407: store_coords_to 1@ 2@ 3@ from_car Car_K with_offset -2.2 9.0 0.0
+                0407: store_coords_to 4@ 5@ 6@  from_car Car_K with_offset 0.2 0.0 0.0
+                015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                
+                00BC: show_text_highpriority GXT 'RQ16_2' time 4000 flag 1  // ~s~Come back between 9:00 and 17:00
+                
+                wait 2600
+                
+                04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 2.8 1.8 0.3
+                04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.0 0.3 0.0
+                015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                
+                00BC: show_text_highpriority GXT 'RQ16_3' time 2000 flag 1  // ~s~Come back between 9:00 and 17:00
+                
+                wait 2000
+                
+                0729: AS_actor $PLAYER_ACTOR hold_cellphone 0
+                
+                016A: fade 0 time 500
+                wait 1500
+                
+                if
+                    not sound == -1
+                then
+                    repeat
+                    wait 0
+                    0AB9: get_audio_stream sound state_to 1@
+                    until 1@ == -1
+                    0AAE: remove_audio_stream sound
+                    sound = -1
+                end
+                
+                01F7: set_player $PLAYER_CHAR ignored_by_cops 0
+                03BF: set_player $PLAYER_CHAR ignored_by_everyone 0
+                01B4: set_player $PLAYER_CHAR can_move 1
+                02EB: restore_camera_with_jumpcut
+                
+                wait 500
+                016A: fade 1 time 500
+                0581: enable_radar 1
+                0826: enable_hud 1
+                02A3: enable_widescreen 0
+                
+
+                Progress = 2
+            end
+            
+        end
+        
+        if
+            Progress > 0
+        then
+        
+            if
+                056E:   car Car_K defined
+            then
+            
+                if and
+                    Progress == 2
+                    00DB:   actor $PLAYER_ACTOR in_car Car_K
+                then
+                    Progress = 3
+                    0E2B: remove_cleo_blip Blip
+                    0E2A: add_cleo_blip 56 position 2773.7957 -1606.1754 is_short 0 RGBA 0 255 0 255 store_to Blip
+                    03E5: show_text_box "RQ16_0"
+                    timer_local = Timeout
+                    0E4E: display_onscreen_timer_local Timer_local direction 1
+                end
+                
+                if
+                    Progress == 3
+                then
+                
+                    0227: 1@ = car Car_K health
+                    if or
+                        0119:   car Car_K wrecked
+                        80DB:   not actor $PLAYER_ACTOR in_car Car_K
+                        1@ < 930
+                        timer_local <= 0
+                    then
+                        020B: explode_car Car_K
+                        Progress = 6
+                        break
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2773.7957 -1606.1754 10.9219 radius 30.0
+                    then
+                        if
+                            0103:   actor $PLAYER_ACTOR in_sphere 2773.7957 -1606.1754 10.9219 radius 4.0 4.0 4.0 sphere 1 stopped_in_car
+                        then
+                            Progress = 4
+                        end
+                    end
+                    
+                    if
+                        Progress == 4
+                    then
+                        01B4: set_player $PLAYER_CHAR can_move 0
+                        05CD: AS_actor $PLAYER_ACTOR exit_car Car_K
+                        01F7: set_player $PLAYER_CHAR ignored_by_cops 1
+                        03BF: set_player $PLAYER_CHAR ignored_by_everyone 1
+                        
+                        016A: fade 0 time 1500
+                        
+                        0581: enable_radar 0
+                        0826: enable_hud 0
+                        02A3: enable_widescreen 1
+                        
+                        repeat
+                        wait 0
+                        until 80DB:   not actor $PLAYER_ACTOR in_car Car_K
+                        
+                        repeat
+                        wait 0
+                        04ED: load_animation  "REP"
+                        until 04EE:   animation "REP" loaded
+
+                        
+                        wait 500
+                        
+                        00AB: put_car Car_K at 2773.7957 -1606.1754 10.9219
+                        0175: set_car Car_K Z_angle_to 90.0
+
+                        
+                        08C7: put_actor $PLAYER_ACTOR at 2782.7515 -1607.5121 10.9219 dont_warp_gang
+                        0173: set_actor $PLAYER_ACTOR Z_angle_to 299.1282
+                        0E24: fix_char $PLAYER_ACTOR ground 1 brightness 0 and_fade_in 0
+                        
+                        067C: put_camera_on_actor $PLAYER_ACTOR offset 2.5 1.7 0.2 rotation 0.0 0.2 0.2 tilt 0.0 switchstyle 2
+                        
+                        wait 500
+                        
+                        015D: set_gamespeed 0.6
+                        
+                        0812: AS_actor $PLAYER_ACTOR perform_animation "R9_PED_JUMP" IFP "REP" framedelta 1000.0 loopA 0 lockX 1 lockY 1 lockF 1 time -1  // versionB
+                        
+                        016A: fade 1 time 0
+                        
+                        wait 1200
+                        
+                        
+                        08C7: put_actor $PLAYER_ACTOR at 2788.5842 -1605.4989 10.9219 dont_warp_gang
+                        0173: set_actor $PLAYER_ACTOR Z_angle_to 299.1282
+                        0E24: fix_char $PLAYER_ACTOR ground 1 brightness 0 and_fade_in 0
+                        
+                        067C: put_camera_on_actor $PLAYER_ACTOR offset 1.5 3.5 -0.7 rotation 0.0 0.2 -0.6 tilt 0.0 switchstyle 2
+                        
+                        015D: set_gamespeed 0.3
+
+                        0812: AS_actor $PLAYER_ACTOR perform_animation "R13_plr_jump" IFP "REP" framedelta 1000.0 loopA 0 lockX 1 lockY 1 lockF 1 time -1  // versionB
+
+                        
+                        wait 250
+                        
+                        070C: explode_car_without_radius_damage Car_K
+                        
+                        04EF: release_animation "REP"
+                        
+                        015D: set_gamespeed 0.4
+
+                        wait 2000
+
+                        016A: fade 0 time 500
+                        
+                        wait 1000
+                        
+                        Progress = 6
+                        0687: clear_actor $PLAYER_ACTOR task
+                        
+                        wait 500
+                        016A: fade 1 time 1000
+                        01F7: set_player $PLAYER_CHAR ignored_by_cops 0
+                        03BF: set_player $PLAYER_CHAR ignored_by_everyone 0
+                        0581: enable_radar 1
+                        0826: enable_hud 1
+                        02A3: enable_widescreen 0
+                        015D: set_gamespeed 1.0
+                        02EB: restore_camera_with_jumpcut
+                        01B4: set_player $PLAYER_CHAR can_move 1
+                        01C3: remove_references_to_car Car_K
+                        
+                        0109: player $PLAYER_CHAR money += 2000
+                        1@ = 2000
+                        01E3: show_text_1number_styled GXT "RQ0_0" number 1@ time 5000 style 2  // NEW HIGH SCORE!!~n~~w~~1~
+                        01B4: set_player $PLAYER_CHAR can_move 1
+                        4@ = 17001
+                        gosub @Sound
+                        break
+
+                    end
+
+                        
+                end
+
+            end
+            
+        end
+
+
+    else
+        break
+    end
+    gosub @Coords
+    until not player.Defined(0)
+    0E2B: remove_cleo_blip Blip
+    0E54: clear_onscreen_timer_local Timer_local
+
+    if 056E:   car Car_K defined
+    then 01C3: remove_references_to_car Car_K
+    end
+
+    if
+        not sound == -1
+    then
+        repeat
+        wait 0
+        0AB9: get_audio_stream sound state_to 1@
+        until 1@ == -1
+        0AAE: remove_audio_stream sound
+    end
+    0AD3: 5@v = string_format "Event_16_%d" 0@
+    0AF1: write_int Progress to_ini_file "cleo\Progress.ini" section "Progress" key 5@v
+    0A93: terminate_this_custom_script
+else
+    0A93: terminate_this_custom_script
+end
+
+
+
+
+
+:Coords
+29@ = 340.3085 
+28@ = -1397.4178
+27@ = 14.3922
+return
+
+:Sound
+repeat
+wait 0
+03CF: load_wav 4@ as 1
+until 03D0:   wav 1 loaded
+03D1: play_wav 1
+repeat
+wait 0
+until 03D2:   wav 1 ended
+040D: unload_wav 1
+return
+

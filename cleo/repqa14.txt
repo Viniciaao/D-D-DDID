@@ -1,0 +1,649 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "REPQA14"
+
+// By ArtemQa146
+
+// Оригинальное название из GTAV - Crash Rescue (Но сделано немного иначе)
+
+const
+    Killer = 31@
+    killer_dead = 30@
+    Pedestrians = 26@
+    Voice_P = 24@
+    Progress = 25@
+    Blip = 22@
+    Blip_2 = 21@
+    Car_player = 19@
+    timer_local = 20@
+    Volume_1 = 18@
+    Radius_out = 150.0
+    Timeout = 50000
+end
+
+0087: Volume_1 = 1@ // (float)
+
+Voice_P = -1
+Progress = 0
+
+if
+    0@ == 1
+then
+    model.Load(19)
+    model.Load(21)
+    model.Load(346)
+    038B: load_requested_models
+    gosub @Coords
+
+    009A: Pedestrians = create_actor_pedtype 4 model 19 at 29@ 28@ 27@
+    0E24: fix_char Pedestrians ground 1 brightness 1 and_fade_in 0
+    0173: set_actor Pedestrians Z_angle_to 4@
+    060A: create_decision_maker_type 0 store_to 1@ // decision\allowed\m_.ped files
+    060B: set_actor Pedestrians decision_maker_to 1@
+    0631: put_actor Pedestrians in_group 1@
+    0489: set_actor Pedestrians muted 1
+    
+    04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 0.0 2.2 0.0
+    0172: 4@ = actor Pedestrians Z_angle
+    4@ += 180.0
+    009A: Killer = create_actor_pedtype 4 model 21 at 1@ 2@ 3@
+    0173: set_actor Killer Z_angle_to 4@
+    0E24: fix_char Killer ground 1 brightness 1 and_fade_in 0
+    060A: create_decision_maker_type 0 store_to 1@ // decision\allowed\m_.ped files
+    060B: set_actor Killer decision_maker_to 1@
+    0631: put_actor Killer in_group 1@
+    0489: set_actor Killer muted 1
+    01B2: give_actor Killer weapon 22 ammo 60 // Load the weapon model before using this
+
+    model.Destroy(19)
+    model.Destroy(21)
+    model.Destroy(346)
+    0E2A: add_cleo_blip 37 position 29@ 28@ is_short 1 RGBA 255 255 255 255 store_to Blip
+
+    
+    repeat
+    wait 0
+    04ED: load_animation  "REP"
+    until 04EE:   animation "REP" loaded
+
+    0605: actor Killer perform_animation "R14_klr_idle" IFP "REP" framedelta 1000.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+    0812: AS_actor Pedestrians perform_animation "R14_ped_idle" IFP "REP" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+    wait 300
+    Progress = 0
+    timer_local = Timeout
+
+    repeat
+    wait 0
+    if and
+        056D:   actor Pedestrians defined
+        056D:   actor Killer defined
+        not Progress == 6
+    then
+
+        if and
+            Progress == 0
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius 20.0
+            03EE:   player $PLAYER_CHAR controllable
+        then
+            0812: AS_actor Pedestrians perform_animation "R14_ped_1" IFP "REP" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            01F7: set_player $PLAYER_CHAR ignored_by_cops 1
+            03BF: set_player $PLAYER_CHAR ignored_by_everyone 1
+            0581: enable_radar 0
+            0826: enable_hud 0
+            02A3: enable_widescreen 1
+            01B4: set_player $PLAYER_CHAR can_move 0
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 2.8 2.8 -0.6
+            04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 1.2 0.0
+            015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+            0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+            timera = 0
+            Progress = 1
+            gosub @Voice_remove
+            gosub @Voice_Load
+            gosub @Voice_Play
+            killer_dead = false
+            00BC: show_text_highpriority GXT 'RQ14_1' time 5000 flag 1  // ~s~Come back between 9:00 and 17:00.
+        end
+        
+        if
+            Progress == 1
+        then
+            if
+                timera > 1700
+            then
+                0812: AS_actor Pedestrians perform_animation "R14_ped_2" IFP "REP" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                01B4: set_player $PLAYER_CHAR can_move 0
+                04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset -3.5 -2.0 0.0
+                04C4: store_coords_to 4@ 5@ 6@ from_actor Killer with_offset -2.0 0.0 0.0
+                015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                timera = 0
+                Progress = 2
+            end
+        end
+        
+        if
+            Progress == 2
+        then
+            if
+                timera > 1200
+            then
+                repeat
+                wait 0
+                04ED: load_animation  "SHOP"
+                until 04EE:   animation "SHOP" loaded
+                0605: actor Killer perform_animation "ROB_LOOP_THREAT" IFP "SHOP" framedelta 1000.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                04EF: release_animation "SHOP"
+                04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 3.4 2.0 -0.0
+                04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 1.0 -0.2
+                015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                timera = 0
+                Progress = 146
+            end
+        end
+        
+        if
+            Progress == 146
+        then
+            if
+                timera > 1200
+            then
+                gosub @Shoot
+                0605: actor Pedestrians perform_animation "R13_plr_hit" IFP "REP" framedelta 8.0 loop 0 lockX 0 lockY 0 lockF 1 time -1
+                01B4: set_player $PLAYER_CHAR can_move 0
+                04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 2.7 4.0 -0.6
+                04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 1.5 -0.2
+                015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                timera = 0
+                Progress = 3
+                gosub @Voice_remove
+                gosub @Voice_Load
+                gosub @Voice_Play
+                00BC: show_text_highpriority GXT 'RQ14_3' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            end
+        end
+        
+        if
+            Progress == 3
+        then
+            if
+                timera > 2000
+            then
+                0605: actor Pedestrians perform_animation "R7_Ped_Loop" IFP "REP" framedelta 1000.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                02EB: restore_camera_with_jumpcut
+                01B4: set_player $PLAYER_CHAR can_move 1
+                04C4: store_coords_to 1@ 2@ 3@ from_actor Killer with_offset 1.0 3.0 1.0
+                05DA: AS_actor Killer run_away_in_panic_from 1@ 2@ 3@ away_radius 100.0 timelimit 15000
+                0332: set_actor Pedestrians bleeding 1
+                Progress = 0
+                gosub @Voice_remove
+                gosub @Voice_Load
+                gosub @Voice_Play
+                Progress = 4
+                01F7: set_player $PLAYER_CHAR ignored_by_cops 0
+                03BF: set_player $PLAYER_CHAR ignored_by_everyone 0
+                0581: enable_radar 1
+                0826: enable_hud 1
+                02A3: enable_widescreen 0
+                00BC: show_text_highpriority GXT 'RQ14_0' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            end
+        end
+
+
+        if and
+            Progress == 4
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius 3.0
+            80DF:   not actor $PLAYER_ACTOR driving
+        then
+            016A: fade 0 time 500
+            01B4: set_player $PLAYER_CHAR can_move 0
+            06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 1
+            wait 500
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset -1.3 -0.15 0.0
+            00A1: put_actor $PLAYER_ACTOR at 1@ 2@ 3@
+            0172: 1@ = actor Pedestrians Z_angle
+            0173: set_actor $PLAYER_ACTOR Z_angle_to 1@
+            0E24: fix_char $PLAYER_ACTOR ground 1 brightness 1 and_fade_in 0
+            0687: clear_actor $PLAYER_ACTOR task
+            0812: AS_actor Pedestrians perform_animation "R7_ped_scene" IFP "REP" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            0812: AS_actor $PLAYER_ACTOR perform_animation "R7_plr_scene" IFP "REP" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            gosub @Voice_remove
+            gosub @Voice_Load
+            gosub @Voice_Play
+            timera = 0
+            01F7: set_player $PLAYER_CHAR ignored_by_cops 1
+            03BF: set_player $PLAYER_CHAR ignored_by_everyone 1
+            7@ = 4.2
+            8@ = -3.0
+            9@ = 1.0
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 0.0 7@ 0.0
+            04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 0.0 0.0
+            015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+            0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+            00BC: show_text_highpriority GXT 'RQ14_4' time 4000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            wait 100
+            016A: fade 1 time 500
+            0581: enable_radar 0
+            0826: enable_hud 0
+            02A3: enable_widescreen 1
+
+            repeat
+            wait 0
+            if
+                0611:   actor $PLAYER_ACTOR performing_animation "R7_plr_scene"
+            then
+                0613: 1@ = actor $PLAYER_ACTOR animation "R7_plr_scene" time
+                if and
+                    not Progress == 5
+                    1@ > 0.48
+                then
+                    Progress = 5
+                    gosub @Voice_remove
+                    gosub @Voice_Load
+                    gosub @Voice_Play
+                    00BC: show_text_highpriority GXT 'RQ14_5' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                end
+
+                0613: 1@ = actor $PLAYER_ACTOR animation "R7_plr_scene" time
+                if
+                    1@ < 0.48
+                then
+                    7@ -= 0.005
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 0.0 7@ -0.3
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 0.0 0.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                else
+                    8@ -= 0.005
+                    9@ += 0.05
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset -2.0 8@ 0.0
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 1.0 0.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                end
+
+                0613: 1@ = actor $PLAYER_ACTOR animation "R7_plr_scene" time
+                if 1@ > 0.8
+                then 016A: fade 0 time 500
+                end
+                if 1@ > 0.95
+                then break
+                end
+            else
+                break
+            end
+            until timera > 15000
+            0687: clear_actor $PLAYER_ACTOR task
+            0687: clear_actor Pedestrians task
+            wait 300
+            016A: fade 1 time 500
+            02EB: restore_camera_with_jumpcut
+            0850: AS_actor Pedestrians follow_actor $PLAYER_ACTOR
+            0332: set_actor Pedestrians bleeding 0
+            01F7: set_player $PLAYER_CHAR ignored_by_cops 0
+            03BF: set_player $PLAYER_CHAR ignored_by_everyone 0
+            01B4: set_player $PLAYER_CHAR can_move 1
+            0581: enable_radar 1
+            0826: enable_hud 1
+            02A3: enable_widescreen 0
+            wait 300
+            Progress = 7
+            gosub @Voice_remove
+            gosub @Voice_Load
+            gosub @Voice_Play
+            00BC: show_text_highpriority GXT 'RQ14_7' time 5000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            Progress = 5
+            timerb = 0
+            0E4E: display_onscreen_timer_local timer_local direction 1
+            0E2B: remove_cleo_blip Blip
+            0E2A: add_cleo_blip 56 position 2001.6654 -1446.6461 is_short 0 RGBA 0 255 0 255 store_to Blip
+            0E2A: add_cleo_blip 56 position 1186.3728 -1325.1224 is_short 0 RGBA 0 255 0 255 store_to Blip_2
+        end
+
+        if and
+            Progress > 0
+            timer_local <= 0
+        then
+            0223: set_actor Pedestrians health_to 0
+            01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+            Progress = 6
+            continue
+        end
+
+        if
+            Progress == 5
+        then
+            if
+                00DF:   actor $PLAYER_ACTOR driving
+            then
+                03C0: Car_player = actor $PLAYER_ACTOR car
+                if and
+                    0431:   car Car_player passenger_seat_free 0
+                    timera > 10000
+                    80DB:   not actor Pedestrians in_car Car_player
+                then
+                    05CA: AS_actor Pedestrians enter_car Car_player passenger_seat 0 time -1
+                    timera = 0
+                end
+                if
+                    00DB:   actor Pedestrians in_car Car_player
+                then
+                    Progress = 8
+                    gosub @Voice_remove
+                    gosub @Voice_Load
+                    gosub @Voice_Play
+                    timera = 0
+                    00BC: show_text_highpriority GXT 'RQ14_8' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+
+                    repeat
+                    wait 0
+                    if
+                        00DF:   actor $PLAYER_ACTOR driving
+                    then
+                        03C0: Car_player = actor $PLAYER_ACTOR car
+                        if or
+                            0103:   actor $PLAYER_ACTOR in_sphere 2001.6654 -1446.6461 13.561 radius 4.0 4.0 4.0 sphere 1 stopped_in_car
+                            0103:   actor $PLAYER_ACTOR in_sphere 1186.3728 -1325.1224 13.5594 radius 4.0 4.0 4.0 sphere 1 stopped_in_car
+                        then
+                            01B4: set_player $PLAYER_CHAR can_move 0
+                            05CD: AS_actor Pedestrians exit_car Car_player
+                            0E54: clear_onscreen_timer_local timer_local
+                            00BC: show_text_highpriority GXT 'RQ14_2' time 5000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                            Progress = 2
+                            gosub @Voice_remove
+                            gosub @Voice_Load
+                            gosub @Voice_Play
+                            wait 3000
+                            016A: fade 0 time 1500
+                            wait 2000
+                            009B: destroy_actor Pedestrians
+                            0508: car Car_player close_all_doors
+                            wait 500
+                            016A: fade 1 time 500
+                            wait 300
+                            
+                            if
+                                killer_dead == true
+                            then
+                                0109: player $PLAYER_CHAR money += 500
+                                1@ = 500
+                                01E3: show_text_1number_styled GXT "RQ0_0" number 1@ time 5000 style 2  // NEW HIGH SCORE!!~n~~w~~1~
+                            else
+                                0109: player $PLAYER_CHAR money += 350
+                                1@ = 350
+                                01E3: show_text_1number_styled GXT "RQ0_0" number 1@ time 5000 style 2  // NEW HIGH SCORE!!~n~~w~~1~
+                            end
+                            01B4: set_player $PLAYER_CHAR can_move 1
+                            Progress = 6
+                            4@ = 17001
+                            gosub @Sound
+                            break
+                        end
+                        if and
+                            not locate_car_distance_to_coordinates Car_player pos 2001.6654 -1446.6461 13.561 radius 10.0
+                            not locate_car_distance_to_coordinates Car_player pos 1186.3728 -1325.1224 13.5594 radius 10.0
+                            timera > 3000
+                            Progress == 8
+                        then
+                            Progress = 9
+                            gosub @Voice_remove
+                            gosub @Voice_Load
+                            gosub @Voice_Play
+                            00BC: show_text_highpriority GXT 'RQ14_9' time 5000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                            timera = 0
+                        end
+                        if and
+                            Progress == 9
+                            timera > 5000
+                        then
+                            00BC: show_text_highpriority GXT 'RQ14_10' time 6000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                            Progress = 10
+                            timera = 0
+                        end
+                        if and
+                            Progress == 10
+                            timera > 6000
+                        then
+                            00BC: show_text_highpriority GXT 'RQ14_11' time 7000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                            Progress = 11
+                            timera = 0
+                        end
+                        if
+                            timer_local <= 0
+                        then
+                            0223: set_actor Pedestrians health_to 0
+                            01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+                            Progress = 6
+                            break
+                        end
+
+                    else
+                        0223: set_actor Pedestrians health_to 0
+                        01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+                        Progress = 6
+                        break
+                    end
+                    until not player.Defined(0)
+                    continue
+                end
+            end
+        end
+
+
+        // Если игрок ранил жертву
+        
+        if
+            Progress > 0
+        then
+            if or
+                051A:   actor Pedestrians damaged_by_actor $PLAYER_ACTOR
+                0118:   actor Pedestrians dead
+            then
+                0223: set_actor Pedestrians health_to 0
+                01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+                Progress = 6
+                gosub @Voice_remove
+                gosub @Voice_Load
+                gosub @Voice_Play
+                00BC: show_text_highpriority GXT 'RQ14_6' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                continue
+            end
+            if
+                0118:   actor Killer dead
+            then
+                killer_dead = true
+                continue
+            end
+        end
+        
+        if
+            Progress == 0
+        then
+            if or
+                051A:   actor Killer damaged_by_actor $PLAYER_ACTOR
+                0118:   actor Killer dead
+                051A:   actor Pedestrians damaged_by_actor $PLAYER_ACTOR
+                0118:   actor Pedestrians dead
+            then
+                01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+                Progress = 6
+                break
+            end
+        end
+
+    else
+        break
+    end
+    gosub @Coords
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
+    0E54: clear_onscreen_timer_local timer_local
+    0E2B: remove_cleo_blip Blip
+    0E2B: remove_cleo_blip Blip_2
+    if
+        not Progress == 6
+    then
+        if 056D:   actor Pedestrians defined
+        then 009B: destroy_actor Pedestrians
+        end
+    end
+    if
+        not Voice_P == -1
+    then
+        repeat
+        wait 0
+        0AB9: get_audio_stream Voice_P state_to 1@
+        until 1@ == -1
+        0AAE: remove_audio_stream Voice_P
+    end
+    if 056D:   actor Killer defined
+    then 01C2: remove_references_to_actor Killer // Like turning an actor into a random pedestrian
+    end
+    0AF1: write_int Progress to_ini_file "cleo\Progress.ini" section "Progress" key "Event_14_1"
+    04EF: release_animation "REP"
+    0A93: terminate_this_custom_script
+else
+    0A93: terminate_this_custom_script
+end
+
+:Voice_Load
+0AD3: 5@v = string_format "V\R14P%d.mp3" Progress
+return
+
+:Voice_Play
+if
+    Voice_P == -1
+then
+    0AC1: Voice_P = load_audio_stream_with_3d_support 5@v // IF and SET
+    0AC4: link_3d_audio_stream Voice_P to_actor Pedestrians
+    0AAD: set_audio_stream Voice_P state 1
+    0ABC: set_audio_stream Voice_P volume Volume_1
+else
+    if
+        not Voice_P == -1
+    then
+        0AB9: get_audio_stream Voice_P state_to 1@
+        if
+            1@ == -1
+        then
+            0AAE: remove_audio_stream Voice_P
+            Voice_P = -1
+        end
+    end
+end
+return
+
+:Voice_remove
+if
+    not Voice_P == -1
+then
+    0AAE: remove_audio_stream Voice_P
+    Voice_P = -1
+end
+return
+
+:Coords
+29@ = 1814.2412 
+28@ = -1680.4365
+27@ = 13.5469
+4@ = 180.5477
+return
+
+:Sound
+repeat
+wait 0
+03CF: load_wav 4@ as 1
+until 03D0:   wav 1 loaded
+03D1: play_wav 1
+repeat
+wait 0
+until 03D2:   wav 1 ended
+040D: unload_wav 1
+return
+
+:Shoot
+get_current_char_weaponinfo Killer store_to 1@
+get_ped_pointer 2@ = ped Killer
+get_weaponinfo_slot 1@ store_to 3@
+3@ *= 0x1C
+3@ += 0x5A4
+write_struct_offset 2@ offset 3@ size 4 value 1
+get_label_pointer 5@ = label @Buffer
+write_struct_offset 5@ offset 48 size 4 value 1@
+write_struct_offset 5@ offset 13 size 1 value 1
+read_memory 1@ = read_memory 0x86D744 size 4 virtual_protect 0
+call_method 1@ struct 5@ num_params 1 pop 0 2@
+return
+
+:Buffer // 128
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP

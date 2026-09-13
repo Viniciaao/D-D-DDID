@@ -1,0 +1,354 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "REPQA13"
+
+// By ArtemQa146
+
+//
+
+const
+    Pedestrians = 26@
+    Progress = 25@
+    choice = 23@
+    Blip = 22@
+    anim = 21@
+    sound = 20@
+    Volume_1 = 19@
+    Radius_out = 150.0
+end
+
+0087: Volume_1 = 1@ // (float)
+
+Progress = 0
+choice = 0
+anim = 0
+
+if
+    0@ == 1
+then
+    0E2A: add_cleo_blip 37 position 2264.1753 -2213.041 is_short 1 RGBA 255 255 255 255 store_to Blip
+
+    repeat
+    wait 0
+    04ED: load_animation  "REP"
+    until 04EE:   animation "REP" loaded
+
+    wait 300
+    Progress = 0
+
+    repeat
+    wait 0
+    if
+        not Progress == 6
+    then
+
+        if and
+            Progress == 0
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2264.1753 -2213.041 13.5469 radius 2.0
+            80DF:   not actor $PLAYER_ACTOR driving
+        then
+            Progress = 1
+            01B4: set_player $PLAYER_CHAR can_move 0
+            016A: fade 0 time 500
+            01F7: set_player $PLAYER_CHAR ignored_by_cops 1
+            03BF: set_player $PLAYER_CHAR ignored_by_everyone 1
+            wait 500
+            
+            model.Load(170)
+            model.Load(336)
+            038B: load_requested_models
+            gosub @Coords
+
+            009A: Pedestrians = create_actor_pedtype 4 model 170 at 29@ 28@ 27@
+            0E24: fix_char Pedestrians ground 1 brightness 1 and_fade_in 0
+            0173: set_actor Pedestrians Z_angle_to 312.6815
+            060A: create_decision_maker_type 0 store_to 1@ // decision\allowed\m_.ped files
+            060B: set_actor Pedestrians decision_maker_to 1@
+            0631: put_actor Pedestrians in_group 1@
+            0489: set_actor Pedestrians muted 1
+            01B2: give_actor Pedestrians weapon 5 ammo 60 // Load the weapon model before using this
+            0223: set_actor Pedestrians health_to 300
+
+            model.Destroy(170)
+            model.Destroy(336)
+            
+            00A1: put_actor $PLAYER_ACTOR at 2268.7996 -2211.0574 13.5469
+            0173: set_actor $PLAYER_ACTOR Z_angle_to 312.9945
+            0E24: fix_char $PLAYER_ACTOR ground 1 brightness 1 and_fade_in 0
+            0687: clear_actor $PLAYER_ACTOR task
+            0812: AS_actor Pedestrians perform_animation "R13_ped_idle" IFP "REP" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            
+            0AAC: sound = load_audio_stream "V\R13.mp3"
+            0AAD: set_audio_stream sound state 1
+            0ABC: set_audio_stream sound volume Volume_1
+            10@ = 0.3
+
+            wait 500
+            016A: fade 1 time 500
+            0581: enable_radar 0
+            0826: enable_hud 0
+            02A3: enable_widescreen 1
+            timera = 0
+            03E5: show_text_box "RQ13_0"
+            015D: set_gamespeed 0.5
+            
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset -1.9 2.8 -0.9
+            04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset -1.0 0.0 -0.2
+            015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+            0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+            
+            repeat
+            wait 0
+                if
+                    00E1:   player 0 pressed_key 14
+                then
+                    choice = 1
+                    break
+                end
+            until timera > 1500
+            
+            015D: set_gamespeed 1.0
+            timera = 0
+            03E6: remove_text_box
+
+            if
+                choice == 1
+            then
+                0812: AS_actor Pedestrians perform_animation "R13_ped_hit" IFP "REP" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                7@ = 4.0
+                8@ = -1.0
+                9@ = 0.5
+                
+                repeat
+                wait 0
+                if and
+                    anim == 0
+                    timera > 500
+                then
+                    anim = 1
+                    0812: AS_actor $PLAYER_ACTOR perform_animation "R13_plr_jump" IFP "REP" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 1 time -1  // versionB
+                end
+                if
+                    0611:   actor Pedestrians performing_animation "R13_ped_hit"
+                then
+                    0613: 1@ = actor Pedestrians animation "R13_ped_hit" time
+                    if
+                        1@ < 0.2
+                    then
+                        if
+                            timera > 500
+                        then
+                            7@ += 0.03
+                            9@ -= 0.01
+                            04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 1.0 7@ 9@
+                            04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+                            015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                            0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                        end
+                    else
+                        8@ += 0.01
+                        04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset -1.5 -2.3 8@
+                        04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset -1.0 0.0 0.2
+                        015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                        0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                    end
+                    0613: 1@ = actor Pedestrians animation "R13_ped_hit" time
+                    if
+                        1@ > 0.3
+                    then
+                        016A: fade 0 time 500
+                        10@ -= 0.01
+                        if 10@ < 0.0
+                        then 10@ = 0.0
+                        end
+                        0ABC: set_audio_stream sound volume 10@
+                    end
+                    if
+                        1@ > 0.45
+                    then
+                        0687: clear_actor Pedestrians task
+                        0687: clear_actor $PLAYER_ACTOR task
+                        break
+                    end
+                else
+                    break
+                end
+                until timera > 10000
+            else
+                0812: AS_actor Pedestrians perform_animation "R13_ped_hit" IFP "REP" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                7@ = 2.0
+                8@ = -0.7
+                9@ = 2.5
+                
+                repeat
+                wait 0
+                if and
+                    anim == 0
+                    timera > 1500
+                then
+                    anim = 1
+                    0812: AS_actor $PLAYER_ACTOR perform_animation "R13_plr_hit" IFP "REP" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                end
+                if
+                    0611:   actor Pedestrians performing_animation "R13_ped_hit"
+                then
+                    0613: 1@ = actor Pedestrians animation "R13_ped_hit" time
+                    if
+                        1@ < 0.4
+                    then
+                        7@ += 0.01
+                        9@ -= 0.01
+                        04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset -0.5 7@ 9@
+                        04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset -1.0 0.0 0.0
+                        015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                        0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                    else
+                        00A1: put_actor Pedestrians at 2278.7126 -2204.0471 13.5469
+                        timera = 0
+                        7@ = 1.5
+                        016A: fade 0 time 3000
+                        
+                        repeat
+                        wait 0
+                        8@ += 0.005
+                        7@ += 0.01
+                        04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 1.5 7@ 8@
+                        04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.0 0.0 -0.8
+                        015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                        0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                        0393: actor $PLAYER_ACTOR perform_animation "R13_plr_hit" at 0.4 times_normal_rate
+                        10@ -= 0.002
+                        if 10@ < 0.0
+                        then 10@ = 0.0
+                        end
+                        0ABC: set_audio_stream sound volume 10@
+                        until timera > 6000
+                        0687: clear_actor $PLAYER_ACTOR task
+                        break
+                        
+                    end
+                else
+                    break
+                end
+                until timera > 10000
+            end
+            
+            01F7: set_player $PLAYER_CHAR ignored_by_cops 0
+            03BF: set_player $PLAYER_CHAR ignored_by_everyone 0
+            if
+                choice == 1
+            then
+                00A1: put_actor Pedestrians at 2269.0466 -2210.3652 13.5469
+                0E24: fix_char Pedestrians ground 1 brightness 1 and_fade_in 0
+                05E2: AS_actor Pedestrians kill_actor $PLAYER_ACTOR
+            else
+                009B: destroy_actor Pedestrians
+                0EBB: pass_time 320000
+                0223: set_actor $PLAYER_ACTOR health_to 15
+                010B: 1@ = player $PLAYER_CHAR money
+                if
+                    1@ < 500
+                then
+                    1@ *= -1
+                    0109: player $PLAYER_CHAR money += 1@
+                    1@ *= -1
+                else
+                0109: player $PLAYER_CHAR money += -500
+                1@ = 500
+                end
+                01E3: show_text_1number_styled GXT "RQ0_4" number 1@ time 5000 style 2  // NEW HIGH SCORE!!~n~~w~~1~
+            end
+            0AAE: remove_audio_stream sound
+            wait 300
+            016A: fade 1 time 500
+            0581: enable_radar 1
+            0826: enable_hud 1
+            02A3: enable_widescreen 0
+            02EB: restore_camera_with_jumpcut
+            01B4: set_player $PLAYER_CHAR can_move 1
+            Progress = 1
+            015D: set_gamespeed 1.0
+            continue
+        end
+        
+        if and
+            Progress == 1
+            choice == 1
+        then
+            if
+                056D:   actor Pedestrians defined
+            then
+                if
+                    not locate_char_distance_to_char Pedestrians char $PLAYER_ACTOR radius 50.0
+                then
+                    01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+                    Progress = 6
+                    continue
+                end
+
+                if
+                    0118:   actor Pedestrians dead
+                then
+                    4@ = 17001
+                    gosub @Sound
+                    0109: player $PLAYER_CHAR money += 350
+                    1@ = 350
+                    01E3: show_text_1number_styled GXT "RQ0_0" number 1@ time 5000 style 2  // NEW HIGH SCORE!!~n~~w~~1~
+                    01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+                    Progress = 6
+                    continue
+                end
+            end
+        else
+            if and
+                Progress == 1
+                choice == 0
+            then
+                Progress = 6
+                continue
+            end
+        end
+
+    else
+        break
+    end
+    gosub @Coords
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
+    0E2B: remove_cleo_blip Blip
+    if
+        not Progress == 6
+    then
+        if 056D:   actor Pedestrians defined
+        then 009B: destroy_actor Pedestrians
+        end
+    end
+    0AF1: write_int Progress to_ini_file "cleo\Progress.ini" section "Progress" key "Event_13_1"
+    04EF: release_animation "REP"
+    0A93: terminate_this_custom_script
+else
+    0A93: terminate_this_custom_script
+end
+
+
+:Coords
+29@ = 2270.3374
+28@ = -2211.772
+27@ = 13.5469
+return
+
+:Sound
+repeat
+wait 0
+03CF: load_wav 4@ as 1
+until 03D0:   wav 1 loaded
+03D1: play_wav 1
+repeat
+wait 0
+until 03D2:   wav 1 ended
+040D: unload_wav 1
+return

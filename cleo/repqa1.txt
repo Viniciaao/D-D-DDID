@@ -1,0 +1,409 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "REPQA1"
+
+// By ArtemQa146
+
+// Оригинальное название из GTAV - Mugging 2
+
+const
+    Killer = 31@
+    Pedestrians = 30@
+    Voice_K = 26@
+    Voice_P = 24@
+    Progress = 25@
+    Car_K = 23@
+    Blip = 22@
+    Win = 21@
+    Volume_1 = 20@
+    Radius_out = 150.0
+end
+
+0087: Volume_1 = 1@ // (float)
+
+Voice_K = -1
+Voice_P = -1
+Progress = 0
+Win = 0
+
+if or
+    0@ == 1
+    0@ == 2
+then
+    model.Load(28)
+    model.Load(56)
+    model.Load(346)
+
+    repeat
+    wait 0
+    model.Load(461)
+    until model.Available(461)
+    
+    038B: load_requested_models
+    gosub @Coords
+    009A: Killer = create_actor_pedtype 4 model 28 at 29@ 28@ 27@
+    0173: set_actor Killer Z_angle_to 4@
+    04C4: store_coords_to 1@ 2@ 3@ from_actor Killer with_offset 0.0 2.0 0.0
+    0E24: fix_char Killer ground 1 brightness 1 and_fade_in 0
+    0172: 4@ = actor Killer Z_angle
+    4@ += 180.0
+    009A: Pedestrians = create_actor_pedtype 4 model 56 at 1@ 2@ 3@
+    0E24: fix_char Pedestrians ground 1 brightness 1 and_fade_in 0
+    0173: set_actor Pedestrians Z_angle_to 4@
+    01B2: give_actor Killer weapon 22 ammo 60 // Load the weapon model before using this
+    060A: create_decision_maker_type 0 store_to 1@ // decision\allowed\m_.ped files
+    060B: set_actor Killer decision_maker_to 1@
+    060B: set_actor Pedestrians decision_maker_to 1@
+    0631: put_actor Killer in_group 1@
+    0631: put_actor Pedestrians in_group 1@
+    04C4: store_coords_to 1@ 2@ 3@ from_actor Killer with_offset 0.0 -1.15 0.0
+    00A5: Car_K = create_car 461 at 1@ 2@ 3@
+    0172: 4@ = actor Killer Z_angle
+    4@ += 270.0
+    0175: set_car Car_K Z_angle_to 4@
+    01C3: remove_references_to_car Car_K
+    0223: set_actor Killer health_to 20
+    0489: set_actor Killer muted 1
+    0489: set_actor Pedestrians muted 1
+    model.Destroy(461)
+    model.Destroy(28)
+    model.Destroy(56)
+    model.Destroy(346)
+    0E2A: add_cleo_blip 37 position 29@ 28@ is_short 1 RGBA 255 255 255 255 store_to Blip
+    
+    repeat
+    wait 0
+    04ED: load_animation  "SHOP"
+    until 04EE:   animation "SHOP" loaded
+    
+    0605: actor Killer perform_animation "ROB_LOOP_THREAT" IFP "SHOP" framedelta 2.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+    0605: actor Pedestrians perform_animation "SHP_ROB_HANDSUP" IFP "SHOP" framedelta 2.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+
+    04EF: release_animation "SHOP"
+    
+    wait 300
+
+    repeat
+    wait 0
+    if and
+        056D:   actor Killer defined
+        056D:   actor Pedestrians defined
+        not Progress == 6
+    then
+        if
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius 4.0
+        then
+            Progress = 5
+            gosub @Voice_killer
+            00BC: show_text_highpriority GXT 'RQ1_5' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+        end
+        // Если закончена последняя фраза то выстрел
+        if
+            Progress == 5
+        then
+            gosub @Shoot
+            Progress = 6
+            0223: set_actor Pedestrians health_to 0
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Killer with_offset 0.0 0.0 0.0
+            01C2: remove_references_to_actor Killer // Like turning an actor into a random pedestrian
+            01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+            05D2: AS_actor Killer run_to_and_hijack_car -1 max_search_radius 40.0 traffic_behavior 2
+            continue
+        end
+
+        // Если игрок ранил/убил грабителя
+        if
+            051A:   actor Killer damaged_by_actor $PLAYER_ACTOR
+        then
+            01C2: remove_references_to_actor Killer // Like turning an actor into a random pedestrian
+            01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+            05E2: AS_actor Killer kill_actor $PLAYER_ACTOR
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 0.0 0.0 0.0
+            05DA: AS_actor Pedestrians run_away_in_panic_from 1@ 2@ 3@ away_radius 100.0 timelimit -1
+            Progress = 5
+            if 0118:   actor Killer dead
+            then
+                gosub @Voice_thanks
+                00BC: show_text_highpriority GXT 'RQ1_10' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            else
+                gosub @Voice_killer
+            end
+            4@ = 17001
+            gosub @Sound
+            0109: player $PLAYER_CHAR money += 100
+            1@ = 100
+            01E3: show_text_1number_styled GXT "RQ0_0" number 1@ time 5000 style 2  // NEW HIGH SCORE!!~n~~w~~1~
+            Win = 1
+            Progress = 6
+            continue
+        end
+        
+        // Если игрок ранил жертву
+        if
+            051A:   actor Pedestrians damaged_by_actor $PLAYER_ACTOR
+        then
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 0.0 0.0 0.0
+            01C2: remove_references_to_actor Killer // Like turning an actor into a random pedestrian
+            01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+            05DA: AS_actor Pedestrians run_away_in_panic_from 1@ 2@ 3@ away_radius 100.0 timelimit -1
+            05D2: AS_actor Killer run_to_and_hijack_car -1 max_search_radius 30.0 traffic_behavior 2
+            Progress = 5
+            gosub @Voice_killer
+            Progress = 6
+            continue
+        end
+        
+        if and
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius 20.0
+            not Progress >= 5
+        then
+            if Progress == 0
+            then Progress = 1
+            end
+            gosub @Voice_Load
+            gosub @Voice_Play
+        end
+    else
+        break
+    end
+    gosub @Coords
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
+    0E2B: remove_cleo_blip Blip
+    if
+        not Progress == 6
+    then
+        if 056D:   actor Killer defined
+        then 009B: destroy_actor Killer
+        end
+        if 056D:   actor Pedestrians defined
+        then 009B: destroy_actor Pedestrians
+        end
+    end
+    
+    if
+        not Voice_K == -1
+    then
+        repeat
+        wait 0
+        0AB9: get_audio_stream Voice_K state_to 1@
+        until 1@ == -1
+        0AAE: remove_audio_stream Voice_K
+    end
+    if
+        not Voice_P == -1
+    then
+        repeat
+        wait 0
+        0AB9: get_audio_stream Voice_P state_to 1@
+        until 1@ == -1
+        0AAE: remove_audio_stream Voice_P
+    end
+    0AD3: 5@v = string_format "Event_1_%d" 0@
+    0AF1: write_int Progress to_ini_file "cleo\Progress.ini" section "Progress" key 5@v
+    0AD3: 5@v = string_format "Present_1_%d" 0@
+    0AF1: write_int Win to_ini_file "cleo\Progress.ini" section "Progress" key 5@v
+    0A93: terminate_this_custom_script
+else
+    0A93: terminate_this_custom_script
+end
+
+:Voice_Load
+0AD3: 5@v = string_format "V\R1K%d.mp3" Progress
+0AD3: 10@v = string_format "V\R1P%d.mp3" Progress
+return
+
+:Voice_Play
+if and
+    Voice_K == -1
+    Voice_P == -1
+then
+    0AC1: Voice_K = load_audio_stream_with_3d_support 5@v // IF and SET
+    0AC1: Voice_P = load_audio_stream_with_3d_support 10@v // IF and SET
+    0AC4: link_3d_audio_stream Voice_K to_actor Killer
+    0AC4: link_3d_audio_stream Voice_P to_actor Pedestrians
+    0AAD: set_audio_stream Voice_K state 1
+    0ABC: set_audio_stream Voice_K volume Volume_1
+    if Progress == 1
+    then 00BC: show_text_highpriority GXT 'RQ1_1' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+    end
+    if Progress == 2
+    then 00BC: show_text_highpriority GXT 'RQ1_2' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+    end
+    if Progress == 3
+    then 00BC: show_text_highpriority GXT 'RQ1_3' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+    end
+    if Progress == 4
+    then 00BC: show_text_highpriority GXT 'RQ1_4' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+    end
+else
+    if
+        not Voice_K == -1
+    then
+        0AB9: get_audio_stream Voice_K state_to 1@
+        if
+            1@ == -1
+        then
+            0AAE: remove_audio_stream Voice_K
+            0AAD: set_audio_stream Voice_P state 1
+            0ABC: set_audio_stream Voice_P volume Volume_1
+            Voice_K = -1
+            if Progress == 1
+            then 00BC: show_text_highpriority GXT 'RQ1_6' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            end
+            if Progress == 2
+            then 00BC: show_text_highpriority GXT 'RQ1_7' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            end
+            if Progress == 3
+            then 00BC: show_text_highpriority GXT 'RQ1_8' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            end
+            if Progress == 4
+            then 00BC: show_text_highpriority GXT 'RQ1_9' time 3000 flag 1  // ~s~Come back between 9:00 and 17:00.
+            end
+        end
+    else
+        0AB9: get_audio_stream Voice_P state_to 1@
+        if
+            1@ == -1
+        then
+            0AAE: remove_audio_stream Voice_P
+            Voice_P = -1
+            Progress += 1
+        end
+    end
+end
+return
+
+:Voice_thanks
+if not Voice_P == -1
+then 0AAE: remove_audio_stream Voice_P
+end
+gosub @Voice_Load
+0AC1: Voice_P = load_audio_stream_with_3d_support 10@v // IF and SET
+0AC4: link_3d_audio_stream Voice_P to_actor Pedestrians
+0AAD: set_audio_stream Voice_P state 1
+0ABC: set_audio_stream Voice_P volume Volume_1
+return
+
+:Voice_killer
+if not Voice_K == -1
+then 0AAE: remove_audio_stream Voice_K
+end
+gosub @Voice_Load
+0AC1: Voice_K = load_audio_stream_with_3d_support 5@v // IF and SET
+0AC4: link_3d_audio_stream Voice_K to_actor Killer
+0AAD: set_audio_stream Voice_K state 1
+0ABC: set_audio_stream Voice_K volume Volume_1
+return
+
+:Coords
+if
+    0@ == 1
+then
+    29@ = 2337.2639 
+    28@ = -1363.198
+    27@ = 24.014
+    4@ = 258.2189
+else
+    29@ = -2405.082
+    28@ = 944.1586
+    27@ = 45.419
+    4@ = 38.3627
+end
+return
+
+:Sound
+repeat
+wait 0
+03CF: load_wav 4@ as 1
+until 03D0:   wav 1 loaded
+03D1: play_wav 1
+repeat
+wait 0
+until 03D2:   wav 1 ended
+040D: unload_wav 1
+return
+
+:Shoot
+get_current_char_weaponinfo Killer store_to 1@
+get_ped_pointer 2@ = ped Killer
+get_weaponinfo_slot 1@ store_to 3@
+3@ *= 0x1C
+3@ += 0x5A4
+write_struct_offset 2@ offset 3@ size 4 value 1
+get_label_pointer 5@ = label @Buffer
+write_struct_offset 5@ offset 48 size 4 value 1@
+write_struct_offset 5@ offset 13 size 1 value 1
+read_memory 1@ = read_memory 0x86D744 size 4 virtual_protect 0
+call_method 1@ struct 5@ num_params 1 pop 0 2@
+return
+    
+:Buffer // 128
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP
+0000: NOP

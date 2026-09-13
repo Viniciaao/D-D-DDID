@@ -1,0 +1,54 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE ini}
+
+0000: NOP
+
+script_name "PREQA6"
+
+// By ArtemQa146
+
+if and
+    $ACTIVE_INTERIOR == 0
+    0EEA: locate_char_distance_to_coordinates $player_actor pos 2492.7634 -1680.9913 13.3376 radius 60.0
+then
+     repeat
+    wait 0
+    model.Load(555)
+    until model.Available(555)
+
+    038B: load_requested_models
+    00A5: 0@ = create_car 555 at 2492.7634 -1680.9913 13.3376
+    0175: set_car 0@ Z_angle_to 86.773
+    model.Destroy(555)
+
+    repeat
+    wait 0
+    if
+        056E:   car 0@ defined
+    then
+        if
+            not locate_char_distance_to_coordinates $player_actor pos 2492.7634 -1680.9913 13.3376 radius 120.0
+        then
+            00A6: destroy_car 0@
+            wait 1000
+            0A93: terminate_this_custom_script
+            break
+        end
+        if
+            00DB:   actor $PLAYER_ACTOR in_car 0@
+        then
+            01C3: remove_references_to_car 0@
+            03E5: show_text_box "RQ0_3"
+            0AF1: write_int 0 to_ini_file "cleo\Progress.ini" section "Progress" key "Present_6_1"
+            wait 1000
+            0A93: terminate_this_custom_script
+            break
+        end
+    else
+        break
+    end
+    until not player.Defined(0)
+end
+
+0A93: terminate_this_custom_script

@@ -1,0 +1,159 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "R5CUT"
+
+// By ArtemQa146
+
+// —цена дл€ квеста Getaway driver - repqa5.qa
+
+const
+    Cop_1 = 30@
+    Killer = 0@
+    Car_1 = 29@
+end
+
+
+
+        repeat
+        wait 0
+        04ED: load_animation  "REP"
+        until 04EE:   animation "REP" loaded
+
+        model.Load(280)
+        model.Load(29)
+        model.Load(596)
+        038B: load_requested_models
+        009A: Cop_1 = create_actor_pedtype 4 model 280 at 1553.8774 -1626.6917 13.3828
+        00A1: put_actor Killer at 1553.8774 -1626.6917 13.3828
+        //009A: Killer = create_actor_pedtype 4 model 29 at 1553.8774 -1626.6917 13.3828
+        0173: set_actor Cop_1 Z_angle_to 270.0983
+        0172: 1@ = actor Cop_1 Z_angle
+        0173: set_actor Killer Z_angle_to 1@
+        0E24: fix_char Cop_1 ground 1 brightness 1 and_fade_in 0
+        0E24: fix_char Killer ground 1 brightness 1 and_fade_in 0
+        0812: AS_actor Cop_1 perform_animation "R5_SCENE_1" IFP "REP" framedelta 8.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1  // versionB
+        0812: AS_actor Killer perform_animation "R5_SCENE_2" IFP "REP" framedelta 8.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1  // version
+        04C4: store_coords_to 1@ 2@ 3@ from_actor Cop_1 with_offset -0.6 -0.1 0.0
+        00A5: Car_1 = create_car 596 at 1@ 2@ 3@
+        099A: set_car Car_1 collision_detection 0
+        0574: set_car Car_1 keep_position 1
+        08A6: set_car Car_1 door 5 rotation_to 0.5
+        0397: enable_car Car_1 siren 1
+        0172: 1@ = actor Cop_1 Z_angle
+        0175: set_car Car_1 Z_angle_to 1@
+        model.Destroy(280)
+        model.Destroy(29)
+        model.Destroy(596)
+        0581: enable_radar 0
+        0826: enable_hud 0
+        02A3: enable_widescreen 1
+        01B4: set_player $PLAYER_CHAR can_move 0
+        01F7: set_player $PLAYER_CHAR ignored_by_cops 1
+        03BF: set_player $PLAYER_CHAR ignored_by_everyone 1
+
+
+        0407: store_coords_to 1@ 2@ 3@ from_car Car_1 with_offset -1.4 4.2 0.5
+        0407: store_coords_to 4@ 5@ 6@ from_car Car_1 with_offset 1.5 0.0 1.0
+        015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+        0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+        7@ = 4.2
+        8@ = 4.0
+        9@ = 1.5
+        10@ = 0.5
+        11@ = -1.4
+        wait 100
+        0394: play_music 2
+        016A: fade 1 time 500
+        
+        0109: player $PLAYER_CHAR money += 1000
+        1@ = 1000
+        01E3: show_text_1number_styled GXT "RQ0_0" number 1@ time 5000 style 2  // NEW HIGH SCORE!!~n~~w~~1~
+        timera = 0
+        
+        repeat
+        wait 0
+        0613: 1@ = actor Killer animation "R5_SCENE_2" time
+        if 1@ < 0.01
+        then 0393: actor Killer perform_animation "R5_SCENE_2" at 0.2 times_normal_rate
+        else 0393: actor Killer perform_animation "R5_SCENE_2" at 1.2 times_normal_rate
+        end
+        0613: 1@ = actor Cop_1 animation "R5_SCENE_1" time
+        if 1@ < 0.01
+        then 0393: actor Cop_1 perform_animation "R5_SCENE_1" at 0.2 times_normal_rate
+        else 0393: actor Cop_1 perform_animation "R5_SCENE_1" at 1.2 times_normal_rate
+        end
+        
+        if and
+            1@ > 0.02
+            1@ < 0.33
+        then
+            7@ -= 0.028
+            9@ += 0.08
+            11@ -= 0.005
+            0407: store_coords_to 1@ 2@ 3@ from_car Car_1 with_offset 11@ 7@ 0.5
+            0407: store_coords_to 4@ 5@ 6@ from_car Car_1 with_offset 9@ 0.0 1.0
+            015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+            0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+        end
+        
+        0613: 1@ = actor Cop_1 animation "R5_SCENE_1" time
+        if and
+            1@ >= 0.33
+            1@ < 0.63
+        then
+            8@ += 0.005
+            10@ -= 0.02
+            0407: store_coords_to 1@ 2@ 3@ from_car Car_1 with_offset 8@ 10@ 0.0
+            0407: store_coords_to 4@ 5@ 6@ from_car Car_1 with_offset 0.0 0.0 0.3
+            015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+            0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+            9@ = -1.5
+        end
+        
+        0613: 1@ = actor Cop_1 animation "R5_SCENE_1" time
+        if
+            1@ >= 0.63
+        then
+            9@ -= 0.02
+            0407: store_coords_to 1@ 2@ 3@ from_car Car_1 with_offset -2.3 9@ 2.7
+            0407: store_coords_to 4@ 5@ 6@ from_car Car_1 with_offset 1.5 0.0 -0.5
+            015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+            0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+        end
+        
+        0613: 1@ = actor Cop_1 animation "R5_SCENE_1" time
+        if
+            1@ > 0.9
+        then
+            016A: fade 0 time 500
+        end
+
+        if or
+            timera > 20000
+            1@ >= 0.95
+        then
+            break
+        end
+
+        until not player.Defined(0)
+        wait 500
+        04EF: release_animation "REP"
+        02EB: restore_camera_with_jumpcut
+        009B: destroy_actor Cop_1
+        009B: destroy_actor Killer
+        00A6: destroy_car Car_1
+        wait 500
+        0581: enable_radar 1
+        0826: enable_hud 1
+        02A3: enable_widescreen 0
+        01B4: set_player $PLAYER_CHAR can_move 1
+        01F7: set_player $PLAYER_CHAR ignored_by_cops 0
+        03BF: set_player $PLAYER_CHAR ignored_by_everyone 0
+        016A: fade 1 time 500
+
+0A93: terminate_this_custom_script

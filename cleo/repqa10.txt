@@ -1,0 +1,325 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "REPQA10"
+
+// By ArtemQa146
+
+// Спасение хоуми - 3 выполненого - респект +3
+
+const
+    Pedestrians = 26@
+    Killer = 23@
+    Progress = 25@
+    Blip = 22@
+    timer_local = 20@
+    Radius_out = 150.0
+    Timeout = 15000
+    Obj_1 = 21@
+    Win = 19@
+    Volume_1 = 18@
+end
+
+0087: Volume_1 = 1@ // (float)
+
+Progress = 0
+Win = 0
+
+if or
+    0@ == 3
+    0@ == 2
+    0@ == 1
+then
+    if
+        0@ == 1
+    then
+        10@ = 106
+        11@ = 102
+    end
+    if
+        0@ == 2
+    then
+        10@ = 107
+        11@ = 104
+    end
+    if
+        0@ == 3
+    then
+        10@ = 105
+        11@ = 103
+    end
+    model.Load(10@)
+    model.Load(11@)
+    model.Load(2121)
+    model.Load(331)
+    038B: load_requested_models
+    gosub @Coords
+
+    009A: Pedestrians = create_actor_pedtype 8 model 10@ at 29@ 28@ 27@
+    0E24: fix_char Pedestrians ground 1 brightness 1 and_fade_in 0
+    0173: set_actor Pedestrians Z_angle_to 4@
+    04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 0.0 1.0 0.0
+    009A: Killer = create_actor_pedtype 4 model 11@ at 1@ 2@ 3@
+    0E24: fix_char Killer ground 1 brightness 1 and_fade_in 0
+    0172: 1@ = actor Pedestrians Z_angle
+    1@ += 180.0
+    0173: set_actor Killer Z_angle_to 1@
+    060A: create_decision_maker_type 0 store_to 1@ // decision\allowed\m_.ped files
+    060B: set_actor Pedestrians decision_maker_to 1@
+    0631: put_actor Pedestrians in_group 1@
+    060B: set_actor Killer decision_maker_to 1@
+    0631: put_actor Killer in_group 1@
+    01B2: give_actor Killer weapon 1 ammo 60 // Load the weapon model before using this
+
+    04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 0.0 0.0 -0.5
+    0E01: create_object_no_save 2121 at 1@ 2@ 3@ offset 0 ground 0 to Obj_1
+    0382: set_object Obj_1 collision_detection 0
+    4@ += 180.0
+    0177: set_object Obj_1 Z_angle_to 4@
+    08D2: object Obj_1 scale_model 1.0
+    
+
+    model.Destroy(10@)
+    model.Destroy(11@)
+    model.Destroy(2121)
+    model.Destroy(331)
+    0E2A: add_cleo_blip 37 position 29@ 28@ is_short 1 RGBA 255 255 255 255 store_to Blip
+
+    repeat
+    wait 0
+    04ED: load_animation  "REP"
+    until 04EE:   animation "REP" loaded
+
+    0812: AS_actor Pedestrians perform_animation "R10_fam_idle" IFP "REP" framedelta 2.0 loopA 1 lockX 0 lockY 1 lockF 1 time -1  // versionB
+    0605: actor Killer perform_animation "R10_bal_idle" IFP "REP" framedelta 2.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+
+    wait 300
+    Progress = 0
+    timer_local = Timeout
+
+    repeat
+    wait 0
+    if and
+        056D:   actor Pedestrians defined
+        not Progress == 6
+    then
+
+        if or
+            Progress == 0
+            Progress == 1
+            Progress == 2
+        then
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Killer with_offset 0.0 1.0 0.0
+            if or
+                051A:   actor Killer damaged_by_actor $PLAYER_ACTOR
+                0118:   actor Killer dead
+                0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 2.0
+                0A1B:   actor Killer colliding_with_actor $PLAYER_ACTOR
+            then
+                0E54: clear_onscreen_timer_local Timer_local
+                05E2: AS_actor Killer kill_actor $PLAYER_ACTOR
+                0812: AS_actor Pedestrians perform_animation "R10_fam_idle_2" IFP "REP" framedelta 2.0 loopA 1 lockX 0 lockY 1 lockF 1 time -1  // versionB
+                Progress = 3
+            end
+            if
+                0611:   actor Pedestrians performing_animation "R10_fam_idle"
+            then
+                0613: 1@ = actor Pedestrians animation "R10_fam_idle" time
+                if
+                    1@ > 0.8
+                then
+                    0393: actor Pedestrians perform_animation "R10_fam_idle" at 0.1 times_normal_rate
+                else
+                    0393: actor Pedestrians perform_animation "R10_fam_idle" at 0.9 times_normal_rate
+                end
+            end
+            if
+                0611:   actor Killer performing_animation "R10_bal_idle"
+            then
+                0613: 1@ = actor Killer animation "R10_bal_idle" time
+                if
+                    1@ > 0.8
+                then
+                    0393: actor Killer perform_animation "R10_bal_idle" at 0.1 times_normal_rate
+                else
+                    0393: actor Killer perform_animation "R10_bal_idle" at 0.9 times_normal_rate
+                end
+            end
+
+        end
+        
+        if
+            Progress == 3
+        then
+            if
+                0118:   actor Killer dead
+            then
+                Progress = 4
+                03E5: show_text_box "RQ10_0"
+            end
+        end
+
+        if
+            Progress == 4
+        then
+            04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 -1.0 0.0
+            if
+                0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 4@ 5@ 6@ radius 1.0
+            then
+                01B4: set_player $PLAYER_CHAR can_move 0
+                0687: clear_actor $PLAYER_ACTOR task
+                04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 -1.0 0.0
+                00A1: put_actor $PLAYER_ACTOR at 4@ 5@ 6@
+                0E24: fix_char $PLAYER_ACTOR ground 1 brightness 1 and_fade_in 0
+                04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+                04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 0.0 0.0
+                0E27: get_angle_from_two_coords 1@ 2@ and 4@ 5@ to 3@
+                0173: set_actor $PLAYER_ACTOR Z_angle_to 3@
+                0812: AS_actor $PLAYER_ACTOR perform_animation "R8_plr_down" IFP "REP" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1  // versionB
+
+                repeat
+                wait 0
+                if
+                    0611:   actor $PLAYER_ACTOR performing_animation "R8_plr_down"
+                then
+                    0613: 1@ = actor $PLAYER_ACTOR animation "R8_plr_down" time
+                    if
+                        1@ > 0.8
+                    then
+                        break
+                    end
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 1.1 2.5 -0.2
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                else
+                    break
+                end
+                until not player.Defined(0)
+                0687: clear_actor Pedestrians task
+                01B4: set_player $PLAYER_CHAR can_move 1
+                02EB: restore_camera_with_jumpcut
+                01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+                01C2: remove_references_to_actor Killer // Like turning an actor into a random pedestrian
+                01C4: remove_references_to_object Obj_1 // This object will now disappear when the player looks away
+                Obj_1 = -1
+                Progress = 6
+                Win = 1
+                continue
+            end
+        end
+
+
+        if and
+            Progress == 0
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius 15.0
+            03EE:   player $PLAYER_CHAR controllable
+        then
+            01B4: set_player $PLAYER_CHAR can_move 0
+            04C4: store_coords_to 1@ 2@ 3@ from_actor Pedestrians with_offset 1.7 2.0 -0.4
+            04C4: store_coords_to 4@ 5@ 6@ from_actor Pedestrians with_offset 0.0 0.0 0.0
+            015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+            0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+            timera = 0
+            Progress = 1
+        end
+        
+        if
+            Progress == 1
+        then
+            if
+                timera > 3000
+            then
+                0E4E: display_onscreen_timer_local Timer_local direction 1
+                02EB: restore_camera_with_jumpcut
+                Progress = 2
+                01B4: set_player $PLAYER_CHAR can_move 1
+            end
+        end
+
+
+        // Если игрок ранил жертву
+        if or
+            timer_local <= 0
+            051A:   actor Pedestrians damaged_by_actor $PLAYER_ACTOR
+            0118:   actor Pedestrians dead
+        then
+            0E54: clear_onscreen_timer_local Timer_local
+            01C2: remove_references_to_actor Pedestrians // Like turning an actor into a random pedestrian
+            01C2: remove_references_to_actor Killer // Like turning an actor into a random pedestrian
+            01C4: remove_references_to_object Obj_1 // This object will now disappear when the player looks away
+            Obj_1 = -1
+            0829: actor Pedestrians perform_animation "R10_fam_dead" IFP_file "REP" rate 2.0 time -1 and_dies
+            if
+                056D:   actor Killer defined
+            then
+                if
+                    0EE4: locate_char_distance_to_char Killer char $PLAYER_ACTOR radius 10.0
+                then
+                    05E2: AS_actor Killer kill_actor $PLAYER_ACTOR
+                end
+            end
+            Progress = 6
+            continue
+        end
+
+    else
+        break
+    end
+    gosub @Coords
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
+    0E54: clear_onscreen_timer_local timer_local
+    0E2B: remove_cleo_blip Blip
+    if
+        not Progress == 6
+    then
+        if 056D:   actor Pedestrians defined
+        then 009B: destroy_actor Pedestrians
+        end
+        if 056D:   actor Killer defined
+        then 009B: destroy_actor Killer
+        end
+    end
+    if 03CA:   object Obj_1 exists
+    then 0108: destroy_object Obj_1
+    end
+    0AD3: 5@v = string_format "Event_10_%d" 0@
+    0AF1: write_int Progress to_ini_file "cleo\Progress.ini" section "Progress" key 5@v
+    0AD3: 5@v = string_format "Present_10_%d" 0@
+    0AF1: write_int Win to_ini_file "cleo\Progress.ini" section "Progress" key 5@v
+    04EF: release_animation "REP"
+    0A93: terminate_this_custom_script
+else
+    0A93: terminate_this_custom_script
+end
+
+:Coords
+if
+    0@ == 1
+then
+    29@ = 2070.6904
+    28@ = -1549.7566
+    27@ = 13.4294
+    4@ = 181.6278
+end
+if
+    0@ == 2
+then
+    29@ =1968.6388
+    28@ = -1306.5603
+    27@ = 23.9244
+    4@ = 360.6278
+end
+if
+    0@ == 3
+then
+    29@ = 446.8353
+    28@ = -1285.8317
+    27@ = 15.2792
+    4@ = 127.9534
+end
+return

@@ -1,0 +1,336 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "REPQA4"
+
+// By ArtemQa146
+
+// Вдохновленный RDR2/Ведьмак 3
+
+const
+    Killer = 31@
+    Obj_3 = 12@
+    Obj_1 = 10@
+    Obj_2 = 11@
+    Progress = 25@
+    Killer_2 = 23@
+    Blip = 22@
+    Object_number = 20@
+    Obj_4 = 13@
+    Obj_5 = 14@
+    Obj_6 = 15@
+    Die_Ped = 18@
+    Voice = 21@
+    Volume_1 = 16@
+    Radius_out = 300.0
+end
+
+0087: Volume_1 = 1@ // (float)
+
+Progress = 1
+
+if
+    0@ == 1
+then
+    model.Load(206)
+    model.Load(162)
+    model.Load(160)
+    model.Load(341)
+    model.Load(342)
+    model.Load(1210)
+    model.Load(1212)
+    038B: load_requested_models
+    gosub @Coords
+    009A: Die_Ped = create_actor_pedtype 4 model 206 at 341.933 -336.7039 10.5413
+    0173: set_actor Die_Ped Z_angle_to 158.9388
+    0E24: fix_char Killer ground 1 brightness 1 and_fade_in 0
+    
+    009A: Killer = create_actor_pedtype 20 model 162 at 525.4364 -223.1393 15.7057
+    009A: Killer_2 = create_actor_pedtype 20 model 160 at 501.3658 -218.4452 15.4226
+    0E24: fix_char Killer ground 1 brightness 1 and_fade_in 0
+    0E24: fix_char Killer_2 ground 1 brightness 1 and_fade_in 0
+    01B2: give_actor Killer weapon 9 ammo 100 // Load the weapon model before using this
+    01B2: give_actor Killer_2 weapon 9 ammo 100 // Load the weapon model before using this
+    060A: create_decision_maker_type 0 store_to 1@ // decision\allowed\m_.ped files
+    060B: set_actor Killer decision_maker_to 1@
+    060B: set_actor Killer_2 decision_maker_to 1@
+    0631: put_actor Killer in_group 1@
+    0631: put_actor Killer_2 in_group 1@
+    0223: set_actor Killer health_to 500
+    0223: set_actor Killer_2 health_to 500
+    0223: set_actor Die_Ped health_to 5
+    081A: set_actor Killer weapon_skill_to 2
+    081A: set_actor Killer_2 weapon_skill_to 2
+
+    
+    0E01: create_object_no_save 1212 at 360.6436 -330.3543 12.9812 offset 0 ground 1 to Obj_1
+    0E01: create_object_no_save 1212 at 386.5186 -311.7685 13.1479 offset 0 ground 1 to Obj_2
+    0E01: create_object_no_save 1212 at 447.2955 -297.7772 7.4816 offset 0 ground 1 to Obj_3
+    0E01: create_object_no_save 1212 at 461.2829 -275.239 10.6495 offset 0 ground 1 to Obj_4
+    0E01: create_object_no_save 1210 at 494.2054 -244.1821 10.8516 offset 0 ground 1 to Obj_5
+    0E01: create_object_no_save 1210 at 515.56 -221.2083 15.1888 offset 0 ground 1 to Obj_6
+    0F03: create_render_object_to_object Obj_6 model 342 offset 0 -0.23 0 rotation 90.0 0 0 store_to 1@
+    0E37: set_render_object_scale 1@ 1.5 1.5 1.5
+    0382: set_object Obj_1 collision_detection 0
+    08D2: object Obj_1 scale_model 1.2
+    0382: set_object Obj_2 collision_detection 0
+    08D2: object Obj_2 scale_model 1.2
+    0382: set_object Obj_3 collision_detection 0
+    08D2: object Obj_3 scale_model 1.2
+    0382: set_object Obj_4 collision_detection 0
+    08D2: object Obj_4 scale_model 1.2
+    0453: set_object Obj_5 XY_rotation 270.0 0.0 angle 0.0
+    0382: set_object Obj_5 collision_detection 0
+    08D2: object Obj_5 scale_model 1.4
+    0453: set_object Obj_6 XY_rotation 270.0 0.0 angle 0.0
+    0382: set_object Obj_6 collision_detection 0
+    08D2: object Obj_6 scale_model 1.7
+    
+    model.Destroy(206)
+    model.Destroy(162)
+    model.Destroy(160)
+    model.Destroy(341)
+    model.Destroy(342)
+    model.Destroy(1210)
+    model.Destroy(1212)
+    0E2A: add_cleo_blip 37 position 29@ 28@ is_short 1 RGBA 255 255 255 255 store_to Blip
+    
+    repeat
+    wait 0
+    04ED: load_animation  "CRACK"
+    until 04EE:   animation "CRACK" loaded
+
+    0812: AS_actor Die_Ped perform_animation "crckidle1" IFP "CRACK" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+    
+    0332: set_actor Die_Ped bleeding 1
+
+    wait 300
+    Progress = 0
+
+    repeat
+    wait 0
+    if
+        not Progress == 6
+    then
+
+        if and
+            timera > 6000
+            Progress == 0
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 341.933 -336.7039 10.5413 radius 35.0
+        then
+            if
+                056D:   actor Die_Ped defined
+            then
+                if
+                    not Voice == -1
+                then
+                    0AAE: remove_audio_stream Voice
+                    Voice = -1
+                end
+                0209: 6@ = random_int_in_ranges 1 4
+                0AD3: 1@v = string_format "V\R4P%d.mp3" 6@
+                if 6@ == 1
+                then 00BC: show_text_highpriority GXT 'RQ4_1' time 7000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                end
+                if 6@ == 2
+                then 00BC: show_text_highpriority GXT 'RQ4_2' time 7000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                end
+                if 6@ == 3
+                then 00BC: show_text_highpriority GXT 'RQ4_3' time 4000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                end
+                0AC1: Voice = load_audio_stream_with_3d_support 1@v // IF and SET
+                0AC4: link_3d_audio_stream Voice to_actor Die_Ped
+                0AAD: set_audio_stream Voice state 1
+                0ABC: set_audio_stream Voice volume Volume_1
+                timera = 0
+            end
+        end
+    
+        if and
+            Progress == 0
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 341.933 -336.7039 10.5413 radius 5.0
+        then
+            if
+                056D:   actor Die_Ped defined
+            then
+                0829: actor Die_Ped perform_animation "crckdeth1" IFP_file "CRACK" rate 2.0 time -1 and_dies
+                0332: set_actor Die_Ped bleeding 0
+                01C2: remove_references_to_actor Die_Ped // Like turning an actor into a random pedestrian
+                Progress = 1
+                if
+                    not Voice == -1
+                then
+                    0AAE: remove_audio_stream Voice
+                    Voice = -1
+                end
+            end
+        end
+        
+        for Object_number = 0 to 5 step 1
+            if
+                03CA:   object Obj_1(Object_number,1i) exists
+            then
+                0400: store_coords_to 1@ 2@ 3@ from_object Obj_1(Object_number,1i) with_offset 0.0 0.0 0.0
+                016F: particle 3 rot 0.0 size 1.2 1 0 35 0 at 1@ 2@ 3@
+                024F: create_corona_with_radius 1.0 type 1 lensflares 0 with_color 0 25 0 at 1@ 2@ 3@
+                if and
+                    80DF:   not actor $PLAYER_ACTOR driving
+                    0EE6: locate_char_distance_to_object $PLAYER_ACTOR object Obj_1(Object_number,1i) radius 1.5
+                then
+                    4@ = 17001
+                    gosub @Sound
+                    0108: destroy_object Obj_1(Object_number,1i)
+                    Obj_1(Object_number,1i) = -1
+                    if or
+                        Object_number == 4
+                        Object_number == 5
+                    then
+                        if
+                            Object_number == 4
+                        then
+                            0109: player $PLAYER_CHAR money += 150
+                            0AD1: show_formatted_text_highpriority "~g~+150$" time 2000
+                        else
+                            06AC: 4@ = actor $PLAYER_ACTOR movement_speed
+                            if
+                                4@ > 3.0
+                            then
+                                3@ += 1.5
+                                0948: create_explosion_at 1@ 2@ 3@ type 12 camera_shake 0.2
+                                05BB: AS_actor $PLAYER_ACTOR fall_down 0 time_on_ground 500
+                            else
+                                0109: player $PLAYER_CHAR money += 250
+                                0AD1: show_formatted_text_highpriority "~g~+250$" time 2000
+                            end
+                        end
+                    else
+                        0109: player $PLAYER_CHAR money += 50
+                        0AD1: show_formatted_text_highpriority "~g~+50$" time 2000
+                    end
+                end
+            else
+                if and
+                    83CA:   not object Obj_1 exists
+                    83CA:   not object Obj_2 exists
+                    83CA:   not object Obj_3 exists
+                    83CA:   not object Obj_4 exists
+                    83CA:   not object Obj_5 exists
+                    83CA:   not object Obj_6 exists
+                then
+                    if Progress == 0
+                    then 01C2: remove_references_to_actor Die_Ped // Like turning an actor into a random pedestrian
+                    end
+                    Progress = 6
+                    break
+                end
+            end
+        end
+
+        if and
+            056D:   actor Killer defined
+            056D:   actor Killer_2 defined
+        then
+            if or
+                051A:   actor Killer damaged_by_actor $PLAYER_ACTOR
+                0118:   actor Killer dead
+                051A:   actor Killer_2 damaged_by_actor $PLAYER_ACTOR
+                0118:   actor Killer_2 dead
+                0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 515.56 -221.2083 15.1888 radius 20.0
+            then
+                if Progress == 0
+                then 01C2: remove_references_to_actor Die_Ped // Like turning an actor into a random pedestrian
+                end
+                if
+                    not Progress == 5
+                then
+                    01C2: remove_references_to_actor Killer // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor Killer_2 // Like turning an actor into a random pedestrian
+                    060A: create_decision_maker_type 0 store_to 1@ // decision\allowed\m_.ped files
+                    060B: set_actor Killer decision_maker_to 1@
+                    060B: set_actor Killer_2 decision_maker_to 1@
+                    0631: put_actor Killer in_group 1@
+                    0631: put_actor Killer_2 in_group 1@
+                    05E2: AS_actor Killer kill_actor $PLAYER_ACTOR
+                    05E2: AS_actor Killer_2 kill_actor $PLAYER_ACTOR
+                    Progress = 5
+                    if and
+                        83CA:   not object Obj_1 exists
+                        83CA:   not object Obj_2 exists
+                        83CA:   not object Obj_3 exists
+                        83CA:   not object Obj_4 exists
+                        83CA:   not object Obj_5 exists
+                        83CA:   not object Obj_6 exists
+                    then
+                        Progress = 6
+                        continue
+                    end
+                end
+            end
+        end
+        
+    else
+        break
+    end
+    gosub @Coords
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
+    0E2B: remove_cleo_blip Blip
+    if and
+        not Progress == 5
+        not Progress == 6
+    then
+        if 056D:   actor Killer defined
+        then 009B: destroy_actor Killer
+        end
+        if 056D:   actor Killer_2 defined
+        then 009B: destroy_actor Killer_2
+        end
+        if 056D:   actor Die_Ped defined
+        then 009B: destroy_actor Die_Ped
+        end
+    end
+    if 03CA:   object Obj_1 exists
+    then 01C4: remove_references_to_object Obj_1 // This object will now disappear when the player looks away
+    end
+    if 03CA:   object Obj_2 exists
+    then 01C4: remove_references_to_object Obj_2 // This object will now disappear when the player looks away
+    end
+    if 03CA:   object Obj_3 exists
+    then 01C4: remove_references_to_object Obj_3 // This object will now disappear when the player looks away
+    end
+    if 03CA:   object Obj_4 exists
+    then 01C4: remove_references_to_object Obj_4 // This object will now disappear when the player looks away
+    end
+    if 03CA:   object Obj_5 exists
+    then 01C4: remove_references_to_object Obj_5 // This object will now disappear when the player looks away
+    end
+    if 03CA:   object Obj_6 exists
+    then 01C4: remove_references_to_object Obj_6 // This object will now disappear when the player looks away
+    end
+    04EF: release_animation "CRACK"
+    0AF1: write_int Progress to_ini_file "cleo\Progress.ini" section "Progress" key "Event_4_1"
+    0A93: terminate_this_custom_script
+else
+    0A93: terminate_this_custom_script
+end
+
+:Coords
+29@ = 341.933
+28@ = -336.7039
+27@ = 10.5413
+return
+
+:Sound
+repeat
+wait 0
+03CF: load_wav 4@ as 1
+until 03D0:   wav 1 loaded
+03D1: play_wav 1
+repeat
+wait 0
+until 03D2:   wav 1 ended
+040D: unload_wav 1
+return
