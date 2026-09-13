@@ -40,6 +40,7 @@ then
 
     wait 300
     Progress = 0
+    gosub @Coords
 
     repeat
     wait 0
@@ -317,7 +318,6 @@ then
     else
         break
     end
-    gosub @Coords
     until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
     0E2B: remove_cleo_blip Blip
     if
@@ -343,12 +343,12 @@ return
 
 :Sound
 repeat
-wait 0
+wait 50
 03CF: load_wav 4@ as 1
 until 03D0:   wav 1 loaded
 03D1: play_wav 1
 repeat
-wait 0
+wait 50
 until 03D2:   wav 1 ended
 040D: unload_wav 1
 return
