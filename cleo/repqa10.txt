@@ -270,7 +270,6 @@ then
     else
         break
     end
-    gosub @Coords
     until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
     0E54: clear_onscreen_timer_local timer_local
     0E2B: remove_cleo_blip Blip

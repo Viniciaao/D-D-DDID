@@ -51,7 +51,6 @@ then
             Progress == 1
             Progress == 0
         then
-            gosub @Coords
             if
                 not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 29@ 28@ 27@ radius Radius_out
             then
@@ -173,7 +172,7 @@ then
                     not sound == -1
                 then
                     repeat
-                    wait 0
+                    wait 100
                     0AB9: get_audio_stream sound state_to 1@
                     until 1@ == -1
                     0AAE: remove_audio_stream sound
@@ -441,7 +440,6 @@ then
     else
         break
     end
-    gosub @Coords
     until not player.Defined(0)
     0E2B: remove_cleo_blip Blip
 
@@ -457,7 +455,7 @@ then
         not sound == -1
     then
         repeat
-        wait 0
+        wait 100
         0AB9: get_audio_stream sound state_to 1@
         until 1@ == -1
         0AAE: remove_audio_stream sound
@@ -481,12 +479,12 @@ return
 
 :Sound
 repeat
-wait 0
+wait 50
 03CF: load_wav 4@ as 1
 until 03D0:   wav 1 loaded
 03D1: play_wav 1
 repeat
-wait 0
+wait 50
 until 03D2:   wav 1 ended
 040D: unload_wav 1
 return
