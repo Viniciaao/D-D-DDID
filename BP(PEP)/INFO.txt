@@ -1,0 +1,25 @@
+* Many settings and parameters are located in the file Busy Pedestrians.ini 
+(Busy Pedestrians (Peds Events Project)\Settings\cleo\Busy Pedestrians.ini)
+Disabling scripts, setting the appearance chance, Ped ID and much more!
+
+* The mod uses the ID for the postman 208 and 265, in case of conflict, replace it with any other in the file 
+1. Busy Pedestrians\Postal Workers\PedIDs.txt
+2. Settings\cleo\Busy Pedestrians.ini
+
+* If the pizzeria cook is standing on top, then install Proper Fixes
+
+* If the ladder of the fire truck is not displayed correctly, then in SkyGfx you need to set this parameter: VehiclePipe = Mobile or Env
+
+-------------------------
+
+* Множество настроек и параметров находится в файле Busy Pedestrians.ini 
+(Busy Pedestrians (Peds Events Project)\Settings\cleo\Busy Pedestrians.ini)
+Отключение скриптов, настройка шанса появления, Ped ID и многое другое!
+
+* Мод использует ID для почтальона 208 и 265, в случае конфликта замените на любой другой в файле 
+1. Busy Pedestrians\Postal Workers\PedIDs.txt
+2. Settings\cleo\Busy Pedestrians.ini
+
+* Если повар в пиццерии стоит сверху, то установите Proper Fixes
+
+* Если лестница у пожарной машины отображается неверно, то в SkyGfx нужно установить этот параметр:  VehiclePipe = Mobile или Env
