@@ -1,0 +1,510 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "StartBW"
+
+// By ArtemQa146
+
+wait 700
+
+if
+    0AA2: 31@ = load_dynamic_library "CLEO+.cleo"
+then
+    if
+        0AA4: 30@ = get_dynamic_library_procedure "GetCleoPlusVersion" library 31@
+    then
+        0AA7: call_function_return 30@ num_params 0 pop 0 29@
+        if
+            not 29@ >= 0x1020000
+        then
+            0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+            0AA3: free_dynamic_library 31@
+            0A93: terminate_this_custom_script
+        end
+        0AA3: free_dynamic_library 31@
+    end
+else
+    0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+    0AA3: free_dynamic_library 31@
+    0A93: terminate_this_custom_script
+end
+
+if
+    0E2D: is_game_first_start
+then
+    0F00: load_special_model_dff "modelsq\Postbag" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postbag"
+    0F00: load_special_model_dff "modelsq\Postmail" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postmail"
+    0F00: load_special_model_dff "modelsq\Postpaper" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postpaper"
+    0F00: load_special_model_dff "modelsq\StopSign" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "StopSign"
+    0F00: load_special_model_dff "modelsq\spanner" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "spanner"
+    0F00: load_special_model_dff "modelsq\screw" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "screw"
+    0F00: load_special_model_dff "modelsq\toolbox" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "toolbox"
+    0F00: load_special_model_dff "modelsq\toolbox2" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "toolbox2"
+    0F00: load_special_model_dff "modelsq\rope" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "rope"
+    0F00: load_special_model_dff "modelsq\wndwash" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "wndwash"
+    0F00: load_special_model_dff "modelsq\sponge2" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "sponge2"
+    0F00: load_special_model_dff "modelsq\standq" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand"
+    0F00: load_special_model_dff "modelsq\stand1" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_1"
+    0F00: load_special_model_dff "modelsq\stand2" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_2"
+    0F00: load_special_model_dff "modelsq\stand3" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_3"
+    0F00: load_special_model_dff "modelsq\paintbrush" txd "modelsq\StWork" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "paintbrush"
+end
+
+const
+    Postbag = 31@
+    Postmail = 30@
+    Postpaper = 29@
+    Ped_ID = 28@
+    Ped_ID_Bike = 27@
+    Project_Props = 26@
+    Ped_Id_g1 = 25@
+    Ped_Id_g2 = 24@
+    Ped_Id_g3 = 23@
+    StopSign = 22@
+    Zone_Check = 0@
+    
+    Screw = 21@
+    Spanner = 20@
+    ToolBox = 19@
+    Rope = 18@
+    Ped_ID_c = 17@
+    ToolBox2 = 7@
+    PEd_id_r = 6@
+    
+    wndwash = 16@
+    sponge2 = 15@
+    SCr_postman = 14@
+    Scr_Gargabe = 13@
+    Scr_CommRepair = 12@
+    Scr_WindWash = 11@
+    Scr_streetart = 10@
+    
+    street_stand = 9@
+    street_brush = 8@
+    pause = 1000
+end
+
+0AF0: Postbag = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "Postbag"
+0AF0: Postmail = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "Postmail"
+0AF0: Postpaper = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "Postpaper"
+0AF0: Ped_ID = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Postman" key "Ped ID"
+0AF0: Ped_ID_Bike = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Postman" key "Ped ID Bike"
+
+0AF0: Project_Props = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Garbage Mans" key "Props"
+
+0AF0: Ped_Id_g1 = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Garbage Mans" key "Ped ID 2"
+0AF0: Ped_Id_g2 = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Garbage Mans" key "Ped ID 1"
+0AF0: Ped_Id_g3 = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Garbage Mans" key "Ped ID Driver"
+0AF0: StopSign = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "StopSign"
+
+0AF0: Spanner = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "spanner"
+0AF0: Screw = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "screw"
+0AF0: ToolBox = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "toolbox"
+0AF0: Rope = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "rope"
+0AF0: Ped_ID_c = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Communication repairers" key "PED ID"
+0AF0: Ped_ID_r = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Repairers" key "PED ID"
+
+0AF0: ToolBox2 = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "toolbox2"
+
+0AF0: wndwash = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "wndwash"
+0AF0: sponge2 = read_int_from_ini_file "cleo\Busy Workers.ini" section "Models" key "sponge2"
+
+0AF0: SCr_postman = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Postman"
+0AF0: Scr_Gargabe = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Garbage Mans"
+0AF0: Scr_CommRepair = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Communication repairers"
+0AF0: Scr_WindWash = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "WindWash"
+0AF0: Scr_streetart = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Street Art"
+
+0AF0: street_brush = read_int_from_ini_file "cleo\Busy Workers.ini" section "models" key "paintbrush"
+0AF0: street_stand = read_int_from_ini_file "cleo\Busy Workers.ini" section "models" key "stand"
+
+timera = 0
+timerb = 0
+
+
+while true
+wait pause
+    if
+        player.Defined(0)
+    then
+        06AC: 1@ = actor $PLAYER_ACTOR movement_speed
+        if or
+            not $ACTIVE_INTERIOR == 0
+            1@ > 50.0
+        then
+            continue
+        end
+
+            wait pause
+
+            if
+                SCr_postman == 1
+            then
+                gosub @Zone
+                if
+                    Zone_Check == true
+                then
+                    0AAA: 1@ = get_script_struct_named "PostMan"
+                    if
+                        1@ == 0
+                    then
+                        0A92: stream_custom_script "PostMan.qa" Postbag Postmail Postpaper Ped_ID Ped_ID_Bike
+                        wait 2000
+                    end
+                end
+            end
+            
+            wait pause
+            
+            if
+                Scr_Gargabe == 1
+            then
+                gosub @Zone_g
+                if
+                    Zone_Check == true
+                then
+                    0AAA: 1@ = get_script_struct_named "GrbgMns"
+                    if
+                        1@ == 0
+                    then
+                        0A92: stream_custom_script "Garbage Mans.qa" Project_Props Ped_Id_g1 Ped_Id_g2 Ped_Id_g3 StopSign
+                        wait 2000
+                    end
+                end
+            end
+            
+            wait pause
+            
+            if
+                Scr_CommRepair == 1
+            then
+                gosub @Time_Weather
+                if
+                    Zone_Check == true
+                then
+                    0AAA: 1@ = get_script_struct_named "Comrprs"
+                    if
+                        1@ == 0
+                    then
+                        0A92: stream_custom_script "Communication repairers.qa" Spanner Screw ToolBox Rope Ped_ID_c
+                        wait 2000
+                    end
+                end
+            end
+            
+            wait pause
+            
+            if
+                Scr_WindWash == 1
+            then
+                gosub @Time_Weather_w
+                if
+                    Zone_Check == true
+                then
+                    0AAA: 1@ = get_script_struct_named "WindWsh"
+                    if
+                        1@ == 0
+                    then
+                        0A92: stream_custom_script "WindWash.qa" wndwash sponge2
+                        wait 2000
+                    end
+                end
+            end
+            
+            wait pause
+            
+            if
+                Scr_streetart == 1
+            then
+                0D59: get_current_weather_to 2@
+                0E40: get_current_hour 3@
+                if and
+                    $ONMISSION == 0
+                    $ACTIVE_INTERIOR == 0
+                    3@ >= 10
+                    3@ < 18
+                    not 2@ == 8
+                    not 2@ == 16
+                then
+                    1@ = 0.0
+                    2@ = 0.0
+                    3@ = 0.0
+                    5@ = 1
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos -2397.145 -555.1846 129.4965 radius 100.0 // SF
+                    then
+                        1@ = -2397.145 
+                        2@ = -555.1846
+                        3@ = 129.4965
+                        4@ = 337.3324
+                        5@ = 1
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 1178.5813 -1995.5548 69.0078 radius 100.0 // LS
+                    then
+                        1@ = 1178.5813
+                        2@ = -1995.5548
+                        3@ = 69.0078
+                        4@ = 337.3553
+                        5@ = 2
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 362.2495 -1887.1648 7.8359 radius 100.0 // LS
+                    then
+                        1@ = 364.0464
+                        2@ = -1901.7749
+                        3@ = 7.8359
+                        4@ = 111.9968
+                        5@ = 3
+                    end
+                    
+                    if and
+                        not 1@ == 0.0
+                        not 2@ == 0.0
+                        not 3@ == 0.0
+                        not locate_char_distance_to_coordinates $player_actor pos 1@ 2@ 3@ radius 50.0
+                    then
+                        0AAA: 0@ = get_script_struct_named "StArtQ"
+                        if
+                            0@ == 0
+                        then
+                            0A92: stream_custom_script "Street Artist.qa" 1@ 2@ 3@ 4@ 5@ street_brush street_stand
+                            wait 2000
+                        end
+                    end
+                end
+            end
+            
+            wait pause
+            
+                0D59: get_current_weather_to 2@
+                0E40: get_current_hour 3@
+                if and
+                    $ONMISSION == 0
+                    $ACTIVE_INTERIOR == 0
+                    3@ >= 6
+                    3@ < 17
+                    not 2@ == 8
+                    not 2@ == 16
+                then
+                    1@ = 0.0
+                    2@ = 0.0
+                    3@ = 0.0
+
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos -2359.2046 -27.1905 35.3203 radius 100.0 // SF
+                    then
+                        1@ = -2359.2046
+                        2@ = -27.1905
+                        3@ = 35.320
+                        4@ = 181.714
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos -2509.6543 454.3044 27.747 radius 100.0 // SF
+                    then
+                        1@ = -2509.6543
+                        2@ = 454.3044
+                        3@ = 27.747
+                        4@ = 38.4329
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos -2452.4744 798.687 35.1797 radius 100.0 // SF
+                    then
+                        1@ = -2452.4744
+                        2@ = 798.687
+                        3@ = 35.1797
+                        4@ = 183.3905
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 1038.1849 -944.5129 42.7696 radius 100.0 // SF
+                    then
+                        1@ = 1038.1849
+                        2@ = -944.2129
+                        3@ = 42.7696
+                        4@ = 7.5227
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 2420.6982 -1466.6644 24.0 radius 100.0 // SF
+                    then
+                        1@ = 2420.6982 
+                        2@ = -1466.6644
+                        3@ = 24.0
+                        4@ = 86.1258
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 1411.6847 -1881.7786 13.5469 radius 100.0 // SF
+                    then
+                        1@ = 1411.6847
+                        2@ = -1881.7786
+                        3@ = 13.5469
+                        4@ = 181.6672
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 1359.8651 304.9644 19.5547 radius 100.0 // SF
+                    then
+                        1@ = 1359.8651
+                        2@ = 304.9644
+                        3@ = 19.5547
+                        4@ = 331.9848
+                    end
+                    
+                    if
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 2035.2906 2158.4905 10.8203 radius 100.0 // SF
+                    then
+                        1@ = 2035.2906
+                        2@ = 2158.4905
+                        3@ = 10.8203
+                        4@ = 2.5325
+                    end
+                    
+
+                    if and
+                        not 1@ == 0.0
+                        not 2@ == 0.0
+                        not 3@ == 0.0
+                        not locate_char_distance_to_coordinates $player_actor pos 1@ 2@ 3@ radius 50.0
+                    then
+                        0AAA: 0@ = get_script_struct_named "whrprsq"
+                        if
+                            0@ == 0
+                        then
+                            0A92: stream_custom_script "RepairsQa.qa" 1@ 2@ 3@ 4@ Screw ToolBox2 Ped_ID_r
+                            wait 2000
+                        end
+                    end
+                end
+
+    end
+end
+
+
+// Местность
+:Zone
+Zone_Check = false
+0E40: get_current_hour 2@
+if and
+    $ACTIVE_INTERIOR == 0
+    2@ >= 6
+    2@ <= 11
+    887A:   not gang_war_in_progress
+    $ONMISSION == 0
+then
+    1@ = 0
+    while 0EA9: get_any_object_no_save_recursive 1@ progress_to 1@ object_to 2@
+        if or
+            09CC:   object 2@ model_is 1291
+            09CC:   object 2@ model_is 1258
+            09CC:   object 2@ model_is 1478
+            09CC:   object 2@ model_is 3408
+            09CC:   object 2@ model_is 3407
+        then
+            Zone_Check = true
+        end
+    end
+end
+return
+
+
+:Zone_G
+Zone_Check = false
+0842: 2@ = player $PLAYER_CHAR town_number
+0E40: get_current_hour 1@
+if and
+    $ACTIVE_INTERIOR == 0
+    $ONMISSION == 0
+    1@ >= 5
+    1@ <= 11
+    not 2@ == 0 // Не в сельской местности. Для того, чтобы попросту не проверять все зоны
+    887A:   not gang_war_in_progress
+then
+    Zone_Check = true
+end
+return
+
+:Time_Weather
+Zone_Check = false
+0E40: get_current_hour 1@
+    if and
+        1@ >= 12
+        1@ < 18
+        887A:   not gang_war_in_progress
+        $ONMISSION == 0
+    then
+        0D59: get_current_weather_to 1@
+        if and
+            not 1@ == 8
+            not 1@ == 16
+        then
+            04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 0.0 20.0 0.0
+            0AA7: call_function_return 0x5693F0 num_params 9 pop 9 0 0 0 0 1 0 60.0 1@v 1308 5@
+            if
+                5@ > 0
+            then
+                Zone_Check = true
+            end
+        end
+    end
+return
+
+:Time_Weather_W
+Zone_Check = false
+0E40: get_current_hour 2@
+    if and
+        $ONMISSION == 0
+        $ACTIVE_INTERIOR == 0
+        2@ >= 6
+        2@ < 18
+    then
+        0D59: get_current_weather_to 2@
+        if and
+            not 2@ == 8
+            not 2@ == 16
+        then
+            if or
+                0EEA: locate_char_distance_to_coordinates $player_actor pos -2016.292 442.9872 75.2456 radius 200.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos -1967.2974 531.8922 100.2716 radius 200.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos -1733.3652 790.6758 75.1478 radius 200.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos -1811.0698 1080.5298 63.499 radius 200.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 1661.4913 -1278.0686 60.9861 radius 200.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 1836.3511 -1301.424 45.8235 radius 200.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 1597.9847 -1236.3354 70.0594 radius 200.0
+            then
+                Zone_Check = true
+            end
+            if
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 1510.2345 -1055.1655 66.0611 radius 200.0
+            then
+                Zone_Check = true
+            end
+        end
+    end
+return

@@ -1,0 +1,190 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "whrprsq"
+
+// By ArtemQa146
+
+const
+    RepairMan_Up = 31@
+    Process = 30@
+    Screw = 29@
+    ToolBox = 28@
+    Screw_Render = 27@
+    Ped_ID = 26@
+    Time_Weather = 25@
+    obj_1 = 24@
+    coords_x = 23@
+    coords_y = 22@
+    coords_z = 21@
+    angle_1 = 20@
+    Time_Work = 80000
+    Time_Out = 30000
+end
+
+0087: coords_x = 0@ // (float)
+0087: coords_y = 1@ // (float)
+0087: coords_z = 2@ // (float)
+0087: angle_1 = 3@ // (float)
+0085: Screw = 4@ // (int)
+0085: ToolBox = 5@ // (int)
+0085: Ped_ID = 6@ // (int)
+
+if
+    0E4D: random_percent 60
+then
+else
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 150.0
+    0A93: terminate_this_custom_script
+end
+
+
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+            
+
+                model.Load(1437)
+                model.Load(Ped_ID)
+                if
+                    not model.Available(1437)
+                then
+                    repeat
+                    wait 0
+                    model.Load(1437)
+                    until model.Available(1437)
+                end
+                if
+                    not model.Available(Ped_ID)
+                then
+                    repeat
+                    wait 0
+                    model.Load(Ped_ID)
+                    until model.Available(Ped_ID)
+                end
+                038B: load_requested_models
+            
+                coords_z += 0.6
+                009A: RepairMan_Up = create_actor_pedtype 21 model Ped_ID at coords_x coords_y coords_z
+                0173: set_actor RepairMan_Up Z_angle_to angle_1
+                model.Destroy(Ped_ID)
+                0575: set_actor RepairMan_Up pinned_position 1
+                0812: AS_actor RepairMan_Up perform_animation "idlerepair" IFP "PedEventsMod" framedelta 10.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                0E24: fix_char RepairMan_Up ground 0 brightness 1 and_fade_in 0
+                0F02: create_render_object_to_char_bone_from_special RepairMan_Up special_model Screw bone 24 offset 0 0 0 rotation 0 0 0 store_to Screw_Render
+                0F02: create_render_object_to_char_bone_from_special RepairMan_Up special_model ToolBox bone 3 offset 0.235 0.0 0.0 rotation 0 5.0 0 store_to 0@
+                0E37: set_render_object_scale 0@ 0.9 0.9 0.9
+                timera = 0
+                timerb = 0
+                Process = 0
+                model.Destroy(1437)
+                
+                04C4: store_coords_to 1@ 2@ 3@ from_actor RepairMan_Up with_offset 0.0 -0.57 -4.52
+                0E01: create_object_no_save 1437 at 1@ 2@ 3@ offset 0 ground 0 to obj_1
+                0172: 1@ = actor RepairMan_Up Z_angle
+                0177: set_object obj_1 Z_angle_to 1@
+                07F7: set_object obj_1 destructible 0
+                0382: set_object obj_1 collision_detection 0
+                model.Destroy(1437)
+                
+                04EF: release_animation "PedEventsMod"
+
+                    // Основной цикл
+                    repeat
+                    wait 0
+                    if
+                        056D:   actor RepairMan_Up defined
+                    then
+
+                        // Если игрок отошел далеко
+                        if
+                            not locate_char_distance_to_char $PLAYER_ACTOR char RepairMan_Up radius 150.0
+                        then
+                            009B: destroy_actor RepairMan_Up
+                            break
+                        end
+
+
+                        // Если получил урон или какого то хрена не получая урона помер
+                        if
+                            Process == 0
+                        then
+                            080E: get_actor RepairMan_Up ped_event_to 0@
+                            if or
+                                0@ == 9
+                                actor.Dead(RepairMan_Up)
+                            then
+                                0E31: set_render_object_visible Screw_Render 0
+                                0575: set_actor RepairMan_Up pinned_position 0
+                                04C4: store_coords_to 1@ 2@ 3@ from_actor RepairMan_Up with_offset 0.0 -0.3 -1.2
+                                0172: 4@ = actor RepairMan_Up Z_angle
+                                4@ += 180.0
+                                0173: set_actor RepairMan_Up Z_angle_to 4@
+                                00A1: put_actor RepairMan_Up at 1@ 2@ 3@
+                                0687: clear_actor RepairMan_Up task
+                                01C2: remove_references_to_actor RepairMan_Up
+                                break
+                            end
+                        end
+
+
+                        // Плановый спуск
+                        if
+                            Process == 0
+                        then
+                            gosub @Time_Weather
+                            if or
+                                0@ == false
+                                timera > Time_Work
+                            then
+                                0E31: set_render_object_visible Screw_Render 0
+                                0575: set_actor RepairMan_Up pinned_position 0
+                                04C4: store_coords_to 1@ 2@ 3@ from_actor RepairMan_Up with_offset 0.0 -0.3 -1.2
+                                0172: 4@ = actor RepairMan_Up Z_angle
+                                4@ += 180.0
+                                0173: set_actor RepairMan_Up Z_angle_to 4@
+                                00A1: put_actor RepairMan_Up at 1@ 2@ 3@
+                                0687: clear_actor RepairMan_Up task
+                                01C2: remove_references_to_actor RepairMan_Up
+                                break
+                            end
+                        end
+
+                    // Если не существует актера
+                    else
+                        break
+                    end
+                        until not player.Defined(0)
+                        if 03CA:   object obj_1 exists
+                        then 01C4: remove_references_to_object obj_1 // This object will now disappear when the player looks away
+                        end
+                        repeat
+                        wait 0
+                        until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 150.0
+                        0A93: terminate_this_custom_script
+
+
+:Time_Weather
+0@ = false
+0E40: get_current_hour 1@
+    if and
+        1@ >= 6
+        1@ < 17
+        887A:   not gang_war_in_progress
+    then
+        0D59: get_current_weather_to 1@
+        if and
+            not 1@ == 8
+            not 1@ == 16
+        then
+            0@ = true
+        end
+    end
+return

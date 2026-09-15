@@ -1,0 +1,175 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "PCKTHI"
+
+// By ArtemQa146
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Pickup thieves"
+if
+    0@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
+const
+    pck_money = 0x9790A0 // 9932960 9933600 9933376
+    pck_money_var = 0@
+    pck_money_obj = 31@
+    find = 30@
+    ped_thief = 29@
+    check = 28@
+    dead_man = 27@
+end
+
+while true
+wait 50
+    if
+        player.Defined(0)
+    then
+        06AC: 1@ = actor $PLAYER_ACTOR movement_speed
+        if or
+            1@ > 20.0
+            not $ONMISSION == 0
+        then
+            continue
+        end
+        if
+            check == true
+        then
+            if
+                timera > 10000
+            then
+                check = false
+            end
+        end
+        
+        00A0: store_actor $PLAYER_ACTOR position_to 1@ 2@ 3@
+        dead_man = -1
+        if
+            0AE1: dead_man = random_char_near_point 1@ 2@ 3@ in_radius 25.0 find_next 1 pass_deads 0
+        then
+            if and
+                056D:   actor dead_man defined
+                0118:   actor dead_man dead
+            then
+                for pck_money_var = 9930944 to 9950752 step 32 // 0x9788C0 - Начало блока пикапов. Количество элементов - 620. Размер одного элемента - 32 байта.
+                0D4E: 1@ = read_struct pck_money_var offset 0x4 size 4 // Указатель на CObject
+                if
+                    not 1@ == 0 // Только работаем с объектами
+                then
+                    0AEC: pck_money_obj = object_struct 1@ handle
+                    0D4E: 1@ = read_struct pck_money_var offset 0x18 size 2 // +24 = [word] ID модели
+                    0D4E: 2@ = read_struct pck_money_var offset 0x1C size 1 // +28 = тип
+                    if and
+                        1@ == 1212 // Деньги
+                        2@ == 8
+                    then
+                        if
+                            0EE6: locate_char_distance_to_object $player_actor object pck_money_obj radius 20.0
+                        then
+                            0400: store_coords_to 1@ 2@ 3@ from_object pck_money_obj with_offset 0.0 0.0 0.0
+                            0AE1: ped_thief = random_char_near_point 1@ 2@ 3@ in_radius 10.0 find_next 1 pass_deads 1
+                                if
+                                    056D:   actor ped_thief defined
+                                then
+
+                                    089F: get_actor ped_thief pedtype_to 1@
+                                    if and
+                                        1@ >= 4
+                                        1@ < 6
+                                        check == false
+                                        8611:   not actor ped_thief performing_animation "ped_thief"
+                                        0EE6: locate_char_distance_to_object ped_thief object pck_money_obj radius 10.0
+                                    then
+                                        if or
+                                            0611:   actor ped_thief performing_animation "roadcross"
+                                            0611:   actor ped_thief performing_animation "roadcross_female"
+                                            0611:   actor ped_thief performing_animation "roadcross_gang"
+                                            0611:   actor ped_thief performing_animation "roadcross_old"
+                                        then
+                                            0400: store_coords_to 1@ 2@ 3@ from_object pck_money_obj with_offset 0.0 0.0 0.0
+                                            04C4: store_coords_to 4@ 5@ 6@ from_actor ped_thief with_offset 0.0 0.0 0.0
+                                            0E27: get_angle_from_two_coords 4@ 5@ and 1@ 2@ to 6@
+
+                                            repeat
+                                            wait 0
+                                            04ED: load_animation  "PedEventsMod"
+                                            until 04EE:   animation "PedEventsMod" loaded
+
+                                            if
+                                                056D:   actor ped_thief defined
+                                            then
+                                                0804: AS_actor ped_thief walk_to 1@ 2@ 3@ angle 6@ radius 0.0 animation "ped_thief" IFP "PedEventsMod" rate 4.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                                            end
+
+                                            04EF: release_animation "PedEventsMod"
+                                            check = true
+                                            timera = 0
+                                            wait 1000
+                                            break
+
+                                        end
+                                    else
+                                        if and
+                                            check == true
+                                            0EE6: locate_char_distance_to_object ped_thief object pck_money_obj radius 1.1
+                                            0611:   actor ped_thief performing_animation "ped_thief"
+                                        then
+                                            timera = 0
+                                            repeat
+                                            wait 0
+                                                if
+                                                    timera > 20000
+                                                then
+                                                    break
+                                                end
+                                                if and
+                                                    056D:   actor ped_thief defined
+                                                    03CA:   object pck_money_obj exists
+                                                then
+
+                                                if
+                                                    0611:   actor ped_thief performing_animation "ped_thief"
+                                                then
+
+
+                                                    0613: 1@ = actor ped_thief animation "ped_thief" time
+                                                    if
+                                                        1@ > 0.7
+                                                    then
+                                                        0D4E: 1@ = read_struct pck_money_var offset 0x8 size 4
+                                                        if
+                                                            not 1@ == 0
+                                                        then
+                                                            03FE: set_actor ped_thief money 1@
+                                                        end
+
+                                                        0E28: write_struct pck_money_var offset 0xC size 4 value 0 // время восстановления
+
+                                                        break
+                                                    end
+                                                else
+                                                    break
+                                                end
+                                            else
+                                                break
+                                            end
+                                            until not player.Defined(0)
+                                            check = false
+                                            timera = 0
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end

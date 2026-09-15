@@ -1,0 +1,1259 @@
+// This file was decompiled using SASCM.ini published on 2021-07-05
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE Audio}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "StGuitar"
+
+repeat
+wait 500
+0AF0: 1@ = read_int_from_ini_file "cleo\streetmus.ini" section "Models" key "Loaded4"
+until 1@ == 1
+0AF1: write_int 0 to_ini_file "cleo\streetmus.ini" section "Models" key "Loaded4"
+0AF2: 27@ = get_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Street musicians" key "Guitar volume"
+0AF2: 26@ = get_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Street musicians" key "Guitar voice"
+0AF0: 15@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Street musicians" key "Guitar Maximum Songs"
+0AF0: 28@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Street musicians" key "Elguitar Maximum Songs"
+15@ += 1
+28@ += 1
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Street musicians"
+if
+    0@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
+const
+    Animation_1 = 8@s
+    ANimation_2 = 11@s
+    MONEY_BAG = 29@
+    Max_Song_EL = 28@
+    Volume_song = 27@
+    Volume_voice = 26@
+    Thank_you = 25@
+    Find_Ped = 24@
+    Ped_donate = 23@
+    Money_donate = 22@
+    Speaker = 21@
+    Event = 20@
+    Event_ped = 18@
+    Money_render = 19@
+    Musician = 1@
+    Progress = 31@
+    Music_stream = 30@
+    Bit_Check = 17@
+    Bar_stul = 16@
+    Max_Song = 15@
+    Not_Again_this_song = 0@
+    Not_to_day = 14@
+
+    Day = 0
+    Stay_Guitar = 1
+    Seat_Guitar = 2
+    El_guitar = 5
+    Sleep_Guitar = 6
+    Destroy_all = 3
+    True_check = 4
+    Radius_in = 100.0
+    Radius_Out = 50.0
+    Min_Donate = 10
+end
+
+while true
+wait 100
+    if
+        Player.Defined($PLAYER_CHAR)
+    then
+        if and
+            $ACTIVE_INTERIOR == 0
+            $ONMISSION == 0
+        then
+            0D59: get_current_weather_to 1@
+            if and
+                not 1@ == 8
+                not 1@ == 16
+            then
+                08C3: clear Bit_Check bit Day
+                08C3: clear Bit_Check bit True_check
+                08C3: clear Bit_Check bit Stay_Guitar
+                08C3: clear Bit_Check bit Seat_Guitar
+                08C3: clear Bit_Check bit Sleep_Guitar
+                08C3: clear Bit_Check bit El_guitar
+
+    // Проверка по координатам
+    
+    // LV магаз
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 3
+        not 7@ == 4
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2831.7122 2400.4548 10.0625 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2831.7122 2400.4548 10.0625 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 12
+            20 > 1@
+        then
+            4@ = 2831.7122
+            5@ = 2400.4548
+            6@ = 10.0625
+            3@ = 180.0
+            2@ = 101
+            08BD: set Bit_Check bit True_check
+            07D0: 7@ = weekday
+            if or
+                7@ == 1
+                7@ == 5
+            then
+                08BD: set Bit_Check bit Seat_Guitar
+            end
+            if or
+                7@ == 2
+                7@ == 4
+                7@ == 6
+            then
+                08BD: set Bit_Check bit Stay_Guitar
+            end
+            if or
+                7@ == 3
+                7@ == 7
+            then
+                08BD: set Bit_Check bit El_guitar
+            end
+        end
+    end
+
+    // ПЛяж LS
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 2
+        not 7@ == 6
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 821.386 -1886.92 11.8672 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 821.386 -1886.92 11.8672 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 9
+            20 >=1@
+        then
+            4@ = 821.386
+            5@ = -1886.92
+            6@ = 11.8672
+            3@ = 278.44
+            2@ = 101
+            08BD: set Bit_Check bit True_check
+            07D0: 7@ = weekday
+            if or
+                7@ == 1
+                7@ == 5
+            then
+                08BD: set Bit_Check bit Stay_Guitar
+            end
+            if or
+                7@ == 2
+                7@ == 4
+                7@ == 6
+            then
+                08BD: set Bit_Check bit El_guitar
+            end
+            if or
+                7@ == 3
+                7@ == 7
+            then
+                08BD: set Bit_Check bit Seat_Guitar
+            end
+        end
+    end
+
+    // LV 
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 7
+        not 7@ == 4
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2010.6108 1232.3624 10.8203 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2010.6108 1232.3624 10.8203 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 12
+            20 > 1@
+        then
+            4@ = 2010.6108
+            5@ = 1232.3624
+            6@ = 10.8203
+            3@ = 270.4029
+            2@ = 59
+            08BD: set Bit_Check bit True_check
+            07D0: 7@ = weekday
+            if or
+                7@ == 1
+                7@ == 5
+            then
+                08BD: set Bit_Check bit El_guitar
+            end
+            if or
+                7@ == 2
+                7@ == 4
+                7@ == 6
+            then
+                08BD: set Bit_Check bit Stay_Guitar
+            end
+            if or
+                7@ == 3
+                7@ == 7
+            then
+                08BD: set Bit_Check bit Seat_Guitar
+            end
+        end
+    end
+    
+    wait 100
+
+    // SF возле doherty
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 4
+        not 7@ == 2
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2176.7063 43.9591 34.3203 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2176.7063 43.9591 34.3203 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 10
+            20 > 1@
+        then
+            4@ = -2176.7063
+            5@ = 43.9591
+            6@ = 34.3203
+            3@ = 280.0
+            2@ = 59
+            08BD: set Bit_Check bit True_check
+            07D0: 7@ = weekday
+            if or
+                7@ == 1
+                7@ == 5
+            then
+                08BD: set Bit_Check bit Seat_Guitar
+            end
+            if or
+                7@ == 2
+                7@ == 4
+                7@ == 6
+            then
+                08BD: set Bit_Check bit Stay_Guitar
+            end
+            if or
+                7@ == 3
+                7@ == 7
+            then
+                08BD: set Bit_Check bit El_guitar
+            end
+        end
+    end
+
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 1
+        not 7@ == 3
+        not 7@ == 5
+        not 7@ == 7
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -259.7794 1086.5804 18.9064 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -259.7794 1086.5804 18.9064 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 9
+            20 > 1@
+        then
+            4@ = -255.3362 
+            5@ = 1086.5804
+            6@ = 19.8912
+            3@ = 0.0
+            2@ = 161
+            08BD: set Bit_Check bit True_check
+            0209: 1@ = random_int_in_ranges 1 3
+            if 1@ == 1
+            then 08BD: set Bit_Check bit Stay_Guitar
+            end
+            if 1@ == 2
+            then 08BD: set Bit_Check bit Seat_Guitar
+            end
+        end
+    end
+
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 2
+        not 7@ == 4
+        not 7@ == 6
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -200.4868 2712.1113 61.6875 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -200.4868 2712.1113 61.6875 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 11
+            20 > 1@
+        then
+            4@ = -200.4868
+            5@ = 2712.1113
+            6@ = 61.6875
+            3@ = 180.0
+            2@ = 161
+            08BD: set Bit_Check bit True_check
+            0209: 1@ = random_int_in_ranges 1 3
+            if 1@ == 1
+            then 08BD: set Bit_Check bit Stay_Guitar
+            end
+            if 1@ == 2
+            then 08BD: set Bit_Check bit Seat_Guitar
+            end
+        end
+    end
+    
+    wait 100
+
+    // LS площадь
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 6
+        not 7@ == 1
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1734.9786 -1716.9294 12.5183 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1734.9786 -1716.9294 12.5183 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 9
+            20 > 1@
+        then
+            4@ = 1734.9786
+            5@ = -1716.9294
+            6@ = 12.5183
+            3@ = 180.0
+            2@ = 29
+            08BD: set Bit_Check bit True_check
+            07D0: 7@ = weekday
+            if or
+                7@ == 1
+                7@ == 5
+            then
+                08BD: set Bit_Check bit Stay_Guitar
+            end
+            if or
+                7@ == 2
+                7@ == 4
+                7@ == 6
+            then
+                08BD: set Bit_Check bit Seat_Guitar
+            end
+            if or
+                7@ == 3
+                7@ == 7
+            then
+                08BD: set Bit_Check bit El_guitar
+            end
+        end
+    end
+
+    // SF площадь
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 6
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -1971.0344 883.941 45.2031 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -1971.0344 883.941 45.2031 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 11
+            20 > 1@
+        then
+            4@ = -1971.0344
+            5@ = 883.941
+            6@ = 45.2031
+            3@ = 88.44
+            2@ = 29
+            08BD: set Bit_Check bit True_check
+            07D0: 7@ = weekday
+            if or
+                7@ == 1
+                7@ == 5
+            then
+                08BD: set Bit_Check bit Stay_Guitar
+            end
+            if or
+                7@ == 2
+                7@ == 4
+                7@ == 6
+            then
+                08BD: set Bit_Check bit El_guitar
+            end
+            if or
+                7@ == 3
+                7@ == 7
+            then
+                08BD: set Bit_Check bit Seat_Guitar
+            end
+        end
+    end
+    
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 1
+        not 7@ == 3
+        not 7@ == 5
+        not 7@ == 7
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1373.2037 265.6998 18.5669 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1373.2037 265.6998 18.5669 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 9
+            20 > 1@
+        then
+            4@ = 1373.2037
+            5@ = 265.6998
+            6@ = 18.5669
+            3@ = 34.0
+            2@ = 157
+            08BD: set Bit_Check bit True_check
+            0209: 1@ = random_int_in_ranges 1 3
+            if 1@ == 1
+            then 08BD: set Bit_Check bit Stay_Guitar
+            end
+            if 1@ == 2
+            then 08BD: set Bit_Check bit Seat_Guitar
+            end
+        end
+    end
+
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 2
+        not 7@ == 4
+        not 7@ == 6
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2179.9104 -2368.2136 29.625 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2179.9104 -2368.2136 29.625 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 11
+            20 > 1@
+        then
+            4@ = -2181.3748
+            5@ = -2368.864
+            6@ = 29.625
+            3@ = 100.44
+            2@ = 157
+            08BD: set Bit_Check bit True_check
+            0209: 1@ = random_int_in_ranges 1 3
+            if 1@ == 1
+            then 08BD: set Bit_Check bit Stay_Guitar
+            end
+            if 1@ == 2
+            then 08BD: set Bit_Check bit Seat_Guitar
+            end
+        end
+    end
+    
+    wait 100
+    
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 2
+        not 7@ == 3
+        not 7@ == 4
+        not 7@ == 5
+        not 7@ == 6
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 689.5571 -465.5647 15.5363 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 689.5571 -465.5647 15.5363 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 9
+            20 > 1@
+        then
+            4@ = 689.5571
+            5@ = -465.5647
+            6@ = 15.5363
+            3@ = 270.0
+            2@ = 128
+            08BD: set Bit_Check bit True_check
+            08BD: set Bit_Check bit Sleep_Guitar
+        end
+    end
+
+    07D0: 7@ = weekday
+    if and
+        not 7@ == 1
+        not 7@ == 7
+        not 7@ == 2
+        not 7@ == 3
+        not 7@ == 4
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2518.6628 -1036.6343 68.5624 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2518.6628 -1036.6343 68.5624 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 11
+            20 > 1@
+        then
+            4@ = -2179.9104
+            5@ = -2368.2136
+            6@ = 29.625
+            3@ = 180.44
+            2@ = 128
+            08BD: set Bit_Check bit True_check
+            08BD: set Bit_Check bit Sleep_Guitar
+        end
+    end
+    
+    if and
+        0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2636.7275 2392.0735 10.8128 radius Radius_in
+        not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2636.7275 2392.0735 10.8128 radius Radius_Out
+    then
+        0E40: get_current_hour 1@
+        if and
+            1@ >= 9
+            20 > 1@
+        then
+            4@ = 2636.7275 2392.0735 10.8128
+            5@ = 2392.0735
+            6@ = 10.8128
+            3@ = 303.8917
+            2@ = 29
+            08BD: set Bit_Check bit True_check
+            08BD: set Bit_Check bit El_guitar
+        end
+    end
+    
+// Начало
+
+if
+    08B7:   test Bit_Check bit True_check
+then
+
+    repeat
+    wait 0
+    04ED: load_animation "PedEventsMod"
+    until 04EE:   animation "PedEventsMod" loaded
+
+    08C3: clear Bit_Check bit True_check
+    
+    if
+        08B7:   test Bit_Check bit El_guitar
+    then
+        07D0: 1@ = weekday
+        if or
+            1@ == 1
+            1@ == 3
+            1@ == 5
+        then
+            2@ = 23
+        else
+            2@ = 217
+        end
+    end
+    
+    Model.Load(2@)
+    model.Load(1550)
+    model.Load(2350)
+    model.Load(2232)
+    if
+        not model.Available(2@)
+    then
+        repeat
+        wait 0
+        model.Load(2@)
+        until model.Available(2@)
+    end
+    if
+        not model.Available(1550)
+    then
+        repeat
+        wait 0
+        model.Load(1550)
+        until model.Available(1550)
+    end
+    if
+        not model.Available(2350)
+    then
+        repeat
+        wait 0
+        model.Load(2350)
+        until model.Available(2350)
+    end
+    if
+        not model.Available(2232)
+    then
+        repeat
+        wait 0
+        model.Load(2232)
+        until model.Available(2232)
+    end
+    038B: load_requested_models
+    Actor.Create(Musician, 21, 2@, 4@, 5@, 6@)
+    0E24: fix_char Musician ground 1 brightness 1 and_fade_in 0
+    Actor.Angle(Musician) = 3@
+    Model.destroy(2@)
+    04C4: store_coords_to 4@ 5@ 6@ from_actor Musician with_offset -1.0 1.0 -1.0
+    0E01: create_object_no_save 1550 at 4@ 5@ 6@ offset 0 ground 0 to MONEY_BAG
+    04C4: store_coords_to 4@ 5@ 6@ from_actor Musician with_offset 0.0 0.0 -0.8
+    0E01: create_object_no_save 2350 at 4@ 5@ 6@ offset 0 ground 0 to Bar_stul
+    04C4: store_coords_to 4@ 5@ 6@ from_actor Musician with_offset 0.5 0.5 -1.10
+    0E01: create_object_no_save 2232 at 4@ 5@ 6@ offset 0 ground 0 to Speaker
+    0382: set_object Bar_stul collision_detection 0
+    0172: 2@ = actor Musician Z_angle
+    0177: set_object MONEY_BAG Z_angle_to 2@
+    2@ += 180.0
+    0177: set_object Speaker Z_angle_to 2@
+    0382: set_object MONEY_BAG collision_detection 0
+    0750: set_object Bar_stul visibility 0
+    0750: set_object Speaker visibility 0
+    Model.destroy(1550)
+    Model.destroy(2350)
+    Model.destroy(2232)
+    
+    gosub @Guitar
+    0F02: create_render_object_to_char_bone_from_special Musician special_model 2@ bone 24 offset 0 0 0 rotation 0 0 0 store_to 3@
+    
+    if or
+        08B7:   test Bit_Check bit Seat_Guitar
+        08B7:   test Bit_Check bit Sleep_Guitar
+    then
+        0750: set_object Bar_stul visibility 1
+    end
+    if 08B7:   test Bit_Check bit El_guitar
+    then 0750: set_object Speaker visibility 1
+    end
+    
+    // Распределение анимации
+    if
+        08B7:   test Bit_Check bit Stay_Guitar
+    then
+        05AA: Animation_1 = "SG1" // @s = 'short
+        05AA: Animation_2 = "SG2" // @s = 'short'
+    end
+    if
+        08B7:   test Bit_Check bit El_guitar
+    then
+        05AA: Animation_1 = "EG1" // @s = 'short
+        05AA: Animation_2 = "EG2" // @s = 'short'
+    end
+    if
+        08B7:   test Bit_Check bit Seat_Guitar
+    then
+        05AA: Animation_1 = "G1" // @s = 'short
+        05AA: Animation_2 = "G2" // @s = 'short'
+    end
+    if
+        08B7:   test Bit_Check bit Sleep_Guitar
+    then
+        05AA: Animation_1 = "SLP1" // @s = 'short
+        05AA: Animation_2 = "SLP2" // @s = 'short'
+    end
+    0812: AS_actor Musician perform_animation Animation_1 IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+
+    // Обнуление всех данных как сроки путина
+    Event = 0
+    Progress = 0
+    Music_stream = -1
+    Thank_you = -1
+    Money_render = -1
+    Money_donate = Min_Donate
+
+    08C3: clear Bit_Check bit Destroy_all
+
+    // Основной цикл
+    
+    13@ = 25000
+
+    repeat
+    wait 0
+    if and
+        03CA:   object Speaker exists
+        03CA:   object Bar_stul exists
+        03CA:   object MONEY_BAG exists
+        056D:   actor Musician defined
+    then
+
+        // Если далеко или на мисии то удаляем все
+        04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+        if or
+            not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2@ 3@ 4@ radius 120.0
+            not $ACTIVE_INTERIOR == 0
+        then
+            08BD: set Bit_Check bit Destroy_all
+            break
+        end
+
+        // Ранен, убит, или стреляет кто то
+        080E: get_actor $PLAYER_ACTOR ped_event_to 2@
+        080E: get_actor Musician ped_event_to 3@
+        if or
+            actor.Dead(Musician)
+            2@ == 11
+            3@ == 49
+            3@ == 9
+            051A:   actor Musician damaged_by_actor $PLAYER_ACTOR
+            not is_char_script_controlled Musician
+        then
+            04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+            break
+        end
+        
+        080E: get_actor Musician ped_event_to 2@
+        if or
+            2@ == 15
+            2@ == 31
+            2@ == 59
+        then
+            04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+            break
+        end
+
+        // Если целится из огнестрела
+        if
+            0457:   player $PLAYER_CHAR aiming_at_actor Musician
+        then
+            0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 2@
+            0E89: get_weaponinfo_fire_type 2@ store_to 3@ // Проверяем с каким оружием игрок
+            if or
+                3@ == 1 // Огнестрельное оружие
+                3@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+            then
+                04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+                break
+            end
+        end
+
+        // Погода и время
+        0D59: get_current_weather_to 3@
+        0E40: get_current_hour 2@
+        if or
+            not 2@ >= 9
+            not 20 >= 2@
+            3@ == 8
+            3@ == 16
+        then
+            04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+            break
+        end
+
+        // Если вблизи то запускаем мелодию, если нет то не тратим попусту ресурсы
+        04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+        if
+            0EBE: locate_camera_distance_to_coordinates 2@ 3@ 4@ radius 50.0
+        then
+            if
+                Progress == 0
+            then
+                Progress = 1
+            end
+        else
+            if
+                Progress == 1
+            then
+                Progress = 0
+                if not Music_stream == -1
+                then 0AAE: remove_audio_stream Music_stream
+                end
+                Music_stream = -1
+            end
+        end
+
+        // Запуск или смена песни
+        if
+            Progress == 1
+        then
+            if not Music_stream == -1
+            then 0AAE: remove_audio_stream Music_stream
+            end
+            Music_stream = -1
+
+            if or
+                08B7:   test Bit_Check bit El_guitar
+                08B7:   test Bit_Check bit Seat_Guitar
+                08B7:   test Bit_Check bit Stay_Guitar
+            then
+                if
+                    08B7:   test Bit_Check bit El_guitar
+                then
+                    0209: 2@ = random_int_in_ranges 1 Max_Song_EL
+                    if 003B:   2@ == Not_Again_this_song  // (int)
+                    then continue
+                    end
+                    0085: Not_Again_this_song = 2@ // (int)
+                    0AD3: 3@v = string_format "M\EL%d.mp3" 2@
+                else
+                    0209: 2@ = random_int_in_ranges 1 Max_Song
+                    if 003B:   2@ == Not_Again_this_song  // (int)
+                    then continue
+                    end
+                    0085: Not_Again_this_song = 2@ // (int)
+                    0AD3: 3@v = string_format "M\G%d.mp3" 2@
+                end
+            end
+            if
+                08B7:   test Bit_Check bit Sleep_Guitar
+            then
+                0AD3: 3@v = string_format "M\SLP1.mp3"
+            end
+            0AC1: Music_stream = load_audio_stream_with_3d_support 3@v // IF and SET
+            0AC4: link_3d_audio_stream Music_stream to_actor Musician
+            0AAD: set_audio_stream Music_stream state 1
+            progress = 2
+            // Если анимация была прервана
+            if
+                8611:   not actor Musician performing_animation Animation_1
+            then
+                0812: AS_actor Musician perform_animation Animation_1 IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            end
+        end
+
+        // Все основное действие
+        if
+            progress == 2
+        then
+
+            // Если песня закончилась
+            0AB9: get_audio_stream Music_stream state_to 2@
+            if 2@ == -1
+            then
+                progress = 1
+                continue
+            end
+
+            // Громкость от камеры
+            04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+            0EB2: get_offset_from_camera_in_world_coords 0.0 0.0 0.0 store_to 5@ 6@ 7@
+            050A: 3@ = distance_between_XYZ 2@ 3@ 4@ and_XYZ 5@ 6@ 7@
+            3@ /= 100.0
+            0087: 2@ = Volume_song // Громкость из .ini файла
+            0063: 2@ -= 3@  // (float)
+            if 2@ < 0.0
+            then 2@ = 0.0
+            end
+            0ABC: set_audio_stream Music_stream volume 2@
+
+            // Если не выполняет анимацию (например вмешался другйо скрипт) то останавливаем музыку
+            0AB9: get_audio_stream Music_stream state_to 2@
+            if and
+                event == 0
+                Event_ped == 0
+                8611:   not actor Musician performing_animation Animation_1
+                8611:   not actor Musician performing_animation Animation_2
+            then
+                0AAD: set_audio_stream Music_stream state 2
+            else
+                if 2@ == 2
+                then 0AAD: set_audio_stream Music_stream state 1
+                end
+            end
+
+            // Донатит главный герой
+            0400: store_coords_to 2@ 3@ 4@ from_object MONEY_BAG with_offset 0.0 1.0 0.0
+            if
+                0102:   actor $PLAYER_ACTOR in_sphere 2@ 3@ 4@ radius 1.0 1.0 1.5 sphere 0 stopped_on_foot
+            then
+                gosub @Money
+                if and
+                    not Event > 0
+                    010A:   player $PLAYER_CHAR money > 49
+                    00E1:   player 0 pressed_key 15
+                then
+                    07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 0
+                    0400: store_coords_to 2@ 3@ 4@ from_object MONEY_BAG with_offset 0.0 0.0 0.0
+                    04C4: store_coords_to 5@ 6@ 7@ from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+                    0E27: get_angle_from_two_coords 5@ 6@ and 2@ 3@ to 4@
+                    0173: set_actor $PLAYER_ACTOR Z_angle_to 4@
+                    06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 1
+                    0992: set_player $PLAYER_CHAR weapons_scrollable 0
+                    0812: AS_actor $PLAYER_ACTOR perform_animation "SAX3" IFP "PedEventsMod" framedelta 4.0 loopA 0 lockX 1 lockY 0 lockF 0 time -1
+                    Event = 1
+                    timerb = 0
+                end
+            else
+                gosub @Text_box_remove
+            end
+            
+            if
+                0611:   actor Musician performing_animation Animation_2
+            then
+                0ABC: set_audio_stream Music_stream volume 0.0
+            end
+
+            // Проверка и рендер денег в руках
+            gosub @event
+            
+        if
+            88B7:   not test Bit_Check bit Sleep_Guitar
+        then
+            // Донатит прохожий
+            Find_Ped = 0
+            while 0EA7: get_any_char_no_save_recursive Find_Ped progress_to Find_Ped char_to Ped_donate
+
+                0EFF: get_char_simplest_active_task Ped_donate id_to 3@ pointer_to 2@
+                089F: get_actor Ped_donate pedtype_to 2@
+                if and
+                    0EE4: locate_char_distance_to_char Musician char $PLAYER_ACTOR radius 20.0
+                    0EE4: locate_char_distance_to_char Musician char Ped_donate radius 10.0
+                    001D:   TIMERA > 13@  // (int)
+                    not is_char_script_controlled Ped_donate
+                    80DF:   not actor Ped_donate driving
+                    3@ == 900
+                then
+                    089F: get_actor Ped_donate pedtype_to 2@
+                    if or
+                        2@ == 4
+                        2@ == 5
+                    then
+                        timera = 0
+                        0209: 2@ = random_int_in_ranges 1 5
+                        if
+                            2@ >= 3
+                        then
+                            0400: store_coords_to 2@ 3@ 4@ from_object MONEY_BAG with_offset 0.0 1.0 0.0
+                            0400: store_coords_to 5@ 6@ 4@ from_object MONEY_BAG with_offset 0.0 0.0 0.0
+                            0E27: get_angle_from_two_coords 2@ 3@ and 5@ 6@ to 5@
+                            0804: AS_actor Ped_donate walk_to 2@ 3@ 4@ angle 5@ radius 0.0 animation "SAX3" IFP "PedEventsMod" rate 4.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                            13@ = 25000
+                            break
+                        end
+                        if
+                            2@ == 1
+                        then
+                            04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 2.0 0.0
+                            04C4: store_coords_to 5@ 6@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+                            0E27: get_angle_from_two_coords 2@ 3@ and 5@ 6@ to 5@
+                            0209: 6@ = random_int_in_ranges 15000 25000
+                            0804: AS_actor Ped_donate walk_to 2@ 3@ 4@ angle 5@ radius 0.0 animation "DAN_Loop_A" IFP "PedEventsMod" rate 4.0 LA 0 LX 0 LY 0 LF 0 LT 6@
+                            13@ = 50000
+                            break
+                        end
+                        if
+                            2@ == 2
+                        then
+                            04C4: store_coords_to 2@ 3@ 4@ from_actor Musician with_offset 0.0 2.0 0.0
+                            04C4: store_coords_to 5@ 6@ 4@ from_actor Musician with_offset 0.0 0.0 0.0
+                            0E27: get_angle_from_two_coords 2@ 3@ and 5@ 6@ to 5@
+                            0209: 6@ = random_int_in_ranges 15000 25000
+                            0804: AS_actor Ped_donate walk_to 2@ 3@ 4@ angle 5@ radius 0.0 animation "dnce_M_b" IFP "PedEventsMod" rate 4.0 LA 0 LX 0 LY 0 LF 0 LT 6@
+                            13@ = 50000
+                            break
+                        end
+                    end
+                end
+
+                if and
+                    timera > 5000
+                    not is_char_script_controlled Ped_donate
+                    Actor.Animation(Ped_donate) == "SAX3"
+                then
+                    0613: 2@ = actor Ped_donate animation "SAX3" time
+                    if
+                        2@ > 0.6
+                    then
+                        if
+                            Thank_you == -1
+                        then
+                            gosub @Animation_donate
+                            gosub @Voice
+                        end
+                        Event_ped = 1
+                        timera = 0
+                    end
+                end
+            end
+        end
+    end
+    else
+        break
+    end
+until not player.Defined(0)
+// Выход из цикла
+
+gosub @Text_box_remove
+
+// Удаление песен
+if not Thank_you == -1
+then 0AAE: remove_audio_stream Thank_you
+end
+if not Music_stream == -1
+then 0AAE: remove_audio_stream Music_stream
+end
+
+// Если далеко то удаляем все, если нет то освобождаем от скрипта
+if
+    08B7:   test Bit_Check bit Destroy_all
+then
+    if 03CA:   object MONEY_BAG exists
+    then object.Destroy(MONEY_BAG)
+    end
+    if 03CA:   object Bar_stul exists
+    then object.Destroy(Bar_stul)
+    end
+    if 03CA:   object Speaker exists
+    then object.Destroy(Speaker)
+    end
+    if 056D:   actor Musician defined
+    then 009B: destroy_actor Musician
+    end
+else
+    if 03CA:   object MONEY_BAG exists
+    then 01C4: remove_references_to_object MONEY_BAG // This object will now disappear when the player looks away
+    end
+    if 03CA:   object Bar_stul exists
+    then 01C4: remove_references_to_object Bar_stul // This object will now disappear when the player looks away
+    end
+    if 03CA:   object Speaker exists
+    then 01C4: remove_references_to_object Speaker // This object will now disappear when the player looks away
+    end
+    if 056D:   actor Musician defined
+    then 01C2: remove_references_to_actor Musician // Like turning an actor into a random pedestrian
+    end
+end
+
+// Если в этот момент донатил игрок, и что то пошло не так
+if
+    Event > 0
+then
+    06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 0
+    0992: set_player $PLAYER_CHAR weapons_scrollable 1
+    07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 1
+    if not Money_render == -1
+    then 0E2F: delete_render_object Money_render
+    end
+end
+04EF: release_animation "PedEventsMod"
+
+repeat
+wait 0
+until not locate_char_distance_to_coordinates $player_actor pos 2@ 3@ 4@ radius 120.0
+                end
+            end
+        end
+    end
+end
+
+// Говорит спасибо за донат
+:Voice
+if not Thank_you == -1
+then 0AAE: remove_audio_stream Thank_you
+end
+Thank_you = -1
+if or
+    08B7:   test Bit_Check bit El_guitar
+    08B7:   test Bit_Check bit Seat_Guitar
+    08B7:   test Bit_Check bit Stay_Guitar
+then
+    if
+        08B7:   test Bit_Check bit El_guitar
+    then
+        0AC1: Thank_you = load_audio_stream_with_3d_support "M/ELV.mp3" // IF and SET
+    else
+        0665: get_actor Musician model_to 2@
+        if
+            2@ == 157
+        then
+            0AC1: Thank_you = load_audio_stream_with_3d_support "M/W1.mp3" // IF and SET
+        else
+            0AC1: Thank_you = load_audio_stream_with_3d_support "M/M4.mp3" // IF and SET
+        end
+    end
+end
+if
+    08B7:   test Bit_Check bit Sleep_Guitar
+then
+    0AC1: Thank_you = load_audio_stream_with_3d_support "M/SLP2.mp3" // IF and SET
+end
+0AC4: link_3d_audio_stream Thank_you to_actor Musician
+0AAD: set_audio_stream Thank_you state 1
+0ABC: set_audio_stream Thank_you volume Volume_voice
+return
+
+// Проццес доната
+:Event
+
+// Создаем рендер денег в руках
+if and
+    timerb > 500
+    Event == 1
+then
+    model.Load(1212)
+    038B: load_requested_models
+    0E2E: create_render_object_to_char_bone $PLAYER_ACTOR model 1212 bone 24 offset 0.08 0.05 -0.04 rotation 0 0 0 store_to Money_render
+    model.Destroy(1212)
+    event = 2
+    timerb = 0
+end
+
+// Удалем и вычитываем деньги, даем звук спасибо
+if and
+    timerb > 3000
+    Event == 2
+then
+    0E2F: delete_render_object Money_render
+    Money_render = -1
+    06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 0
+    0992: set_player $PLAYER_CHAR weapons_scrollable 1
+    07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 1
+    0109: player $PLAYER_CHAR money += -50
+    if
+        Thank_you == -1
+    then
+        gosub @Animation_donate
+        gosub @Voice
+    end
+    event = 3
+    timerb = 0
+end
+
+// Удаляем звук "спасибо"
+if and
+    timerb > 1500
+    Event == 3
+then
+    if
+        08B7:   test bit_check bit sleep_guitar
+    then
+        if and
+            timerb > 4000
+            Event == 3
+        then
+            if not Thank_you == -1
+            then 0AAE: remove_audio_stream Thank_you
+            end
+            Thank_you = -1
+            event = 4
+        end
+    else
+        if not Thank_you == -1
+        then 0AAE: remove_audio_stream Thank_you
+        end
+        Thank_you = -1
+        event = 4
+    end
+end
+
+// От суммы доната переключаем песню или нет
+if
+    Event == 4
+then
+    0209: 2@ = random_int_in_ranges 10 50
+    if 0E4D: random_percent 2@
+    then
+        progress = 1
+        if
+            08B7:   test bit_check bit sleep_guitar
+        then
+            08C3: clear bit_check bit sleep_guitar
+            08BD: set bit_check bit seat_guitar
+            05AA: Animation_1 = "G1" // @s = 'short
+            05AA: Animation_2 = "G2" // @s = 'short'
+            0E97: clear_char_secondary_tasks Musician
+            0812: AS_actor Musician perform_animation Animation_1 IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+        end
+    end
+    event = 0
+end
+
+// Пед задонатил, удаляем спасибо, т.к. дали его уже
+if and
+    timera > 1500
+    Event_ped == 1
+then
+    if not Thank_you == -1
+    then 0AAE: remove_audio_stream Thank_you
+    end
+    Thank_you = -1
+    Event_ped = 0
+end
+return
+
+// Спасиюо и обратно анимации
+:Animation_donate
+3@ = 1000
+if 08B7:   test bit_check bit sleep_guitar
+then 3@ = 4500
+end
+0615: define_AS_pack_begin 2@
+0812: AS_actor -1 perform_animation Animation_2 IFP "PedEventsMod" framedelta 4.0 loopA 0 lockX 0 lockY 0 lockF 1 time 3@
+0812: AS_actor -1 perform_animation Animation_1 IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+0616: define_AS_pack_end 2@
+0618: assign_actor Musician to_AS_pack 2@
+061B: remove_references_to_AS_pack 2@
+return
+
+// Отображение суммы и изменение
+:Money
+if
+    event == 0
+then
+    if
+        010A:   player $PLAYER_CHAR money > 49
+    then
+        if
+            8A2A:   not text_box 'donat1' displayed
+        then
+            0512: show_permanent_text_box 'donat1'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+        end
+    else
+        if
+            8A2A:   not text_box 'donat2' displayed
+        then
+            0512: show_permanent_text_box 'donat2'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+        end
+    end
+else
+    gosub @Text_box_remove
+end
+return
+
+:Text_box_remove
+if or
+    0A2A:   text_box 'donat1' displayed
+    0A2A:   text_box 'donat2' displayed
+then
+    03E6: remove_text_box
+end
+return
+
+:Guitar
+if
+    08B7:   test Bit_Check bit El_guitar
+then
+    0209: 3@ = random_int_in_ranges 1 3
+    if 3@ == 1
+    then 0AF0: 2@ = read_int_from_ini_file "cleo\streetmus.ini" section "Models" key "elguitar"
+    end
+    if 3@ == 2
+    then 0AF0: 2@ = read_int_from_ini_file "cleo\streetmus.ini" section "Models" key "elguitar2"
+    end
+end
+if or
+    08B7:   test Bit_Check bit Seat_Guitar
+    08B7:   test Bit_Check bit Stay_Guitar
+then
+    0209: 3@ = random_int_in_ranges 1 4
+    if 3@ == 1
+    then 0AF0: 2@ = read_int_from_ini_file "cleo\streetmus.ini" section "Models" key "guitar"
+    end
+    if 3@ == 2
+    then 0AF0: 2@ = read_int_from_ini_file "cleo\streetmus.ini" section "Models" key "guitar2"
+    end
+    if 3@ == 3
+    then 0AF0: 2@ = read_int_from_ini_file "cleo\streetmus.ini" section "Models" key "guitar3"
+    end
+end
+if
+    08B7:   test Bit_Check bit Sleep_Guitar
+then
+    0AF0: 2@ = read_int_from_ini_file "cleo\streetmus.ini" section "Models" key "guitar"
+end
+return
+

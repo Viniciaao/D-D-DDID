@@ -1,0 +1,311 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP 
+
+script_name "LoadModels"
+
+wait 50
+
+if
+    0AA2: 31@ = load_dynamic_library "CLEO+.cleo"
+then
+    if
+        0AA4: 30@ = get_dynamic_library_procedure "GetCleoPlusVersion" library 31@
+    then
+        0AA7: call_function_return 30@ num_params 0 pop 0 29@
+        if
+            not 29@ >= 0x1020000
+        then
+            0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+            0AA3: free_dynamic_library 31@
+            0A93: terminate_this_custom_script
+        end
+        0AA3: free_dynamic_library 31@
+    end
+else
+    0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+    0AA3: free_dynamic_library 31@
+    0A93: terminate_this_custom_script
+end
+
+
+if
+    is_game_first_start
+then
+
+// case
+0F00: load_special_model_dff "modelsq\case_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case1"
+0F00: load_special_model_dff "modelsq\case2_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case2"
+0F00: load_special_model_dff "modelsq\case3_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case3"
+0F00: load_special_model_dff "modelsq\case4_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case4"
+0F00: load_special_model_dff "modelsq\case5_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case5"
+0F00: load_special_model_dff "modelsq\case6_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case6"
+0F00: load_special_model_dff "modelsq\case7_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case7"
+0F00: load_special_model_dff "modelsq\case8_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case8"
+0F00: load_special_model_dff "modelsq\case9_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case9"
+0F00: load_special_model_dff "modelsq\case10_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case10"
+0F00: load_special_model_dff "modelsq\case11_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case11"
+0F00: load_special_model_dff "modelsq\case12_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case12"
+0F00: load_special_model_dff "modelsq\case13_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "case13"
+
+//shop_bag
+0F00: load_special_model_dff "modelsq\shop_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop1"
+0F00: load_special_model_dff "modelsq\shop2_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop2"
+0F00: load_special_model_dff "modelsq\shop3_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop3"
+0F00: load_special_model_dff "modelsq\shop4_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop4"
+0F00: load_special_model_dff "modelsq\shop5_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop5"
+0F00: load_special_model_dff "modelsq\shop6_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop6"
+0F00: load_special_model_dff "modelsq\shop7_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop7"
+0F00: load_special_model_dff "modelsq\shop8_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop8"
+0F00: load_special_model_dff "modelsq\shop9_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop9"
+0F00: load_special_model_dff "modelsq\shop10_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop10"
+0F00: load_special_model_dff "modelsq\shop11_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop11"
+0F00: load_special_model_dff "modelsq\shop12_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop12"
+0F00: load_special_model_dff "modelsq\shop13_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "shop13"
+
+//wcase
+0F00: load_special_model_dff "modelsq\wcase_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "wcase1"
+0F00: load_special_model_dff "modelsq\wcase2_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "wcase2"
+0F00: load_special_model_dff "modelsq\wcase3_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "wcase3"
+0F00: load_special_model_dff "modelsq\wcase4_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "wcase4"
+0F00: load_special_model_dff "modelsq\wcase5_peds" txd "modelsq\CaseQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "wcase5"
+
+//torso
+0F00: load_special_model_dff "modelsq\tors_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tors1"
+0F00: load_special_model_dff "modelsq\tors2_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tors2"
+0F00: load_special_model_dff "modelsq\tors3_peds" txd "modelsq\ShopQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tors3"
+
+//paper
+0F00: load_special_model_dff "modelsq\NewsPaper" txd "modelsq\PaperQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "paper"
+0F00: load_special_model_dff "modelsq\NewsPaper2" txd "modelsq\PaperQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "paper2"
+0F00: load_special_model_dff "modelsq\NewsPaper3" txd "modelsq\PaperQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "paper3"
+
+//book
+0F00: load_special_model_dff "modelsq\book_peds" txd "modelsq\PaperQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "book"
+0F00: load_special_model_dff "modelsq\book_peds2" txd "modelsq\PaperQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "book2"
+0F00: load_special_model_dff "modelsq\book_peds3" txd "modelsq\PaperQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "book3"
+0F00: load_special_model_dff "modelsq\book_peds4" txd "modelsq\PaperQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "book4"
+
+//drink
+0F00: load_special_model_dff "modelsq\drink_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "drink1"
+0F00: load_special_model_dff "modelsq\drink2_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "drink2"
+0F00: load_special_model_dff "modelsq\drink3_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "drink3"
+0F00: load_special_model_dff "modelsq\drink4_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "drink4"
+0F00: load_special_model_dff "modelsq\drink5_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "drink5"
+
+//eat
+0F00: load_special_model_dff "modelsq\eat_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat1"
+0F00: load_special_model_dff "modelsq\eat2_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat2"
+0F00: load_special_model_dff "modelsq\eat3_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat3"
+0F00: load_special_model_dff "modelsq\eat4_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat4"
+0F00: load_special_model_dff "modelsq\eat5_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat5"
+0F00: load_special_model_dff "modelsq\eat6_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat6"
+0F00: load_special_model_dff "modelsq\eat7_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat7"
+0F00: load_special_model_dff "modelsq\eat8_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat8"
+0F00: load_special_model_dff "modelsq\eat9_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat9"
+0F00: load_special_model_dff "modelsq\eat10_peds" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "eat10"
+
+//phone
+0F00: load_special_model_dff "modelsq\phone_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "phone"
+
+//cigar
+0F00: load_special_model_dff "modelsq\cigar_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cigar"
+
+//cop
+0F00: load_special_model_dff "modelsq\cops_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cop1"
+0F00: load_special_model_dff "modelsq\cops_peds2" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cop2"
+0F00: load_special_model_dff "modelsq\cops_peds3" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cop3"
+
+//med
+0F00: load_special_model_dff "modelsq\Med_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "med1"
+0F00: load_special_model_dff "modelsq\Med2_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "med2"
+0F00: load_special_model_dff "modelsq\Med3_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "med3"
+0F00: load_special_model_dff "modelsq\Med4_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "med4"
+
+
+//umbrella
+0F00: load_special_model_dff "modelsq\umb_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "umb1"
+0F00: load_special_model_dff "modelsq\umb_peds2" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "umb2"
+0F00: load_special_model_dff "modelsq\umb_peds3" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "umb3"
+
+//tools
+0F00: load_special_model_dff "modelsq\tool_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool1"
+0F00: load_special_model_dff "modelsq\tool2_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool2"
+0F00: load_special_model_dff "modelsq\tool3_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool3"
+0F00: load_special_model_dff "modelsq\tool4_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool4"
+0F00: load_special_model_dff "modelsq\tool5_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool5"
+0F00: load_special_model_dff "modelsq\tool6_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool6"
+0F00: load_special_model_dff "modelsq\tool7_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool7"
+0F00: load_special_model_dff "modelsq\tool8_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool8"
+0F00: load_special_model_dff "modelsq\tool9_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool9"
+0F00: load_special_model_dff "modelsq\tool10_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool10"
+0F00: load_special_model_dff "modelsq\tool11_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool11"
+0F00: load_special_model_dff "modelsq\tool12_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool12"
+0F00: load_special_model_dff "modelsq\tool13_peds" txd "modelsq\ToolsQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tool13"
+
+//beach
+0F00: load_special_model_dff "modelsq\beach_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach1"
+0F00: load_special_model_dff "modelsq\beach2_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach2"
+0F00: load_special_model_dff "modelsq\beach3_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach3"
+0F00: load_special_model_dff "modelsq\beach4_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach4"
+0F00: load_special_model_dff "modelsq\beach5_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach5"
+0F00: load_special_model_dff "modelsq\beach6_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach6"
+0F00: load_special_model_dff "modelsq\beach7_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach7"
+0F00: load_special_model_dff "modelsq\beach8_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach8"
+0F00: load_special_model_dff "modelsq\beach9_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach9"
+0F00: load_special_model_dff "modelsq\beach10_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach10"
+0F00: load_special_model_dff "modelsq\beach11_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach11"
+0F00: load_special_model_dff "modelsq\beach12_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach12"
+0F00: load_special_model_dff "modelsq\beach13_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach13"
+0F00: load_special_model_dff "modelsq\beach14_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach14"
+0F00: load_special_model_dff "modelsq\beach15_peds" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "beach15"
+
+//Cside
+0F00: load_special_model_dff "modelsq\CSide_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide1"
+0F00: load_special_model_dff "modelsq\CSide2_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide2"
+0F00: load_special_model_dff "modelsq\CSide3_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide3"
+0F00: load_special_model_dff "modelsq\CSide4_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide4"
+0F00: load_special_model_dff "modelsq\CSide5_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide5"
+0F00: load_special_model_dff "modelsq\CSide6_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide6"
+0F00: load_special_model_dff "modelsq\CSide7_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide7"
+0F00: load_special_model_dff "modelsq\CSide8_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide8"
+0F00: load_special_model_dff "modelsq\CSide9_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "CSide9"
+
+//Camera
+0F00: load_special_model_dff "modelsq\camera_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "camera"
+0F00: load_special_model_dff "modelsq\camera2_peds" txd "modelsq\OtherQa" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "camera2"
+
+0F00: load_special_model_dff "modelsq\water" txd "modelsq\EatQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "water"
+
+0F00: load_special_model_dff "modelsq\bballqa1" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "bball1"
+0F00: load_special_model_dff "modelsq\bballqa2" txd "modelsq\BeachQ" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "bball2"
+end
+
+1@ = 1 //  loaded
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded1"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded2"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded3"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded4"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded5"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded6"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded7"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded8"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded9"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded10"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded11"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "LoadedTram"
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "LoadedST"
+004E: terminate_this_script

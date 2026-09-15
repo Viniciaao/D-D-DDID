@@ -1,0 +1,245 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "CRIMQA"
+
+// By ArtemQa146
+
+const
+    cop_1 = 31@
+    cop_2 = 30@
+    dead_1 = 29@
+    progress = 27@
+    ped_id = 24@
+    coord_x = 22@
+    coord_y = 21@
+    coord_z = 20@
+    angle_1 = 19@
+    render_model = 28@
+    redner_flash = 23@
+    redner_book = 25@
+    render_model_2 = 18@
+end
+
+0087: coord_x = 0@ // (float)
+0087: coord_y = 1@ // (float)
+0087: coord_z = 2@ // (float)
+0087: angle_1 = 3@ // (float)
+0085: render_model = 4@ // (int)
+0085: render_model_2 = 6@ // (int)
+
+if
+    0E4D: random_percent 5@
+then
+else
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coord_x coord_y coord_z radius 150.0
+    0A93: terminate_this_custom_script
+end
+
+repeat
+wait 0
+04ED: load_animation  "PedEventsMod"
+until 04EE:   animation "PedEventsMod" loaded
+
+ped_id = 283
+
+0842: 1@ = player $PLAYER_CHAR town_number
+if 1@ == 1
+then ped_id = 280
+end
+0842: 1@ = player $PLAYER_CHAR town_number
+if 1@ == 2
+then ped_id = 281
+end
+0842: 1@ = player $PLAYER_CHAR town_number
+if 1@ == 3
+then ped_id = 282
+end
+
+model.Load(ped_id)
+if
+    not model.Available(ped_id)
+then
+    repeat
+    wait 0
+    model.Load(ped_id)
+    until model.Available(ped_id)
+end
+038B: load_requested_models
+
+    009A: cop_1 = create_actor_pedtype 6 model ped_id at coord_x coord_y coord_z
+    0173: set_actor cop_1 Z_angle_to angle_1
+    0E24: fix_char cop_1 ground 1 brightness 1 and_fade_in 0
+    
+    04C4: store_coords_to 1@ 2@ 3@ from_actor cop_1 with_offset 1.5 1.0 0.0
+    009A: cop_2 = create_actor_pedtype 6 model ped_id at 1@ 2@ 3@
+    0087: 1@ = angle_1 // (float)
+    1@ += 35.0
+    0173: set_actor cop_2 Z_angle_to 1@
+    0E24: fix_char cop_2 ground 1 brightness 1 and_fade_in 0
+    
+    04C4: store_coords_to 1@ 2@ 3@ from_actor cop_1 with_offset -0.5 2.5 0.0
+    0376: dead_1 = create_random_actor_at 1@ 2@ 3@
+    0173: set_actor dead_1 Z_angle_to angle_1
+    0E24: fix_char dead_1 ground 1 brightness 1 and_fade_in 0
+    0223: set_actor dead_1 health_to 0
+
+    0812: AS_actor cop_1 perform_animation "crime_c1" IFP "PedEventsMod" framedelta 50.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+    0812: AS_actor cop_2 perform_animation "crime_c2" IFP "PedEventsMod" framedelta 50.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+    0F02: create_render_object_to_char_bone_from_special cop_1 special_model render_model bone 24 offset 0 0 0 rotation 0 0 0 store_to redner_flash
+    0F02: create_render_object_to_char_bone_from_special cop_2 special_model render_model_2 bone 34 offset 0.25 0 0 rotation 0 180.0 350.0 store_to redner_book
+
+    04EF: release_animation "PedEventsMod"
+
+model.Destroy(ped_id)
+timera = 0
+progress = -1
+
+wait 300
+
+repeat
+wait 0
+    if and
+        056D:   actor cop_1 defined
+        056D:   actor cop_2 defined
+        056D:   actor dead_1 defined
+    then
+    
+    04C4: store_coords_to 1@ 2@ 3@ from_actor cop_1 with_offset 0.0 1.5 0.0
+    09E5: create_flash_light_at 1@ 2@ 3@ RGB_mask 255 255 255 radius 20.0
+    
+            if or
+                0457:   player $PLAYER_CHAR aiming_at_actor cop_1
+                0457:   player $PLAYER_CHAR aiming_at_actor cop_2
+            then
+                0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                if or
+                    2@ == 1 // Огнестрельное оружие
+                    2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                then
+                    010E: set_player $PLAYER_CHAR minimum_wanted_level_to 1
+                    0E2F: delete_render_object redner_flash
+                    0E2F: delete_render_object redner_book
+                    break
+                end
+            end
+
+    // Ранен, убит, или стреляет кто то
+    080E: get_actor cop_1 ped_event_to 3@
+    080E: get_actor cop_2 ped_event_to 2@
+    if or
+        3@ == 49
+        2@ == 49
+        051A:   actor cop_1 damaged_by_actor $PLAYER_ACTOR
+        051A:   actor cop_2 damaged_by_actor $PLAYER_ACTOR
+        0EE4: locate_char_distance_to_char $PLAYER_ACTOR char dead_1 radius 1.5
+    then
+        010E: set_player $PLAYER_CHAR minimum_wanted_level_to 1
+        0E2F: delete_render_object redner_flash
+        0E2F: delete_render_object redner_book
+        break
+    end
+    
+    080E: get_actor cop_1 ped_event_to 3@
+    080E: get_actor cop_2 ped_event_to 2@
+    if or
+        3@ == 15
+        3@ == 31
+        3@ == 59
+        2@ == 15
+        2@ == 31
+        2@ == 59
+    then
+        010E: set_player $PLAYER_CHAR minimum_wanted_level_to 1
+        0E2F: delete_render_object redner_flash
+        0E2F: delete_render_object redner_book
+        break
+    end
+    
+    if or
+        0118:   actor cop_1 dead
+        0118:   actor cop_2 dead
+        not is_char_script_controlled cop_2
+        not is_char_script_controlled cop_1
+        not $ACTIVE_INTERIOR == 0
+        010F:   player $PLAYER_CHAR wanted_level > 0
+    then
+        0E2F: delete_render_object redner_flash
+        0E2F: delete_render_object redner_book
+        break
+    end
+    
+    if
+        0EE4: locate_char_distance_to_char $PLAYER_ACTOR char cop_1 radius 3.0
+    then
+        if
+            timerb > 15000
+        then
+            010E: set_player $PLAYER_CHAR minimum_wanted_level_to 1
+            0E2F: delete_render_object redner_flash
+            0E2F: delete_render_object redner_book
+            break
+        end
+    else
+        timerb = 0
+    end
+    
+    if and
+        not locate_char_distance_to_char $PLAYER_ACTOR char cop_1 radius 20.0
+        timera > 120000
+    then
+        0E2F: delete_render_object redner_flash
+        0E2F: delete_render_object redner_book
+        break
+    end
+    
+    if or
+        8611:   not actor cop_1 performing_animation "crime_c1"
+        8611:   not actor cop_2 performing_animation "crime_c2"
+    then
+        0E2F: delete_render_object redner_flash
+        0E2F: delete_render_object redner_book
+        break
+    end
+    
+    0E40: get_current_hour 1@
+    if and
+        1@ > 6
+        1@ < 21
+    then
+        0E2F: delete_render_object redner_flash
+        0E2F: delete_render_object redner_book
+        break
+    end
+    
+
+    else
+        break
+    end
+until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coord_x coord_y coord_z radius 150.0
+
+if 056D:   actor cop_2 defined
+then 01C2: remove_references_to_actor cop_2 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor cop_1 defined
+then 01C2: remove_references_to_actor cop_1 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor dead_1 defined
+then 01C2: remove_references_to_actor dead_1 // Like turning an actor into a random pedestrian
+end
+
+wait 120000
+
+repeat
+wait 0
+until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coord_x coord_y coord_z radius 150.0
+
+0A93: terminate_this_custom_script

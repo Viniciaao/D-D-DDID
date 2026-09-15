@@ -1,0 +1,339 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE Audio}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP 
+
+script_name "CopMedPeds"
+
+// By ArtemQa146
+
+// Проверяем загружены ли модели
+repeat
+wait 500
+0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded3"
+until 1@ == 1
+1@ = 0
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded3"
+
+const
+    Peds_Find = 25@
+    Ped_Select = 24@
+    Bit_sets = 31@
+
+    cop1 = 8@
+    cop2 = 9@
+    cop3 = 26@
+    med1 = 27@
+    med2 = 28@
+    med3 = 29@
+    med4 = 30@
+end
+
+0AF0: cop1 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop1"
+0AF0: cop2 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop2"
+0AF0: cop3 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop3"
+
+0AF0: med1 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "med1"
+0AF0: med2 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "med2"
+0AF0: med3 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "med3"
+0AF0: med4 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "med4"
+
+while true
+wait 100
+if
+    Player.Defined($PLAYER_CHAR)
+then
+gosub @Peds
+gosub @Realese_animation
+    if
+        not $ACTIVE_INTERIOR == 0
+    then
+        gosub @References_remove
+        continue
+    end
+
+    0D59: get_current_weather_to 1@
+    if and
+        not 1@ == 8 // not weather rain
+        not 1@ == 16 // not weather rain 2
+    then
+    Peds_Find = 0
+    while 0EA7: get_any_char_no_save_recursive Peds_Find progress_to Peds_Find char_to 0@
+    089F: get_actor 0@ pedtype_to 4@
+    if or
+        4@ == 6
+        4@ == 18
+    then
+        0EFF: get_char_simplest_active_task 0@ id_to 1@ pointer_to 2@
+        080E: get_actor 0@ ped_event_to 2@
+        0470: 3@ = actor 0@ current_weapon
+        if and
+            not 2@ == 9 // ped damaged
+            80DF: not actor 0@ driving
+            not is_char_script_controlled 0@
+            1@ == 900 //walk
+            3@ == 0 //unarmed
+        then
+            gosub @Load_animation
+            if
+                056D: actor 0@ defined
+            then
+            
+            for Ped_Select = 0 to 1 step 1
+                089F: get_actor 0@ pedtype_to 4@
+                if and
+                    803B:   not 0@ == 20@  // (int)
+                    803B:   not 0@ == 21@  // (int)
+                    856D: not actor 20@(Ped_Select,1i) defined
+                    4@ == 18
+                then
+                    0085: 20@(Ped_Select,1i) = 0@ // (int)
+                    0209: 2@ = random_int_in_ranges 1 5
+                    if
+                        2@ == 1
+                    then
+                        0085: 1@ = med1 // (int)
+                    end
+                    if
+                        2@ == 2
+                    then
+                        0085: 1@ = med2 // (int)
+                    end
+                    if
+                        2@ == 3
+                    then
+                        0085: 1@ = med3 // (int)
+                    end
+                    if
+                        2@ == 4
+                    then
+                        0085: 1@ = med4 // (int)
+                    end
+                    gosub @Peds_Med
+                    0@ = -1
+                    break
+                end
+            end
+            
+            if 856D: not actor 0@ defined
+            then break
+            end
+
+            089F: get_actor 0@ pedtype_to 4@
+            if and
+                810F:   not player $PLAYER_CHAR wanted_level > 0
+                4@ == 6
+                not locate_char_distance_to_char 0@ char $PLAYER_ACTOR radius 50.0
+                856D: not actor 22@ defined
+                0E4D: random_percent 2
+            then
+                Ped_Select = 2
+                08C3: clear Bit_sets bit 1
+                0085: 20@(Ped_Select,1i) = 0@ // (int)
+                0209: 2@ = random_int_in_ranges 1 4
+                if
+                    2@ == 1
+                then
+                    0085: 1@ = cop1 // (int)
+                end
+                if
+                    2@ == 2
+                then
+                    0085: 1@ = cop2 // (int)
+                end
+                if
+                    2@ == 3
+                then
+                    0085: 1@ = cop3 // (int)
+                end
+
+                if 2@ == 1
+                then
+                    06D2: 15@v = "cops2"
+                    08BD: set Bit_sets bit 1
+                else 06D2: 15@v = "cops1"
+                end
+                if
+                    not 23@ == -1
+                then
+                    0AAE: remove_audio_stream 23@
+                    23@ = -1
+                end
+                gosub @Peds_Cop
+                break
+            end
+        end
+    end
+end
+end
+end
+end
+end
+
+:Peds_Cop
+0F02:  20@(Ped_Select,1i) special_model 1@ bone 24 offset 0 0 0 rotation 0 0 0 scale 10@(Ped_Select,1i) // bone 34 left hand, 24 right hand, 9 had, 3 tors
+0E30: set_render_object_auto_hide 10@(Ped_Select,1i) dead 1 weapon 1 car 1
+wait 1000
+0006: TIMERA = 0
+return
+
+
+:Peds_Med
+0F02:  20@(Ped_Select,1i) special_model 1@ bone 24 offset 0 0 0 rotation 0 0 0 scale 10@(Ped_Select,1i) // bone 34 left hand, 24 right hand, 9 had, 3 tors
+0E30: set_render_object_auto_hide 10@(Ped_Select,1i) dead 1 weapon 1 car 1
+wait 1000
+return
+
+
+:Peds
+for Ped_Select = 0 to 2 step 1
+wait 50
+if
+    056D: actor 20@(Ped_Select,1i) defined
+then
+    if and
+        not actor.Dead(20@(Ped_Select,1i))
+        not is_char_script_controlled 20@(Ped_Select,1i)
+        locate_char_distance_to_char 20@(Ped_Select,1i) char $PLAYER_ACTOR radius 120.0
+    then
+    
+        // Медики
+        if or
+            Ped_Select == 0
+            Ped_Select == 1
+        then
+            0EFF: get_char_simplest_active_task 20@(Ped_Select,1i) id_to 3@ pointer_to 2@
+            if or
+                3@ == 100
+                3@ == 101
+                3@ == 102
+            then
+                0E31: set_render_object_visible 10@(Ped_Select,1i) 0
+            end
+            if and
+                not 3@ == 100
+                not 3@ == 101
+                not 3@ == 102
+            then
+                0E31: set_render_object_visible 10@(Ped_Select,1i) 1
+            end
+        end
+        
+        if
+            Ped_Select == 2
+        then
+            0EFF: get_char_simplest_active_task 20@(Ped_Select,1i) id_to 3@ pointer_to 2@
+            if and
+                3@ == 900 //walk
+                0019:   TIMERA > 35000
+            then
+                0792: disembark_instantly_actor 20@(Ped_Select,1i)
+                0A1A: actor 20@(Ped_Select,1i) perform_walk_animation 15@v IFP "PedEventsMod" framedelta 4.0 loopA 0 lockX 0 lockY 0 lockF 0 10000 ms // versionC
+                0006: TIMERA = 0
+                if
+                    08B7:   test Bit_sets bit 1
+                then
+                    if
+                        not 23@ == -1
+                    then
+                        0AAE: remove_audio_stream 23@
+                        23@ = -1
+                    end
+                    0209: 1@ = random_int_in_ranges 1 5
+                    0AD3: 2@v = string_format "SQ/cop%d.mp3" 1@
+                    0AC1: 23@ = load_audio_stream_with_3d_support 2@v // IF and SET
+                    0AC4: link_3d_audio_stream 23@ to_actor 20@(Ped_Select,1i)
+                    0AAD: set_audio_stream 23@ state 1
+                end
+            end
+        end
+
+        if or
+            0E47: is_char_fighting 20@(Ped_Select,1i)
+            82D8:   not actor 20@(Ped_Select,1i) current_weapon == 0
+            actor.Driving(20@(Ped_Select,1i))
+        then
+            gosub @PedsMod_Delete_Render
+            continue
+        end
+    else
+        gosub @PedsMod_Delete_Render
+        continue
+    end
+end
+end
+return
+
+// Если что то пошло не так
+:PedsMod_Delete_Render
+if
+    056D: actor 20@(Ped_Select,1i) defined
+then
+    if
+        locate_char_distance_to_char 20@(Ped_Select,1i) char $PLAYER_ACTOR radius 50.0
+    then
+        if
+            not 10@(Ped_Select,1i) <= -1
+        then
+            0E31: set_render_object_visible 10@(Ped_Select,1i) 0
+        end
+    end
+    if
+        Ped_Select == 2
+    then
+        if or
+            Actor.Animation(20@(Ped_Select,1i)) == "cops2"
+            Actor.Animation(20@(Ped_Select,1i)) == "cops1"
+        then
+            0792: disembark_instantly_actor 20@(Ped_Select,1i)
+        end
+    end
+end
+20@(Ped_Select,1i) = -1
+10@(Ped_Select,1i) = -1
+return
+
+// Загрузка анимации
+:Load_animation
+if
+    84EE: not animation "PedEventsMod" loaded
+then
+    repeat
+    wait 0
+    04ED: load_animation  "PedEventsMod"
+    until 04EE:   animation "PedEventsMod" loaded
+end
+return
+
+// Если нет никого то удаялем анимацию, если была загружена
+:Realese_animation
+if and
+    856D: not actor 20@ defined
+    856D: not actor 21@ defined
+    856D: not actor 22@ defined
+then
+    if
+        04EE: animation "PedEventsMod" loaded
+    then
+        04EF: release_animation "PedEventsMod"
+    end
+end
+return
+
+// Если зашли в другйо интерьер
+:References_remove
+for Ped_Select = 0 to 2 step 1
+    20@(Ped_Select,1i) = -1
+    10@(Ped_Select,1i) = -1
+end
+    if
+        not 23@ == -1
+    then
+        0AAE: remove_audio_stream 23@
+        23@ = -1
+    end
+return
+

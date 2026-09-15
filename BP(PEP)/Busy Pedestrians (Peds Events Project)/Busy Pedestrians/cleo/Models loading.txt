@@ -1,0 +1,57 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "Loads models"
+
+// By ArtemQa146
+
+wait 100
+
+if
+    0AA2: 31@ = load_dynamic_library "CLEO+.cleo"
+then
+    if
+        0AA4: 30@ = get_dynamic_library_procedure "GetCleoPlusVersion" library 31@
+    then
+        0AA7: call_function_return 30@ num_params 0 pop 0 29@
+        if
+            not 29@ >= 0x1020000
+        then
+            0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+            0AA3: free_dynamic_library 31@
+            0A93: terminate_this_custom_script
+        end
+        0AA3: free_dynamic_library 31@
+    end
+else
+    0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+    0AA3: free_dynamic_library 31@
+    0A93: terminate_this_custom_script
+end
+
+// Загружаем модели
+if
+    is_game_first_start
+then
+    0F00: load_special_model_dff "modelsq\Eat1" txd "modelsq\PedsVndQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Peds use Vends.ini" section "Models" key "Eat1"
+    0F00: load_special_model_dff "modelsq\Eat2" txd "modelsq\PedsVndQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Peds use Vends.ini" section "Models" key "Eat2"
+    0F00: load_special_model_dff "modelsq\dog" txd "modelsq\PedsVndQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Peds use Vends.ini" section "Models" key "dog"
+    0F00: load_special_model_dff "modelsq\ice" txd "modelsq\PedsVndQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Peds use Vends.ini" section "Models" key "ice"
+    0F00: load_special_model_dff "modelsq\ChinaEat" txd "modelsq\PedsVndQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Peds use Vends.ini" section "Models" key "ChinaEat"
+    0F00: load_special_model_dff "modelsq\chicken" txd "modelsq\PedsVndQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Peds use Vends.ini" section "Models" key "chicken"
+    0F00: load_special_model_dff "modelsq\donut" txd "modelsq\PedsVndQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Peds use Vends.ini" section "Models" key "donut"
+end
+0AF1: write_int 1 to_ini_file "cleo\Peds use Vends.ini" section "Models" key "Loaded"
+0AF1: write_int 1 to_ini_file "cleo\Peds use Vends.ini" section "Models" key "Loaded2"
+0A93: terminate_this_custom_script

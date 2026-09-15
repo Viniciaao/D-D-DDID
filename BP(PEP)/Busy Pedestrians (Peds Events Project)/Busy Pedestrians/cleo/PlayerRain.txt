@@ -1,0 +1,310 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "Player Rain"
+
+// By ArtemQa146
+
+repeat
+wait 500
+0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded10"
+until 1@ == 1
+1@ = 0
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded10"
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Player can use umbrella"
+if
+    0@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
+repeat
+wait 0
+until player.Defined(0)
+
+0AF0: 27@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Player can use umbrella" key "Main Key"
+0AF0: 26@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Player can use umbrella" key "Enable"
+0AF0: 25@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Player can use umbrella" key "Disable"
+0AF0: 24@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Player can use umbrella" key "Change Hand"
+0AF0: 23@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Player can use umbrella" key "Change Color"
+
+const
+    Main_key = 27@
+    Enable_key = 26@
+    Disable_key = 25@
+    Hand_key = 24@
+    Color_key = 23@
+    
+    Right_1 = 1@
+    Right_2 = 2@
+    Right_3 = 3@
+    Left_1 = 4@
+    Left_2 = 5@
+    Left_3 = 6@
+    Process = 31@
+    Check_ACtor = 30@
+    Current_Umbrella = 29@
+    Check_Animation = 28@
+end
+
+0AF0: 0@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "umb1"
+0F02:  $player_actor special_model 0@ bone 24 offset 0 0 0 rotation 0 0 0 scale Right_1
+0F02:  $player_actor special_model 0@ bone 34 offset 0.01 0.035 0 rotation 0 180.0 180.0 scale Left_1
+0AF0: 0@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "umb2"
+0F02:  $player_actor special_model 0@ bone 24 offset 0 0 0 rotation 0 0 0 scale Right_2
+0F02:  $player_actor special_model 0@ bone 34 offset 0.01 0.035 0 rotation 0 180.0 180.0 scale Left_2
+0AF0: 0@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "umb3"
+0F02:  $player_actor special_model 0@ bone 24 offset 0 0 0 rotation 0 0 0 scale Right_3
+0F02:  $player_actor special_model 0@ bone 34 offset 0.01 0.035 0 rotation 0 180.0 180.0 scale Left_3
+
+gosub @Hide_render
+
+while true
+wait 50
+    if
+        player.Defined(0)
+    then
+        0D59: get_current_weather_to 0@
+        if or
+            0@ == 8
+            0@ == 16
+        then
+            gosub @Actor_check
+            if and
+                timerb > 500
+                Check_ACtor == true
+                0AB0:   is_key_pressed Main_key
+                0AB0:   is_key_pressed Enable_key
+            then
+            
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+            
+            0E31: set_render_object_visible Right_1 1
+            0A1A: actor $player_actor perform_walk_animation "RainRight" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 0 -1 ms // versionC
+            Current_Umbrella = 1
+            Process = 0
+            timera = 0
+            timerb = 0
+            
+            repeat
+            wait 0
+            gosub @Actor_check
+            if
+                Check_ACtor == true
+            then
+                gosub @Hide_render
+                gosub @Current_Umbrella
+            
+            if and
+                timera > 500
+                Process == 0
+            then
+                if
+                    8611:   not actor $player_actor performing_animation "RainRight"
+                then
+                gosub @Actor_check
+                gosub @Actor_anim
+                    if and
+                        Check_Animation == true
+                        Check_ACtor == true
+                    then
+                        0A1A: actor $player_actor perform_walk_animation "RainRight" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 0 -1 ms // versionC
+                        timera = 0
+                    end
+                end
+            end
+            
+            if and
+                timera > 500
+                Process == 1
+            then
+                if
+                    8611:   not actor $player_actor performing_animation "RainLeft"
+                then
+                gosub @Actor_check
+                gosub @Actor_anim
+                    if and
+                        Check_Animation == true
+                        Check_ACtor == true
+                    then
+                        0A1A: actor $player_actor perform_walk_animation "RainLeft" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 0 -1 ms // versionC
+                        timera = 0
+                    end
+                end
+            end
+
+            
+            if and
+                timerb > 500
+                0AB0:   is_key_pressed Main_key
+                0AB0:   is_key_pressed Hand_key
+            then
+                if
+                    Process == 0
+                then
+                    0A1A: actor $player_actor perform_walk_animation "RainLeft" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 0 -1 ms // versionC
+                    timera = 0
+                    Process = 1
+                    timerb = 0
+                    gosub @Select_Umbrella
+                else
+                    if
+                        Process == 1
+                    then
+                        0A1A: actor $player_actor perform_walk_animation "RainRight" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 0 -1 ms // versionC
+                        timera = 0
+                        Process = 0
+                        timerb = 0
+                        gosub @Select_Umbrella
+                    end
+                end
+            end
+            
+            if and
+                timerb > 500
+                0AB0:   is_key_pressed Main_key
+                0AB0:   is_key_pressed Color_key
+            then
+                gosub @Select_Umbrella
+                timerb = 0
+            end
+                
+                
+            if and
+                timerb > 500
+                0AB0:   is_key_pressed Main_key
+                0AB0:   is_key_pressed Disable_key
+            then
+                timerb = 0
+                break
+            end
+            
+            else
+                break
+            end
+            until not player.Defined(0)
+            04EF: release_animation "PedEventsMod"
+            //0687: clear_actor $PLAYER_ACTOR task
+            0E97: clear_char_secondary_tasks $PLAYER_ACTOR
+            gosub @Hide_render
+            end
+        end
+    end
+end
+
+:Hide_render
+0E31: set_render_object_visible Right_1 0
+0E31: set_render_object_visible Right_2 0
+0E31: set_render_object_visible Right_3 0
+0E31: set_render_object_visible Left_1 0
+0E31: set_render_object_visible Left_2 0
+0E31: set_render_object_visible Left_3 0
+return
+
+:Actor_check
+Check_ACtor = false
+if and
+    02D8:   actor $PLAYER_ACTOR current_weapon == 0
+    not actor.Dead($player_actor)
+    80DF:   not actor $PLAYER_ACTOR driving
+    not is_char_entering_any_car $player_actor
+    8741:   not actor $PLAYER_ACTOR busted
+then
+    Check_ACtor = true
+end
+return
+
+:Actor_anim
+Check_Animation = false
+if and
+    8597:   not actor $PLAYER_ACTOR crouching
+    8A29:   not player $PLAYER_CHAR climbing
+    not is_char_fighting $PLAYER_ACTOR
+    not is_char_playing_any_script_animation $PLAYER_ACTOR include_anims 3
+then
+    Check_Animation = true
+end
+return
+
+
+
+
+
+:Current_Umbrella
+if Current_Umbrella == 1
+then 0E31: set_render_object_visible Right_1 1
+end
+if Current_Umbrella == 2
+then 0E31: set_render_object_visible Right_2 1
+end
+if Current_Umbrella == 3
+then 0E31: set_render_object_visible Right_3 1
+end
+
+if Current_Umbrella == 4
+then 0E31: set_render_object_visible Left_1 1
+end
+if Current_Umbrella == 5
+then 0E31: set_render_object_visible Left_2 1
+end
+if Current_Umbrella == 6
+then 0E31: set_render_object_visible Left_3 1
+end
+return
+
+:Select_Umbrella
+if
+    Process == 0
+then
+    if or
+    Current_Umbrella == 1
+    Current_Umbrella == 5
+    then Current_Umbrella = 2
+    return
+    end
+    if or
+    Current_Umbrella == 2
+    Current_Umbrella == 6
+    then Current_Umbrella = 3
+    return
+    end
+    if or
+    Current_Umbrella == 3
+    Current_Umbrella == 4
+    then Current_Umbrella = 1
+    return
+    end
+end
+if
+    Process == 1
+then
+    if or
+    Current_Umbrella == 4
+    Current_Umbrella == 2
+    then Current_Umbrella = 5
+    return
+    end
+    if or
+    Current_Umbrella == 5
+    Current_Umbrella == 3
+    then Current_Umbrella = 6
+    return
+    end
+    if or
+    Current_Umbrella == 6
+    Current_Umbrella == 1
+    then Current_Umbrella = 4
+    return
+    end
+end
+return
+
+

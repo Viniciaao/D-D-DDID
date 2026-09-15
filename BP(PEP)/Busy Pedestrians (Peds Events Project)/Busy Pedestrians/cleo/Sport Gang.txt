@@ -1,0 +1,479 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "GSPRTQ"
+
+// By ArtemQa146
+
+const
+    gang_man = 31@
+    gang_check = 30@
+
+    Event = 27@
+    coords_x = 26@
+    coords_y = 25@
+    coords_z = 24@
+    angle_1 = 23@
+    obj_1 = 21@
+    render_1 = 19@
+    render_2 = 18@
+    render_3 = 17@
+end
+
+0087: coords_x = 0@ // (float)
+0087: coords_y = 1@ // (float)
+0087: coords_z = 2@ // (float)
+0087: angle_1 = 3@ // (float)
+0085: gang_check = 4@ // (int)
+
+if
+    gang_check == 7
+then
+    0209: 2@ = random_int_in_ranges 1 4
+    if 2@ == 1
+    then 1@ = 102
+    end
+    if 2@ == 2
+    then 1@ = 103
+    end
+    if 2@ == 3
+    then 1@ = 104
+    end
+end
+
+if
+    gang_check == 8
+then
+    0209: 2@ = random_int_in_ranges 1 4
+    if 2@ == 1
+    then 1@ = 105
+    end
+    if 2@ == 2
+    then 1@ = 106
+    end
+    if 2@ == 3
+    then 1@ = 107
+    end
+end
+
+if
+    gang_check == 9
+then
+    0209: 2@ = random_int_in_ranges 1 4
+    if 2@ == 1
+    then 1@ = 108
+    end
+    if 2@ == 2
+    then 1@ = 109
+    end
+    if 2@ == 3
+    then 1@ = 110
+    end
+end
+
+0209: Event = random_int_in_ranges 1 4
+
+model.Load(1@)
+model.Load(2629)
+model.Load(2913)
+model.Load(3071)
+
+if
+    not model.Available(1@)
+then
+    repeat
+    wait 0
+    model.Load(1@)
+    until model.Available(1@)
+end
+if
+    not model.Available(2629)
+then
+    repeat
+    wait 0
+    model.Load(2629)
+    until model.Available(2629)
+end
+if
+    not model.Available(2913)
+then
+    repeat
+    wait 0
+    model.Load(2913)
+    until model.Available(2913)
+end
+if
+    not model.Available(3071)
+then
+    repeat
+    wait 0
+    model.Load(3071)
+    until model.Available(3071)
+end
+038B: load_requested_models
+coords_z -= 1.0
+0E01: create_object_no_save 2629 at coords_x coords_y coords_z offset 0 ground 0 to obj_1
+0177: set_object obj_1 Z_angle_to angle_1
+
+if
+    0E4D: random_percent 65
+then
+else
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 150.0
+    if 03CA:   object obj_1 exists
+    then 0108: destroy_object obj_1
+    end
+    model.Destroy(2629)
+    model.Destroy(2913)
+    model.Destroy(3071)
+    model.Destroy(1@)
+    0A93: terminate_this_custom_script
+end
+
+if
+    Event == 1
+then
+    0400: store_coords_to 2@ 3@ 4@ from_object obj_1 with_offset 0.0 -1.0 0.0
+end
+
+if
+    Event == 2
+then
+    0400: store_coords_to 2@ 3@ 4@ from_object obj_1 with_offset -1.65 0.0 0.0
+    angle_1 -= 90.0
+end
+
+if
+    Event == 3
+then
+    0400: store_coords_to 2@ 3@ 4@ from_object obj_1 with_offset -1.65 -0.3 0.0
+end
+
+repeat
+wait 0
+04ED: load_animation  "benchpress"
+until 04EE:   animation "benchpress" loaded
+
+repeat
+wait 0
+04ED: load_animation  "Freeweights"
+until 04EE:   animation "Freeweights" loaded
+
+repeat
+wait 0
+04ED: load_animation  "PedEventsMod"
+until 04EE:   animation "PedEventsMod" loaded
+
+
+009A: gang_man = create_actor_pedtype 21 model 1@ at 2@ 3@ 4@
+0173: set_actor gang_man Z_angle_to angle_1
+0E2E: create_render_object_to_char_bone gang_man model 2913 bone 24 offset 0 0 0 rotation 0 0 0 store_to render_1
+0E2E: create_render_object_to_char_bone gang_man model 3071 bone 24 offset 0 0 0 rotation 0 0 0 store_to render_2
+0E2E: create_render_object_to_char_bone gang_man model 3071 bone 34 offset 0 0 0 rotation 0 0 0 store_to render_3
+0E31: set_render_object_visible render_1 0
+0E31: set_render_object_visible render_2 0
+0E31: set_render_object_visible render_3 0
+
+if
+    Event == 1
+then
+    0812: AS_actor gang_man perform_animation "gym_bp_up_A" IFP "benchpress" framedelta 1000.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1
+    0E31: set_render_object_visible render_1 1
+end
+
+if
+    Event == 2
+then
+    0812: AS_actor gang_man perform_animation "gym_free_A" IFP "Freeweights" framedelta 1000.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1
+    0E31: set_render_object_visible render_2 1
+    0E31: set_render_object_visible render_3 1
+end
+
+if
+    Event == 3
+then
+    0812: AS_actor gang_man perform_animation "Otjim2" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+end
+
+model.Destroy(2629)
+model.Destroy(2913)
+model.Destroy(3071)
+model.Destroy(1@)
+
+timera = 0
+
+wait 300
+
+repeat
+wait 0
+    if
+        056D:   actor gang_man defined
+    then
+
+        // Ранен, убит, или стреляет кто то
+        080E: get_actor $PLAYER_ACTOR ped_event_to 2@
+        080E: get_actor gang_man ped_event_to 3@
+        if or
+            actor.Dead(gang_man)
+            2@ == 11
+            3@ == 49
+            3@ == 9
+            051A:   actor gang_man damaged_by_actor $PLAYER_ACTOR
+            not is_char_script_controlled gang_man
+            not locate_char_distance_to_coordinates gang_man pos coords_x coords_y coords_z radius 3.0
+        then
+            0E31: set_render_object_visible render_1 0
+            0E31: set_render_object_visible render_2 0
+            0E31: set_render_object_visible render_3 0
+            break
+        end
+        
+        080E: get_actor gang_man ped_event_to 3@
+        if or
+            3@ == 15
+            3@ == 31
+            3@ == 59
+        then
+            0E31: set_render_object_visible render_1 0
+            0E31: set_render_object_visible render_2 0
+            0E31: set_render_object_visible render_3 0
+            break
+        end
+
+
+        if
+            not $ACTIVE_INTERIOR == 0
+        then
+            break
+        end
+
+        // Если целится из огнестрела
+        if
+            0457:   player $PLAYER_CHAR aiming_at_actor gang_man
+        then
+            0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 2@
+            0E89: get_weaponinfo_fire_type 2@ store_to 3@ // Проверяем с каким оружием игрок
+            if or
+                3@ == 1 // Огнестрельное оружие
+                3@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+            then
+                0E31: set_render_object_visible render_1 0
+                0E31: set_render_object_visible render_2 0
+                0E31: set_render_object_visible render_3 0
+                break
+            end
+        end
+
+        if
+            0EE4: locate_char_distance_to_char $PLAYER_ACTOR char gang_man radius 25.0
+        then
+        
+        
+            if
+                Event == 1
+            then
+                if
+                    timera > 3000
+                then
+
+                    if
+                        0611:   actor gang_man performing_animation "gym_bp_up_A"
+                    then
+                        0613: 1@ = actor gang_man animation "gym_bp_up_A" time
+                        if
+                            1@ > 0.95
+                        then
+                            0812: AS_actor gang_man perform_animation "gym_bp_down" IFP "benchpress" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1
+                            wait 300
+                            timera = 1500
+                            continue
+                        end
+                    end
+                    if
+                        0611:   actor gang_man performing_animation "gym_bp_down"
+                    then
+                        0613: 1@ = actor gang_man animation "gym_bp_down" time
+                        if
+                            1@ > 0.95
+                        then
+                            if
+                                timerb > 60000
+                            then
+                                0812: AS_actor gang_man perform_animation "gym_bp_getoff" IFP "benchpress" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1
+                                wait 300
+                            else
+                                0812: AS_actor gang_man perform_animation "gym_bp_up_A" IFP "benchpress" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1
+                                wait 300
+                            end
+                            timera = 0
+                            continue
+                        end
+                    end
+                end
+            end
+            
+            if
+                Event == 2
+            then
+                if
+                    timera > 3000
+                then
+
+                    if
+                        0611:   actor gang_man performing_animation "gym_free_A"
+                    then
+                        0613: 1@ = actor gang_man animation "gym_free_A" time
+                        if
+                            1@ > 0.95
+                        then
+                            0812: AS_actor gang_man perform_animation "gym_free_down" IFP "Freeweights" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1
+                            wait 300
+                            timera = 1500
+                            continue
+                        end
+                    end
+                    if
+                        0611:   actor gang_man performing_animation "gym_free_down"
+                    then
+                        0613: 1@ = actor gang_man animation "gym_free_down" time
+                        if
+                            1@ > 0.95
+                        then
+                            if
+                                timerb > 60000
+                            then
+                                0812: AS_actor gang_man perform_animation "gym_free_putdown" IFP "Freeweights" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1
+                                wait 300
+                            else
+                                0812: AS_actor gang_man perform_animation "gym_free_A" IFP "Freeweights" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1
+                                wait 300
+                            end
+                            timera = 0
+                            continue
+                        end
+                    end
+                end
+            end
+            
+            if
+                Event == 3
+            then
+                if
+                    0611:   actor gang_man performing_animation "Otjim2"
+                then
+                    0613: 1@ = actor gang_man animation "Otjim2" time
+                    if
+                        1@ > 0.95
+                    then
+                        if
+                            timerb > 60000
+                        then
+                            0812: AS_actor gang_man perform_animation "Otjim3" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1
+                            wait 300
+                        end
+                        timera = 0
+                        continue
+                    end
+                end
+            end
+            
+            
+        else
+            timerb = 0
+        end
+        
+        if
+            Event == 1
+        then
+            if
+                0611:   actor gang_man performing_animation "gym_bp_getoff"
+            then
+                0613: 1@ = actor gang_man animation "gym_bp_getoff" time
+                if
+                    1@ > 0.4
+                then
+                    0E31: set_render_object_visible render_1 0
+                end
+                if
+                    1@ > 0.95
+                then
+                    break
+                end
+            end
+        end
+        
+        if
+            Event == 2
+        then
+            if
+                0611:   actor gang_man performing_animation "gym_free_putdown"
+            then
+                0613: 1@ = actor gang_man animation "gym_free_putdown" time
+                if
+                    1@ > 0.25
+                then
+                    0E31: set_render_object_visible render_2 0
+                    0E31: set_render_object_visible render_3 0
+                end
+                if
+                    1@ > 0.95
+                then
+                    break
+                end
+            end
+        end
+        
+        if
+            Event == 3
+        then
+            if
+                0611:   actor gang_man performing_animation "Otjim3"
+            then
+                0613: 1@ = actor gang_man animation "Otjim3" time
+                if
+                    1@ > 0.95
+                then
+                    break
+                end
+            end
+        end
+
+
+    else
+        break
+    end
+until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+04EF: release_animation "benchpress"
+04EF: release_animation "Freeweights"
+04EF: release_animation "PedEventsMod"
+
+if
+    0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 50.0
+then
+    if 056D:   actor gang_man defined
+    then 01C2: remove_references_to_actor gang_man // Like turning an actor into a random pedestrian
+    end
+    if 03CA:   object obj_1 exists
+    then 01C4: remove_references_to_object obj_1 // This object will now disappear when the player looks away
+    end
+else
+    if 056D:   actor gang_man defined
+    then 009B: destroy_actor gang_man
+    end
+    if 03CA:   object obj_1 exists
+    then 0108: destroy_object obj_1
+    end
+end
+
+repeat
+wait 0
+until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
+
+0A93: terminate_this_custom_script
+

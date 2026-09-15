@@ -1,0 +1,156 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "PDPHONE"
+
+// By ArtemQa146
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Pickup thieves"
+if
+    0@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
+const
+    phone_kiosk = 31@
+    ped_call = 30@
+    find_ped = 29@
+    find_obj = 28@
+    player_kill = 27@
+    check = 26@
+    check_2 = 25@
+end
+
+player_kill = 0
+
+while true
+wait 0
+    if
+        player.Defined(0)
+    then
+
+        0806: get_player $PLAYER_CHAR kills_from_last_checkpoint 1@
+        if
+            803B:   not 1@ == player_kill  // (int)
+        then
+            if
+                810F:   not player $PLAYER_CHAR wanted_level > 0
+            then
+                0806: get_player $PLAYER_CHAR kills_from_last_checkpoint player_kill
+                
+                0AD1: show_formatted_text_highpriority "1" time 2000
+
+                check = false
+                check_2 = false
+                find_obj = 0
+                
+                while get_any_object_no_save_recursive find_obj progress_to find_obj object_to phone_kiosk
+                    if and
+                        09CC:   object phone_kiosk model_is 1216
+                        0EE6: locate_char_distance_to_object $player_actor object phone_kiosk radius 50.0
+                    then
+                        check = true
+                        0AD1: show_formatted_text_highpriority "2" time 2000
+                        break
+                    end
+                end
+                
+                if
+                    check == true
+                then
+                    find_ped = 0
+                    while get_any_char_no_save_recursive find_ped progress_to find_ped char_to ped_call
+                        if 03CA:   object phone_kiosk exists
+                        then
+                        else break
+                        end
+                        
+                        if
+                            0EE6: locate_char_distance_to_object ped_call object phone_kiosk radius 40.0
+                        then
+                            if or
+                                Actor.Animation(ped_call) == "sprint_panic"
+                                Actor.Animation(ped_call) == "woman_runpanic"
+                            then
+                                0792: disembark_instantly_actor ped_call
+                                wait 500
+                                if
+                                    056D:   actor ped_call defined
+                                then
+                                    0400: store_coords_to 1@ 2@ 3@ from_object phone_kiosk with_offset 0.0 -0.6 0.0
+                                    05D3: AS_actor ped_call goto_point 1@ 2@ 3@ mode 6 time -1 ms // versionA
+                                    0400: store_coords_to 4@ 5@ 6@ from_object phone_kiosk with_offset 0.0 0.0 0.0
+                                    0E27: get_angle_from_two_coords 1@ 2@ and 4@ 5@ to 4@
+                                    check_2 = true
+                                end
+                                0AD1: show_formatted_text_highpriority "3" time 2000
+                                break
+                            end
+                        end
+                    end
+                end
+                
+                if
+                    check_2 == true
+                then
+                
+                    repeat
+                    wait 0
+                    04ED: load_animation  "PedEventsMod"
+                    until 04EE:   animation "PedEventsMod" loaded
+                
+                    repeat
+                    wait 0
+                    if
+                        056D:   actor ped_call defined
+                    then
+                        if
+                            0118:   actor ped_call dead
+                        then
+                            break
+                        end
+                        
+                        if and
+                            not Actor.Animation(ped_call) == "phone_kiosk"
+                            0EEA: locate_char_distance_to_coordinates ped_call pos 1@ 2@ 3@ radius 1.0
+                        then
+                            0173: set_actor ped_call Z_angle_to 4@
+                            00A1: put_actor ped_call at 1@ 2@ 3@
+                            0E24: fix_char ped_call ground 1 brightness 1 and_fade_in 0
+                            0812: AS_actor ped_call perform_animation "phone_kiosk" IFP "PedEventsMod" framedelta 4.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1  // versionB
+                            wait 300
+                            continue
+                        end
+
+                        if
+                            Actor.Animation(ped_call) == "phone_kiosk"
+                        then
+                            0613: 4@ = actor ped_call animation "phone_kiosk" time
+                            if
+                                4@ > 0.85
+                            then
+                                010E: set_player $PLAYER_CHAR minimum_wanted_level_to 1
+                                05DE: AS_actor ped_call walk_around_ped_path
+                                0AD1: show_formatted_text_highpriority "4" time 2000
+                                break
+                            end
+                        end
+                    else
+                        break
+                    end
+                    until not player.Defined(0)
+                    
+                    04EF: release_animation "PedEventsMod"
+                
+                end
+                
+                
+            end
+        end
+    end
+end

@@ -1,0 +1,148 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "RLBRUSH"
+
+// By ArtemQa146
+
+const
+    Chef_1 = 31@
+    obj_1 = 30@
+    ped_id = 29@
+    coords_x = 28@
+    coords_y = 27@
+    coords_z = 26@
+    angle_1 = 25@
+    render_obj = 0@
+end
+
+
+                0087: coords_x = 0@ // (float)
+                0087: coords_y = 1@ // (float)
+                0087: coords_z = 2@ // (float)
+                0087: angle_1 = 3@ // (float)
+                0085: render_obj = 4@ // (int)
+
+                if
+                    0E4D: random_percent 5@
+                then
+                else
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
+                    0A93: terminate_this_custom_script
+                end
+
+                0209: 1@ = random_int_in_ranges 1 5
+                if 1@ == 1
+                then ped_id = 60
+                end
+                if 1@ == 2
+                then ped_id = 95
+                end
+                if 1@ == 3
+                then ped_id = 183
+                end
+                if 1@ == 4
+                then ped_id = 188
+                end
+
+                repeat
+                wait 0
+                04ED: load_animation  "PedEventsMod"
+                until 04EE:   animation "PedEventsMod" loaded
+
+                model.Load(ped_id)
+                if
+                    not model.Available(ped_id)
+                then
+                    repeat
+                    wait 0
+                    model.Load(ped_id)
+                    until model.Available(ped_id)
+                end
+                038B: load_requested_models
+
+                009A: Chef_1 = create_actor_pedtype 4 model ped_id at coords_x coords_y coords_z
+                0173: set_actor Chef_1 Z_angle_to angle_1
+
+                0F02: create_render_object_to_char_bone_from_special Chef_1 special_model render_obj bone 24 offset 0 0 0 rotation 0 0 0 store_to obj_1
+                0812: AS_actor Chef_1 perform_animation "Roll_brush" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                0E24: fix_char Chef_1 ground 1 brightness 1 and_fade_in 0
+                0E37: set_render_object_scale obj_1 0.8 0.8 0.8
+                
+                model.Destroy(ped_id)
+
+                repeat
+                wait 0
+                if
+                    056D:   actor Chef_1 defined
+                then
+
+                    0E40: get_current_hour 1@
+                    0D59: get_current_weather_to 2@
+                    if or
+                        2@ == 8
+                        2@ == 16
+                        1@ >= 17
+                    then
+                        0E31: set_render_object_visible obj_1 0
+                        break
+                    end
+
+                    080E: get_actor Chef_1 ped_event_to 1@
+                    if or
+                        051A:   actor Chef_1 damaged_by_actor $PLAYER_ACTOR
+                        0118:   actor Chef_1 dead
+                        1@ == 49
+                        1@ == 9
+                        1@ == 15
+                        1@ == 31
+                        1@ == 59
+                    then
+                        0E31: set_render_object_visible obj_1 0
+                        break
+                    end
+
+                    if or
+                        0118:   actor Chef_1 dead
+                        not locate_char_distance_to_char $player_actor char Chef_1 radius 100.0
+                        not $ACTIVE_INTERIOR == 0
+                        051A:   actor Chef_1 damaged_by_actor $PLAYER_ACTOR
+                        not is_char_script_controlled Chef_1
+                    then
+                        0E31: set_render_object_visible obj_1 0
+                        break
+                    end
+
+                    if
+                        0457:   player $PLAYER_CHAR aiming_at_actor Chef_1
+                    then
+                        0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                        0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                        if or
+                            2@ == 1 // Огнестрельное оружие
+                            2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                        then
+                            0E31: set_render_object_visible obj_1 0
+                            break
+                        end
+                    end
+
+                end
+                until not player.Defined(0)
+
+                if 056D:   actor Chef_1 defined
+                then 01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                end
+                04EF: release_animation "PedEventsMod"
+
+                repeat
+                wait 0
+                until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
+
+0A93: terminate_this_custom_script

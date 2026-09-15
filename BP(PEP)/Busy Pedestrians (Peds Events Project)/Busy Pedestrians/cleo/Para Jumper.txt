@@ -1,0 +1,169 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "PEDPARQ"
+
+// By ArtemQa146
+
+const
+    jumper = 31@
+    render_para = 30@
+    process = 29@
+    coords_x = 28@
+    coords_y = 27@
+    coords_z = 26@
+    angle_1 = 25@
+    render_para1 = 24@
+    render_para2 = 23@
+end
+
+0087: coords_x = 0@ // (float)
+0087: coords_y = 1@ // (float)
+0087: coords_z = 2@ // (float)
+0087: angle_1 = 3@ // (float)
+0085: render_para1 = 4@ // (int)
+0085: render_para2 = 5@ // (int)
+
+if
+    0E4D: random_percent 6@
+then
+else
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 500.0
+    0A93: terminate_this_custom_script
+end
+
+repeat
+wait 0
+04ED: load_animation  "PARACHUTE"
+until 04EE:   animation "PARACHUTE" loaded
+
+model.Load(96)
+model.Load(371)
+if
+    not model.Available(96)
+then
+    repeat
+    wait 0
+    model.Load(96)
+    until model.Available(96)
+end
+if
+    not model.Available(371)
+then
+    repeat
+    wait 0
+    model.Load(371)
+    until model.Available(371)
+end
+038B: load_requested_models
+009A: jumper = create_actor_pedtype 4 model 96 at coords_x coords_y coords_z
+0173: set_actor jumper Z_angle_to angle_1
+04C4: store_coords_to 1@ 2@ 3@ from_actor jumper with_offset 0.0 -145.0 80.0
+00A1: put_actor jumper at 1@ 2@ 3@
+model.Destroy(96)
+if 0E4D: random_percent 50
+then 0F02:  jumper special_model render_para1 bone 3 offset 0.27 0.22 0 rotation 0 0 -4.5 scale render_para // bone 34 left hand, 24 right hand, 9 had, 3 tors, 4 upper tors
+else 0F02:  jumper special_model render_para2 bone 3 offset 0.27 0.22 0 rotation 0 0 -4.5 scale render_para // bone 34 left hand, 24 right hand, 9 had, 3 tors, 4 upper tors
+end
+0E37: set_render_object_scale render_para 1.921 2.237 2.237
+0812: AS_actor jumper perform_animation "PARA_float" IFP "PARACHUTE" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+0575: set_actor jumper pinned_position 1
+01B2: give_actor jumper weapon 46 ammo 1 // Load the weapon model before using this
+model.Destroy(371)
+process = -1
+timera = 0
+
+    repeat
+    wait 0
+    if
+        056D:   actor jumper defined
+    then
+    
+        // Ранен, убит, или стреляет кто то
+        0226: 1@ = actor jumper health
+        if or
+            1@ < 1
+            actor.Dead(jumper)
+            not is_char_script_controlled jumper
+            not  locate_char_distance_to_char $player_actor char jumper radius 500.0
+            not $ACTIVE_INTERIOR == 0
+        then
+            0E31: set_render_object_visible render_para 0
+            0575: set_actor jumper pinned_position 0
+            break
+        end
+        
+        if
+            process == -1
+        then
+            if or
+                locate_char_distance_to_char $player_actor char jumper radius 200.0
+                02CB:   actor jumper bounding_sphere_visible
+            then
+                process = 0
+            end
+        end
+    
+    
+        if
+            process == 0
+        then
+            04C4: store_coords_to 1@ 2@ 3@  from_actor jumper with_offset 0.0 0.1 -1.05
+            00A1: put_actor jumper at 1@ 2@ 3@
+        end
+        
+        if
+            process == 0
+        then
+            04C4: store_coords_to 1@ 2@ 3@  from_actor jumper with_offset 0.0 0.0 0.0
+            02CE: 4@ = ground_z_at 1@ 2@ 3@
+            050A: 5@ = distance_between_XYZ 1@ 2@ 3@ and_XYZ 1@ 2@ 4@
+            if
+                5@ < 2.0
+            then
+                0E31: set_render_object_visible render_para 0
+                0575: set_actor jumper pinned_position 0
+                0812: AS_actor jumper perform_animation "PARA_Land" IFP "PARACHUTE" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                process = 1
+                wait 300
+                continue
+            end
+        end
+        if
+            process == 1
+        then
+            if
+                0611:   actor jumper performing_animation "PARA_Land"
+            then
+                0613: 1@ = actor jumper animation "PARA_Land" time
+                if
+                    1@ > 0.9
+                then
+                    break
+                end
+            else
+                break
+            end
+        end
+        
+    else
+        break
+    end
+    until not player.Defined(0)
+    04EF: release_animation "PedEventsMod"
+    if 056D:   actor jumper defined
+    then 01C2: remove_references_to_actor jumper // Like turning an actor into a random pedestrian
+    end
+    
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 500.0
+
+0A93: terminate_this_custom_script

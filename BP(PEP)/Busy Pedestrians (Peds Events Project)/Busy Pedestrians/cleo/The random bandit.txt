@@ -1,0 +1,349 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "KLRQ146"
+
+// By ArtemQa146
+
+const
+    Chef_1 = 31@
+    obj_1 = 30@
+    Ped_ID = 29@
+    coords_x = 28@
+    coords_y = 27@
+    coords_z = 26@
+    angle_1 = 25@
+    progress = 24@
+    render_S = 23@
+    render_obj = 0@
+end
+
+
+
+                0087: coords_x = 0@ // (float)
+                0087: coords_y = 1@ // (float)
+                0087: coords_z = 2@ // (float)
+                0087: angle_1 = 3@ // (float)
+                0085: render_obj = 4@ // (int)
+                
+                if
+                    0E4D: random_percent 70
+                then
+                else
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
+                    0A93: terminate_this_custom_script
+                end
+
+
+                repeat
+                wait 0
+                04ED: load_animation  "PedEventsMod"
+                until 04EE:   animation "PedEventsMod" loaded
+                
+                Ped_ID = 47
+
+                0209: 1@ = random_int_in_ranges 1 3
+                if 1@ == 1
+                then Ped_ID = 47
+                end
+                if 1@ == 2
+                then Ped_ID = 21
+                end
+                
+
+                
+                0209: progress = random_int_in_ranges 1 3
+                
+                if
+                    progress == 1
+                then
+                
+                    model.Load(Ped_ID)
+                    model.Load(336)
+                    if
+                        not model.Available(Ped_ID)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(Ped_ID)
+                        until model.Available(Ped_ID)
+                    end
+                    if
+                        not model.Available(336)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(336)
+                        until model.Available(336)
+                    end
+                    038B: load_requested_models
+
+                    009A: Chef_1 = create_actor_pedtype 21 model Ped_ID at coords_x coords_y coords_z
+                    0173: set_actor Chef_1 Z_angle_to angle_1
+
+                    0812: AS_actor Chef_1 perform_animation "killer_idle_bat" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                    0E24: fix_char Chef_1 ground 1 brightness 1 and_fade_in 0
+                    01B2: give_actor Chef_1 weapon 5 ammo 1 // Load the weapon model before using this
+                    03FE: set_actor Chef_1 money 300
+
+                    model.Destroy(Ped_ID)
+                    model.Destroy(336)
+                    
+                else
+                
+                    model.Load(Ped_ID)
+                    model.Load(335)
+                    if
+                        not model.Available(Ped_ID)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(Ped_ID)
+                        until model.Available(Ped_ID)
+                    end
+                    if
+                        not model.Available(335)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(335)
+                        until model.Available(335)
+                    end
+                    038B: load_requested_models
+
+                    009A: Chef_1 = create_actor_pedtype 21 model Ped_ID at coords_x coords_y coords_z
+                    0173: set_actor Chef_1 Z_angle_to angle_1
+
+                    0812: AS_actor Chef_1 perform_animation "killer_idle_knife" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                    0E24: fix_char Chef_1 ground 1 brightness 1 and_fade_in 0
+                    01B2: give_actor Chef_1 weapon 4 ammo 1 // Load the weapon model before using this
+                    03FE: set_actor Chef_1 money 300
+
+                    model.Destroy(Ped_ID)
+                    model.Destroy(335)
+                end
+
+                progress = 0
+                obj_1 = -1
+
+                repeat
+                wait 0
+                if
+                    056D:   actor Chef_1 defined
+                then
+                
+                    if and
+                        progress == 0
+                        0EE4: locate_char_distance_to_char Chef_1 char $player_actor radius 5.0
+                    then
+                        progress = 1
+                        timera = 0
+                    else
+                        if and
+                            not locate_char_distance_to_char Chef_1 char $player_actor radius 5.5
+                            progress > 0
+                            not progress == 146
+                        then
+                            gosub @Text_box_remove
+                            01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                            if
+                                056D:   actor Chef_1 defined
+                            then
+                                05E2: AS_actor Chef_1 kill_actor $player_actor
+                            end
+
+                            repeat
+                            wait 0
+                            until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+
+                            break
+                        end
+                        if
+                            progress == 146
+                        then
+                            if and
+                                0EE4: locate_char_distance_to_char Chef_1 char $player_actor radius 5.0
+                                timera > 12000
+                            then
+                                gosub @Text_box_remove
+                                01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                                if
+                                    056D:   actor Chef_1 defined
+                                then
+                                    05E2: AS_actor Chef_1 kill_actor $player_actor
+                                end
+
+                                repeat
+                                wait 0
+                                until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+
+                                break
+                            end
+                        end 
+                    end
+                    
+                    if
+                        progress == 1
+                    then
+                        progress = 2
+                    end
+                    
+                    if
+                        progress == 2
+                    then
+                        if
+                            8A2A:   not text_box 'TALK_1' displayed
+                        then
+                            03E5: show_text_box 'TALK_1'  // Respect can be earned be passing certain missions, killing rival gangs members, gaining territory and tagging.
+                            05BF: AS_actor Chef_1 look_at_actor $PLAYER_ACTOR 5000 ms
+                            progress = 3
+                        end
+                    end
+                    
+                    if
+                        progress == 3
+                    then
+                        00BC: show_text_highpriority GXT 'RNBNDQ1' time 500 flag 1  // ~s~Come back between 9:00 and 17:00.
+                        if
+                            00E1:   player 0 pressed_key 11 // Y
+                        then
+                            if
+                                010A:   player $PLAYER_CHAR money > 200
+                            then
+                                0109: player $PLAYER_CHAR money += -200
+                                progress = 146
+                                gosub @Text_box_remove
+                                00BC: show_text_highpriority GXT 'RNBNDQ2' time 4000 flag 1  // ~s~Come back between 9:00 and 17:00.
+                                timera = 0
+                            else
+                                gosub @Text_box_remove
+                                01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                                if
+                                    056D:   actor Chef_1 defined
+                                then
+                                    05E2: AS_actor Chef_1 kill_actor $player_actor
+                                end
+
+                                repeat
+                                wait 0
+                                until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+                                break
+                            end
+                        end
+                        if or
+                            timera > 7000
+                            00E1:   player 0 pressed_key 10 // N
+                        then
+                            gosub @Text_box_remove
+                            01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                            if
+                                056D:   actor Chef_1 defined
+                            then
+                                05E2: AS_actor Chef_1 kill_actor $player_actor
+                            end
+
+                            repeat
+                            wait 0
+                            until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+                            break
+                        end
+                    end
+                    
+                    
+                    
+                
+                    if or
+                        0EE4: locate_char_distance_to_char Chef_1 char $player_actor radius 1.5
+                        051A:   actor Chef_1 damaged_by_actor $PLAYER_ACTOR
+                    then
+                        gosub @Text_box_remove
+                        01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                        if
+                            056D:   actor Chef_1 defined
+                        then
+                            05E2: AS_actor Chef_1 kill_actor $player_actor
+                        end
+                        
+                        repeat
+                        wait 0
+                        until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+                        
+                        break
+                    end
+
+
+                    080E: get_actor Chef_1 ped_event_to 1@
+                    if or
+                        1@ == 49
+                        1@ == 9
+                        1@ == 15
+                        1@ == 31
+                        1@ == 59
+                    then
+                        break
+                    end
+
+                    if or
+                        0118:   actor Chef_1 dead
+                        not locate_char_distance_to_char $player_actor char Chef_1 radius 120.0
+                        not $ACTIVE_INTERIOR == 0
+                        not is_char_script_controlled Chef_1
+                    then
+                        break
+                    end
+
+                    if
+                        0457:   player $PLAYER_CHAR aiming_at_actor Chef_1
+                    then
+                        0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                        0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                        if or
+                            2@ == 1 // Огнестрельное оружие
+                            2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                        then
+                            gosub @Text_box_remove
+                            01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                            if
+                                056D:   actor Chef_1 defined
+                            then
+                                05E2: AS_actor Chef_1 kill_actor $player_actor
+                            end
+
+                            repeat
+                            wait 0
+                            until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+                            
+                            break
+                        end
+                    end
+
+                end
+                until not player.Defined(0)
+                gosub @Text_box_remove
+
+                if 056D:   actor Chef_1 defined
+                then 01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                end
+                04EF: release_animation "PedEventsMod"
+
+                repeat
+                wait 0
+                until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+
+0A93: terminate_this_custom_script
+
+
+
+:Text_box_remove
+if
+    0A2A:   text_box 'TALK_1' displayed
+then
+    03E6: remove_text_box
+end
+return

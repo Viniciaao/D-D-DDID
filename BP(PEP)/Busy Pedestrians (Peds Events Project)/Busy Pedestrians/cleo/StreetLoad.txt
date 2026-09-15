@@ -1,0 +1,75 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP 
+
+script_name "LoadModelsSM"
+
+wait 400
+
+if
+    0AA2: 31@ = load_dynamic_library "CLEO+.cleo"
+then
+    if
+        0AA4: 30@ = get_dynamic_library_procedure "GetCleoPlusVersion" library 31@
+    then
+        0AA7: call_function_return 30@ num_params 0 pop 0 29@
+        if
+            not 29@ >= 0x1020000
+        then
+            0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+            0AA3: free_dynamic_library 31@
+            0A93: terminate_this_custom_script
+        end
+        0AA3: free_dynamic_library 31@
+    end
+else
+    0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+    0AA3: free_dynamic_library 31@
+    0A93: terminate_this_custom_script
+end
+
+if
+    is_game_first_start
+then
+
+0F00: load_special_model_dff "modelsq\elguitar" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "elguitar"
+
+0F00: load_special_model_dff "modelsq\elguitar2" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "elguitar2"
+
+0F00: load_special_model_dff "modelsq\guitar" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "guitar"
+
+0F00: load_special_model_dff "modelsq\guitar2" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "guitar2"
+
+0F00: load_special_model_dff "modelsq\guitar3" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "guitar3"
+
+0F00: load_special_model_dff "modelsq\sax" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "sax"
+
+0F00: load_special_model_dff "modelsq\viol" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "viol"
+
+0F00: load_special_model_dff "modelsq\viol2" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "viol2"
+
+0F00: load_special_model_dff "modelsq\sint" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "sint"
+
+0F00: load_special_model_dff "modelsq\pipem" txd "modelsq\STMusic" store_to 0@
+0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "pipem"
+end
+
+1@ = 1 //  loaded
+0AF1: write_int 1@ to_ini_file "cleo\streetmus.ini" section "Models" key "Loaded1"
+0AF1: write_int 1@ to_ini_file "cleo\streetmus.ini" section "Models" key "Loaded2"
+0AF1: write_int 1@ to_ini_file "cleo\streetmus.ini" section "Models" key "Loaded3"
+0AF1: write_int 1@ to_ini_file "cleo\streetmus.ini" section "Models" key "Loaded4"
+0AF1: write_int 1@ to_ini_file "cleo\streetmus.ini" section "Models" key "Loaded5"
+004E: terminate_this_script

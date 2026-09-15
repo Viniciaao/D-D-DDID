@@ -1,0 +1,261 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "MONKQA"
+
+// By ArtemQa146
+
+const
+    monk_man = 31@
+    music = 30@
+    progress = 28@
+    coords_x = 24@
+    coords_y = 23@
+    coords_z = 22@
+    angle_1 = 21@
+end
+
+0087: coords_x = 0@ // (float)
+0087: coords_y = 1@ // (float)
+0087: coords_z = 2@ // (float)
+0087: angle_1 = 3@ // (float)
+
+if
+    0E4D: random_percent 4@
+then
+else
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 150.0
+    0A93: terminate_this_custom_script
+end
+
+
+        repeat
+        wait 0
+        04ED: load_animation  "PedEventsMod"
+        until 04EE:   animation "PedEventsMod" loaded
+
+        model.Load(49)
+        if
+            not model.Available(49)
+        then
+            repeat
+            wait 0
+            model.Load(49)
+            until model.Available(49)
+        end
+        038B: load_requested_models
+
+        009A: monk_man = create_actor_pedtype 21 model 49 at coords_x coords_y coords_z
+        0173: set_actor monk_man Z_angle_to angle_1
+        0E24: fix_char monk_man ground 1 brightness 1 and_fade_in 0
+        0812: AS_actor monk_man perform_animation "monk" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+        model.Destroy(49)
+
+        repeat
+        wait 0
+        if
+            056D:   actor monk_man defined
+        then
+
+            080E: get_actor monk_man ped_event_to 1@
+            if or
+                0118:   actor monk_man dead
+                not locate_char_distance_to_char $player_actor char monk_man radius 150.0
+                not $ACTIVE_INTERIOR == 0
+                051A:   actor monk_man damaged_by_actor $PLAYER_ACTOR
+                not is_char_script_controlled monk_man
+                1@ == 49
+                1@ == 9
+            then
+                break
+            end
+            
+            if and
+                810F:   not player $PLAYER_CHAR wanted_level > 0
+                locate_char_distance_to_char $player_actor char monk_man radius 1.5
+            then
+                if
+                    8A2A:   not text_box 'monk1' displayed
+                then
+                    0512: show_permanent_text_box 'monk1'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+                end
+                
+                if
+                    00E1:   player 0 pressed_key 15
+                then
+            
+                if
+                    0A2A:   text_box 'monk1' displayed
+                then
+                    03E6: remove_text_box
+                end
+                016A: fade 0 time 1000
+                wait 1000
+                0687: clear_actor $PLAYER_ACTOR task
+                04C4: store_coords_to 1@ 2@ 3@ from_actor monk_man with_offset 1.5 2.0 1.0
+                04C4: store_coords_to 4@ 5@ 6@ from_actor monk_man with_offset 5.5 10.0 1.0
+                015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                04C4: store_coords_to 1@ 2@ 3@ from_actor monk_man with_offset -1.0 0.0 0.0
+                08C7: put_actor $PLAYER_ACTOR at 1@ 2@ 3@ dont_warp_gang
+                0173: set_actor $player_actor Z_angle_to angle_1
+                0E24: fix_char $player_actor ground 1 brightness 1 and_fade_in 0
+                progress = 0
+                TIMERA = 0
+                0581: enable_radar 0
+                0826: enable_hud 0
+                01B4: set_player $PLAYER_CHAR can_move 0
+                0992: set_player $PLAYER_CHAR weapons_scrollable 0
+                0812: AS_actor $player_actor perform_animation "monk" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                0AAC: music = load_audio_stream "SQ/monk.mp3"
+                0AAD: set_audio_stream music state 1
+                0AC0: audio_stream music looped 1
+                0AF2: 1@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Monk" key "Volume"
+                0ABC: set_audio_stream music volume 1@
+                wait 500
+                016A: fade 1 time 1000
+                if
+                    8A2A:   not text_box 'monk2' displayed
+                then
+                    0512: show_permanent_text_box 'monk2'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+                end
+
+                
+                repeat
+                wait 0
+                if
+                    00E1:   player 0 pressed_key 15
+                then
+                    016A: fade 0 time 1000
+                    wait 1000
+                    0687: clear_actor $PLAYER_ACTOR task
+                    02EB: restore_camera_with_jumpcut
+                    0581: enable_radar 1
+                    0826: enable_hud 1
+                    01B4: set_player $PLAYER_CHAR can_move 1
+                    0992: set_player $PLAYER_CHAR weapons_scrollable 1
+                    0AAE: remove_audio_stream music
+                    wait 500
+                    016A: fade 1 time 1000
+                    break
+                end
+                if and
+                    progress == 0
+                    timera > 10000
+                then
+                    progress = 1
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 1.5 20.0 0.0
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.5 0.0 0.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                    TIMERA = 0
+                end
+                if and
+                    progress == 1
+                    timera > 10000
+                then
+                    progress = 2
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor monk_man with_offset -1.5 2.0 1.0
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor monk_man with_offset -5.5 3.0 1.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                    TIMERA = 0
+                end
+                if and
+                    progress == 2
+                    timera > 10000
+                then
+                    progress = 3
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 0.0 -4.0 0.0
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.5 0.0 0.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                    TIMERA = 0
+                end
+                if and
+                    progress == 3
+                    timera > 10000
+                then
+                    progress = 4
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor monk_man with_offset 1.5 2.0 1.0
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor monk_man with_offset 5.5 3.0 1.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                    TIMERA = 0
+                end
+                if and
+                    progress == 4
+                    timera > 10000
+                then
+                    progress = 5
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 1.0 4.0 -1.0
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                    TIMERA = 0
+                end
+                if and
+                    progress == 5
+                    timera > 10000
+                then
+                    progress = 0
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor monk_man with_offset 1.5 2.0 1.0
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor monk_man with_offset 5.5 10.0 1.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 2
+                    TIMERA = 0
+                end
+                until not player.Defined(0)
+                02EB: restore_camera_with_jumpcut
+                0581: enable_radar 1
+                0826: enable_hud 1
+                01B4: set_player $PLAYER_CHAR can_move 1
+                0992: set_player $PLAYER_CHAR weapons_scrollable 1
+                if
+                    0A2A:   text_box 'monk2' displayed
+                then
+                    03E6: remove_text_box
+                end
+                end
+            else
+                if
+                    0A2A:   text_box 'monk1' displayed
+                then
+                    03E6: remove_text_box
+                end
+            end
+
+
+
+        else
+            break
+        end
+
+        until not player.Defined(0)
+          
+                if
+                    0A2A:   text_box 'monk1' displayed
+                then
+                    03E6: remove_text_box
+                end
+            if 056D:   actor monk_man defined
+            then 01C2: remove_references_to_actor monk_man // Like turning an actor into a random pedestrian
+            end
+        04EF: release_animation "PedEventsMod"
+
+        repeat
+        wait 0
+        until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
+        
+        wait 60000
+
+0A93: terminate_this_custom_script
+

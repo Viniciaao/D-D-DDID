@@ -1,0 +1,121 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+{$USE Audio}
+
+0000: NOP
+
+script_name "watrqa"
+
+// By ArtemQa146
+
+const
+    progress = 31@
+    water_vend = 30@
+    soundsqa = 29@
+    Render_Obj = 28@
+    timeq = 27@
+end
+
+timeq = 200
+
+while true
+wait timeq
+    if
+        player.Defined(0)
+    then
+        04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+        0AA7: call_function_return 0x5693F0 num_params 9 pop 9 0 0 0 0 1 0 20.0 1@v 12741 water_vend
+        if
+            water_vend > 0
+        then
+            0EEE: get_entity_coordinates water_vend store_to 1@ 2@ 3@
+            if
+                locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 10.0
+            then
+                timeq = 0
+                0D4E: 5@ = read_struct water_vend offset 0x14 size 4 // CPlaceable -> m_pMatrix
+                if
+                    5@ > 0
+                then
+                    0D0A: store_coords_to 1@ 2@ 3@ from_matrix 5@ with_offsets -0.9 0.0 0.0
+                    0D04: 4@ = matrix 5@ z_angle
+                    if
+                        0102:   actor $PLAYER_ACTOR in_sphere 1@ 2@ 3@ radius 0.6 0.6 1.0 sphere 0 stopped_on_foot
+                    then
+
+                        //0513: show_text_box_1number 'SLOT_05' number 2  // ~k~~VEHICLE_ENTER_EXIT~ Use Slot Machine $~1~
+                        0512: show_permanent_text_box 'SLOT_05'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+
+                        repeat
+                        wait 0
+                                if and
+                                    02A0:   actor $PLAYER_ACTOR stopped
+                                    00E1:   player 0 pressed_key 15
+                                    010A:   player $PLAYER_CHAR money > 1
+                                    80DF:   not actor $PLAYER_ACTOR driving
+                                    03EE:   player $PLAYER_CHAR controllable
+                                then
+                                    repeat
+                                    wait 0
+                                    04ED: load_animation  "VENDING"
+                                    until 04EE:   animation "VENDING" loaded
+
+                                    03E6: remove_text_box
+                                    0109: player $PLAYER_CHAR money += -1
+                                    06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 1
+                                    0687: clear_actor $PLAYER_ACTOR task
+                                    07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 0
+
+                                    08C7: put_actor $PLAYER_ACTOR at 1@ 2@ 3@ dont_warp_gang
+                                    0173: set_actor $PLAYER_ACTOR Z_angle_to 4@
+                                    0E24: fix_char $PLAYER_ACTOR ground 1 brightness 1 and_fade_in 0
+
+                                    0AC1: soundsqa = load_audio_stream_with_3d_support "SQ\pedsbuy.mp3" // IF and SET
+                                    0AC4: link_3d_audio_stream soundsqa to_actor $PLAYER_ACTOR
+
+                                    0615: define_AS_pack_begin 5@
+                                    0812: AS_actor -1 perform_animation "VEND_USE" IFP "VENDING" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1
+                                    0812: AS_actor -1 perform_animation "VEND_DRINK_P" IFP "VENDING" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1
+                                    0616: define_AS_pack_end 5@
+                                    0618: assign_actor $PLAYER_ACTOR to_AS_pack 5@
+                                    061B: remove_references_to_AS_pack 5@
+
+                                    wait 500
+
+                                    0AAD: set_audio_stream soundsqa state 1
+                                    0ABC: set_audio_stream soundsqa volume 0.5
+
+                                    wait 2000
+                                    0AF0: 0@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "water"
+                                    0F02: create_render_object_to_char_bone_from_special $PLAYER_ACTOR special_model 0@ bone 34 offset 0.09 0.04 -0.02 rotation 180.0 -20.0 70.0 store_to Render_Obj
+                                    0E37: set_render_object_scale Render_Obj 0.9 0.9 0.5
+
+                                    wait 1400
+                                    0226: 5@ = actor $PLAYER_actor health
+                                    5@ += 10
+                                    0223: set_actor $PLAYER_actor health_to 5@
+                                    0AAE: remove_audio_stream soundsqa
+                                    0E2F: delete_render_object Render_Obj
+
+                                    0687: clear_actor $PLAYER_ACTOR task
+                                    06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 0
+                                    wait 300
+                                    07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 1
+                                    04EF: release_animation "VENDING"
+                                    wait 200
+                                    break
+                                end
+                        until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 0.75
+                        03E6: remove_text_box
+                    end
+                end
+            else
+                timeq = 200
+            end
+        else
+            timeq = 200
+        end
+    end
+end

@@ -1,0 +1,349 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE Audio}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP 
+
+script_name "StSledge"
+
+// By ArtemQa146
+
+wait 500
+
+:LoadedModels
+wait 500
+0AF0: 1@ = read_int_from_ini_file "cleo\StreetCleaners.ini" section "Models" key "Loaded5"
+if
+1@ == 1
+jf @LoadedModels
+1@ = 0 
+0AF1: write_int 1@ to_ini_file "cleo\StreetCleaners.ini" section "Models" key "Loaded5"
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Street Cleaners"
+if
+    0@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
+0AF0: 6@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Street Cleaners" key "Ped ID Sledge"
+0AF0: 31@ = read_int_from_ini_file "cleo\StreetCleaners.ini" section "Models" key "Sledge"
+0AF0: 30@ = read_int_from_ini_file "cleo\StreetCleaners.ini" section "Models" key "Girdpile"
+
+if
+    6@ <= 0
+then
+    6@ = 27
+end
+
+// 1@ actor
+// 0@ render
+// 5@ particle
+// 6@ Ped ID from ini
+
+:Sledge
+wait 250
+if 
+   Player.Defined($PLAYER_CHAR)
+jf @Sledge
+if and
+$ACTIVE_INTERIOR == 0  
+$ONMISSION == 0 
+jf @Sledge
+0D59: get_current_weather_to 3@
+0E40: get_current_hour 2@
+if and
+not 3@ == 8 // not weather rain 
+not 3@ == 16 // not weather rain 2
+2@ >= 6
+18 >= 2@
+jf @Sledge
+
+// LS
+
+:Sledge_Coords_1 
+if and
+0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2020.9331 376.1464 35.1719 radius 100.0
+not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2020.9331 376.1464 35.1719 radius 60.0
+jf @Sledge_Coords_2 
+// coords to walk 
+10@ = -2020.9331
+11@ = 376.1464
+12@ = 34.1719
+13@ = 90.6898
+jump @Sledge_Start
+
+:Sledge_Coords_2 
+if and
+0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1891.7303 -1323.536 14.5004 radius 100.0
+not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1891.7303 -1323.536 14.5004 radius 60.0
+jf @Sledge_Coords_3 
+// coords to walk 
+10@ = 1889.1383
+11@ = -1322.7153
+12@ = 13.5004
+13@ = 181.143
+jump @Sledge_Start
+
+:Sledge_Coords_3 
+if and
+0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2485.4968 1856.6873 16.3222 radius 100.0
+not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2485.4968 1856.6873 16.3222 radius 60.0
+jf @Sledge
+// coords to walk 
+10@ = 2485.4968
+11@ = 1856.6873
+12@ = 15.3222
+13@ = 94.003
+jump @Sledge_Start
+
+
+:Sledge_Start 
+Model.Load(6@)
+model.Load(843)
+if
+    not model.Available(6@)
+then
+    repeat
+    wait 0
+    model.Load(6@)
+    until model.Available(6@)
+end
+if
+    not model.Available(843)
+then
+    repeat
+    wait 0
+    model.Load(843)
+    until model.Available(843)
+end
+038B: load_requested_models 
+
+repeat
+wait 0
+04ED: load_animation  "PedEventsMod"
+until 04EE:   animation "PedEventsMod" loaded
+
+20@ = -1
+Actor.Create(1@, 21, 6@, 10@, 11@, 12@)   
+Actor.Angle(1@) = 13@   
+04C4: store_coords_to 2@ 3@ 4@ from_actor 1@ with_offset 0.12 1.25 -1.0
+0E01: create_object_no_save 843 at 2@ 3@ 4@ offset 0 ground 0 to 8@
+0E01: create_object_no_save 843 at 2@ 3@ 4@ offset 0 ground 0 to 14@
+0F04: create_render_object_to_object_from_special 8@ special_model 30@ offset 0 0 0 rotation 0 0 0 store_to 20@
+0F04: create_render_object_to_object_from_special 14@ special_model 30@ offset 0 0 0 rotation 0 0 0 store_to 20@
+0382: set_object 8@ collision_detection 0
+08D2: object 8@ scale_model 0.0
+0177: set_object 8@ Z_angle_to 13@
+0382: set_object 14@ collision_detection 0
+08D2: object 14@ scale_model 0.0
+0177: set_object 14@ Z_angle_to 13@
+04C4: store_coords_to 15@ 16@ 17@ from_actor 1@ with_offset 0.12 1.25 -0.6
+064B: 5@ = create_particle "vent" at 15@ 16@ 17@ type 1
+25@ = 0
+26@ = 0
+0812: AS_actor 1@ perform_animation "AxeLoop" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+0F02:  1@ special_model 31@ bone 24 offset 0 0 0 rotation 0 0 0 scale 0@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+0E30: set_render_object_auto_hide 0@ dead 1 weapon 1 car 1
+0AC1: 7@ = load_audio_stream_with_3d_support "SQ/Sledge.mp3" // IF and SET
+0AC4: link_3d_audio_stream 7@ to_actor 1@
+21@ = 0
+model.Destroy(843)
+Model.destroy(6@)
+
+while true
+wait 0
+    if
+        056D:   actor 1@ defined
+    then
+        if and
+            0EE4: locate_char_distance_to_char $PLAYER_ACTOR char 1@ radius 150.0
+            $ACTIVE_INTERIOR == 0
+        then
+        
+            if or
+                Actor.Animation(1@) == "AxeLoop"
+                Actor.Animation(1@) == "AxeTired"
+            then
+                if
+                    Actor.Animation(1@) == "AxeLoop"
+                then
+                    0613: 4@ = actor 1@ animation "AxeLoop" time
+                    25@ = 1
+                end
+                if
+                    Actor.Animation(1@) == "AxeTired"
+                then
+                    0613: 4@ = actor 1@ animation "AxeTired" time
+                    25@ = 2
+                end
+
+// particle
+
+                if
+                    Actor.Animation(1@) == "AxeLoop"
+                then
+                    if and
+                        4@ >= 0.36
+                        4@ <= 0.46
+                    then
+                        0EC0: add_fx_system_particle 5@ coord 15@ 16@ 17@ vel 0 0 0 size 0.7 brightness 0.0 rgba 0.8 0.7 0.8 0.2 lastFactor 0.3
+                        if and
+                            26@ == 0
+                            0EE4: locate_char_distance_to_char $PLAYER_ACTOR char 1@ radius 20.0
+                        then
+                            0AAD: set_audio_stream 7@ state 1
+                            0ABC: set_audio_stream 7@ volume 0.4
+                            26@ = 1
+                        end
+                    end
+
+                    if and
+                        4@ >= 0.85
+                        4@ <= 0.95
+                    then
+                        0EC0: add_fx_system_particle 5@ coord 15@ 16@ 17@ vel 0 0 0 size 0.7 brightness 0.0 rgba 0.8 0.7 0.8 0.2 lastFactor 0.3
+                        if and
+                            26@ == 1
+                            0EE4: locate_char_distance_to_char $PLAYER_ACTOR char 1@ radius 20.0
+                        then
+                            0AAD: set_audio_stream 7@ state 1
+                            0ABC: set_audio_stream 7@ volume 0.4
+                            26@ = 0
+                        end
+                    end
+                end
+
+
+                // if animation ended, walk another position
+                if
+                    4@ >= 0.95
+                then
+                    26@ = 0
+                    0208: 18@ = random_float_in_ranges 5.0 10.0
+                    18@ *= -1.0
+                    if
+                        25@ == 1
+                    then
+                        0812: AS_actor 1@ perform_animation "AxeTired" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+                        25@ = 0
+                        wait 50
+                        continue
+                    end
+                    if
+                        25@ == 2
+                    then
+                        0812: AS_actor 1@ perform_animation "AxeLoop" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+                        25@ = 0
+                        wait 50
+                        continue
+                    end
+                end
+            end
+
+
+            0D59: get_current_weather_to 3@
+            0E40: get_current_hour 4@
+            080E: get_actor 1@ ped_event_to 2@
+            if or
+                0118:   actor 1@ dead
+                3@ == 8 // not weather rain
+                3@ == 16 // not weather rain 2
+                4@ >= 19 // timeout
+                2@ == 9 // ped damaged
+                2@ == 49 // shoot close ped
+            then
+                if
+                0EE4: locate_char_distance_to_char $PLAYER_ACTOR char 1@ radius 50.0
+                then
+                    gosub @Remove_2
+                else
+                    gosub @Remove
+                end
+                jump @Sledge
+            end
+            
+            080E: get_actor 1@ ped_event_to 2@
+            if or
+                2@ == 15
+                2@ == 31
+                2@ == 59
+            then
+                if
+                0EE4: locate_char_distance_to_char $PLAYER_ACTOR char 1@ radius 50.0
+                then
+                    gosub @Remove_2
+                else
+                    gosub @Remove
+                end
+                jump @Sledge
+            end
+            
+            // Если целится из огнестрела
+            if
+                0457:   player $PLAYER_CHAR aiming_at_actor 1@
+            then
+                0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 2@
+                0E89: get_weaponinfo_fire_type 2@ store_to 3@ // Проверяем с каким оружием игрок
+                if or
+                    3@ == 1 // Огнестрельное оружие
+                    3@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                then
+                    if
+                    0EE4: locate_char_distance_to_char $PLAYER_ACTOR char 1@ radius 50.0
+                    then
+                        gosub @Remove_2
+                    else
+                        gosub @Remove
+                    end
+                    jump @Sledge
+                end
+            end
+            
+            
+        else
+            gosub @Remove
+            wait 1000
+            jump @Sledge
+        end
+    else
+        gosub @Remove
+        wait 1000
+        jump @Sledge
+    end
+end
+
+
+:Remove
+if 03CA:   object 8@ exists
+then 0108: destroy_object 8@
+end
+if 03CA:   object 14@ exists
+then 0108: destroy_object 14@
+end
+0AAE: remove_audio_stream 7@
+0650: destroy_particle 5@
+if 056D:   actor 1@ defined
+then 009B: destroy_actor 1@
+end
+04EF: release_animation "PedEventsMod"
+return
+
+:Remove_2
+if 03CA:   object 8@ exists
+then 01C4: remove_references_to_object 8@ // This object will now disappear when the player looks away
+end
+if 03CA:   object 14@ exists
+then 01C4: remove_references_to_object 14@ // This object will now disappear when the player looks away
+end
+0AAE: remove_audio_stream 7@
+0650: destroy_particle 5@
+if 056D:   actor 1@ defined
+then 01C2: remove_references_to_actor 1@ // Like turning an actor into a random pedestrian
+end
+04EF: release_animation "PedEventsMod"
+return
+
+// By ArtemQa146

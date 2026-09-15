@@ -1,0 +1,614 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "TRAMQA"
+
+// By ArtemQa146
+
+if
+    0AA2: 31@ = load_dynamic_library "CLEO+.cleo"
+then
+    if
+        0AA4: 30@ = get_dynamic_library_procedure "GetCleoPlusVersion" library 31@
+    then
+        0AA7: call_function_return 30@ num_params 0 pop 0 29@
+        if
+            not 29@ >= 0x1020000
+        then
+            0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+            0AA3: free_dynamic_library 31@
+            0A93: terminate_this_custom_script
+        end
+        0AA3: free_dynamic_library 31@
+    end
+else
+    0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+    0AA3: free_dynamic_library 31@
+    0A93: terminate_this_custom_script
+end
+
+repeat
+wait 500
+0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "LoadedTram"
+until 1@ == 1
+1@ = 0
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "LoadedTram"
+
+const
+    find = 31@
+    tramp = 30@
+    ped_1 = 29@
+    ped_2 = 28@
+    ped_3 = 27@
+    ped_4 = 26@
+    paper = 25@
+    drink = 24@
+    x1 = 23@
+    y1 = 22@
+    z1 = 21@
+    x2 = 20@
+    y2 = 19@
+    z2 = 18@
+    x3 = 17@
+    y3 = 16@
+    z3 = 15@
+    x4 = 14@
+    y4 = 13@
+    z4 = 12@
+    x5 = 11@
+    y5 = 10@
+    z5 = 9@
+    ped_11 = 8@
+    ped_22 = 7@
+    ped_33 = 6@
+    ped_44 = 5@
+    tramp_2 = 4@
+    Memory_adr = 0xD
+end
+
+0AF2: x1 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "x1"
+0AF2: x2 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "x2"
+0AF2: x3 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "x3"
+0AF2: x4 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "x4"
+0AF2: x5 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "x5"
+0AF2: y1 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "y1"
+0AF2: y2 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "y2"
+0AF2: y3 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "y3"
+0AF2: y4 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "y4"
+0AF2: y5 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "y5"
+0AF2: z1 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "z1"
+0AF2: z2 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "z2"
+0AF2: z3 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "z3"
+0AF2: z4 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "z4"
+0AF2: z5 = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Tram" key "z5"
+
+0AF0: paper = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "paper"
+0AF0: drink = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "drink1"
+
+wait 5000
+
+ped_1 = -1
+ped_2 = -1
+ped_3 = -1
+ped_4 = -1
+ped_11 = -1
+ped_22 = -1
+ped_33 = -1
+ped_44 = -1
+
+while true
+wait 500
+    if
+        player.Defined(0)
+    then
+
+        tramp = 0
+        find = 0
+        while 0EA8: get_any_car_no_save_recursive find progress_to find car_to 0@
+            if
+                0137:   car 0@ model == 449
+            then
+            
+                02E3: 1@ = car 0@ speed
+                if and
+                    0EE5: locate_char_distance_to_car $PLAYER_ACTOR car 0@ radius 120.0
+                    not locate_char_distance_to_car $PLAYER_ACTOR car 0@ radius 30.0
+                    1@ > 5.0
+                then
+                    0A97: 1@ = car 0@ struct
+                    0D4E: 1@ = struct 1@ offset Memory_adr size 1
+                    if and
+                        856D:   not actor ped_1 defined
+                        856D:   not actor ped_2 defined
+                        856D:   not actor ped_3 defined
+                        856D:   not actor ped_4 defined
+                        not 1@ == 2
+                        not 1@ == 3
+                    then
+                        gosub @Ped_CReate
+                    else
+                        if and
+                            856D:   not actor ped_11 defined
+                            856D:   not actor ped_22 defined
+                            856D:   not actor ped_33 defined
+                            856D:   not actor ped_44 defined
+                            not 1@ == 2
+                            not 1@ == 3
+                        then
+                            gosub @Ped_CReate_2
+                        end
+                    end
+                end
+                
+                if
+                    056E:   car 0@ defined
+                then
+                    0A97: 1@ = car 0@ struct
+                    0D4E: 1@ = struct 1@ offset Memory_adr size 1
+                    if
+                        1@ == 2
+                    then
+                        0085: tramp = 0@ // (int)
+                    end
+                    if
+                        1@ == 3
+                    then
+                        0085: tramp_2 = 0@ // (int)
+                    end
+                end
+            end
+        end
+        
+        if
+            056E:   car tramp defined
+        then
+            0A97: 1@ = car tramp struct
+            0D4E: 1@ = struct 1@ offset Memory_adr size 1
+            if and
+                0137:   car tramp model == 449
+                1@ == 2
+            then
+                if and
+                    056D:   actor ped_1 defined
+                    056D:   actor ped_2 defined
+                    056D:   actor ped_3 defined
+                    056D:   actor ped_4 defined
+                then
+
+                    if or
+                        0119:   car tramp wrecked
+                        not locate_char_distance_to_car $PLAYER_ACTOR car tramp radius 200.0
+                    then
+                        0465: remove_actor ped_1 from_turret_mode
+                        0465: remove_actor ped_2 from_turret_mode
+                        0465: remove_actor ped_3 from_turret_mode
+                        0465: remove_actor ped_4 from_turret_mode
+                        gosub @Destroy_peds
+                        continue
+                    end
+
+
+                    if or
+                        051A:   actor ped_1 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor ped_2 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor ped_3 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor ped_4 damaged_by_actor $PLAYER_ACTOR
+                        0118:   actor ped_1 dead
+                        0118:   actor ped_2 dead
+                        0118:   actor ped_3 dead
+                        0118:   actor ped_4 dead
+                    then
+                        0465: remove_actor ped_1 from_turret_mode
+                        0465: remove_actor ped_2 from_turret_mode
+                        0465: remove_actor ped_3 from_turret_mode
+                        0465: remove_actor ped_4 from_turret_mode
+                        gosub @Destroy_peds
+                        continue
+                    end
+
+                    if or
+                        not locate_char_distance_to_car ped_1 car tramp radius 10.0
+                        not locate_char_distance_to_car ped_2 car tramp radius 10.0
+                        not locate_char_distance_to_car ped_3 car tramp radius 10.0
+                        not locate_char_distance_to_car ped_4 car tramp radius 10.0
+                    then
+                        0465: remove_actor ped_1 from_turret_mode
+                        0465: remove_actor ped_2 from_turret_mode
+                        0465: remove_actor ped_3 from_turret_mode
+                        0465: remove_actor ped_4 from_turret_mode
+                        gosub @Destroy_peds
+                        continue
+                    end
+                else
+                    gosub @Destroy_peds
+                end
+            end
+        else
+            gosub @Destroy_peds
+        end
+        
+        if
+            056E:   car tramp_2 defined
+        then
+            0A97: 1@ = car tramp_2 struct
+            0D4E: 1@ = struct 1@ offset Memory_adr size 1
+            if and
+                0137:   car tramp_2 model == 449
+                1@ == 3
+            then
+                if and
+                    056D:   actor ped_11 defined
+                    056D:   actor ped_22 defined
+                    056D:   actor ped_33 defined
+                    056D:   actor ped_44 defined
+                then
+
+                    if or
+                        0119:   car tramp_2 wrecked
+                        not locate_char_distance_to_car $PLAYER_ACTOR car tramp_2 radius 200.0
+                    then
+                        0465: remove_actor ped_11 from_turret_mode
+                        0465: remove_actor ped_22 from_turret_mode
+                        0465: remove_actor ped_33 from_turret_mode
+                        0465: remove_actor ped_44 from_turret_mode
+                        gosub @Destroy_peds_2
+                        continue
+                    end
+
+
+                    if or
+                        051A:   actor ped_11 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor ped_22 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor ped_33 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor ped_44 damaged_by_actor $PLAYER_ACTOR
+                        0118:   actor ped_11 dead
+                        0118:   actor ped_22 dead
+                        0118:   actor ped_33 dead
+                        0118:   actor ped_44 dead
+                    then
+                        0465: remove_actor ped_11 from_turret_mode
+                        0465: remove_actor ped_22 from_turret_mode
+                        0465: remove_actor ped_33 from_turret_mode
+                        0465: remove_actor ped_44 from_turret_mode
+                        gosub @Destroy_peds_2
+                        continue
+                    end
+
+                    if or
+                        not locate_char_distance_to_car ped_11 car tramp_2 radius 10.0
+                        not locate_char_distance_to_car ped_22 car tramp_2 radius 10.0
+                        not locate_char_distance_to_car ped_33 car tramp_2 radius 10.0
+                        not locate_char_distance_to_car ped_44 car tramp_2 radius 10.0
+                    then
+                        0465: remove_actor ped_11 from_turret_mode
+                        0465: remove_actor ped_22 from_turret_mode
+                        0465: remove_actor ped_33 from_turret_mode
+                        0465: remove_actor ped_44 from_turret_mode
+                        gosub @Destroy_peds_2
+                        continue
+                    end
+                else
+                    gosub @Destroy_peds_2
+                end
+            end
+        else
+            gosub @Destroy_peds_2
+        end
+        
+    end
+end
+
+
+:Ped_CReate
+repeat
+wait 0
+04ED: load_animation  "PedEventsMod"
+until 04EE:   animation "PedEventsMod" loaded
+
+if
+    056E:   car 0@ defined
+then
+
+    0376: ped_1 = create_random_actor_at 0.0 0.0 0.0
+    0464: put_actor ped_1 into_turret_on_car 0@ at_car_offset x1 y1 z1 position 0 shooting_angle_limit 0.0 with_weapon 0 // лево перед
+    0E24: fix_char ped_1 ground 0 brightness 1 and_fade_in 0
+
+    0209: 1@ = random_int_in_ranges 1 4
+    if
+        1@ == 1
+    then
+        0812: AS_actor ped_1 perform_animation "TramL1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+    else
+        if
+            1@ == 2
+        then
+            0812: AS_actor ped_1 perform_animation "TramL2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_1 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        else
+            0812: AS_actor ped_1 perform_animation "TramL3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_1 special_model drink bone 34 offset 0.09 0.025 -0.02 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        end
+    end
+
+    0A97: 1@ = car 0@ struct
+    0D4E: 1@ = read_struct 1@ offset 0x5D4 size 4
+
+    if
+        1@ == 0
+    then
+        0376: ped_2 = create_random_actor_at 0.0 0.0 0.0
+        0464: put_actor ped_2 into_turret_on_car 0@ at_car_offset x2 y2 z2 position 0 shooting_angle_limit 0.0 with_weapon 0 // зад
+        0E24: fix_char ped_2 ground 0 brightness 1 and_fade_in 0
+        0209: 1@ = random_int_in_ranges 1 4
+        if
+            1@ == 1
+        then
+            0812: AS_actor ped_2 perform_animation "TramUp1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+        else
+            0812: AS_actor ped_2 perform_animation "TramUp2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+        end
+    else
+        0376: ped_2 = create_random_actor_at 0.0 0.0 0.0
+        0464: put_actor ped_2 into_turret_on_car 0@ at_car_offset x3 y3 z3 position 0 shooting_angle_limit 0.0 with_weapon 0 // зад
+        0E24: fix_char ped_2 ground 0 brightness 1 and_fade_in 0
+        0209: 1@ = random_int_in_ranges 1 4
+        if
+            1@ == 1
+        then
+            0812: AS_actor ped_2 perform_animation "TramR1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+        else
+            if
+                1@ == 2
+            then
+                0812: AS_actor ped_2 perform_animation "TramR2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+                0F02:  ped_2 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+                0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+            else
+                0812: AS_actor ped_2 perform_animation "TramR3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+                0F02:  ped_2 special_model drink bone 34 offset 0.09 0.025 -0.02 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+                0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+            end
+        end
+    end
+
+    0376: ped_3 = create_random_actor_at 0.0 0.0 0.0
+    0464: put_actor ped_3 into_turret_on_car 0@ at_car_offset x4 y4 z4 position 0 shooting_angle_limit 0.0 with_weapon 0 // лево внутри
+    0E24: fix_char ped_3 ground 0 brightness 1 and_fade_in 0
+
+    0209: 1@ = random_int_in_ranges 1 4
+    if
+        1@ == 1
+    then
+        0812: AS_actor ped_3 perform_animation "TramL1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+    else
+        if
+            1@ == 2
+        then
+            0812: AS_actor ped_3 perform_animation "TramL2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_3 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        else
+            0812: AS_actor ped_3 perform_animation "TramL3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_3 special_model drink bone 34 offset 0.09 0.025 -0.02 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        end
+    end
+
+    0376: ped_4 = create_random_actor_at 0.0 0.0 0.0
+    0464: put_actor ped_4 into_turret_on_car 0@ at_car_offset x5 y5 z5 position 0 shooting_angle_limit 0.0 with_weapon 0 // право перед
+    0E24: fix_char ped_4 ground 0 brightness 1 and_fade_in 0
+
+    0209: 1@ = random_int_in_ranges 1 4
+    if
+        1@ == 1
+    then
+        0812: AS_actor ped_4 perform_animation "TramR1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+    else
+        if
+            1@ == 2
+        then
+            0812: AS_actor ped_4 perform_animation "TramR2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_4 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        else
+            0812: AS_actor ped_4 perform_animation "TramR3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_4 special_model drink bone 34 offset 0.09 0.025 -0.02 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        end
+    end
+    
+    0A97: 1@ = car 0@ struct
+    0E28: write_struct 1@ offset Memory_adr size 1 value 2 // Метка что пассажир создан
+
+end
+
+04EF: release_animation "PedEventsMod"
+return
+
+:Destroy_peds
+if 056D:   actor ped_1 defined
+then 01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor ped_2 defined
+then 01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor ped_3 defined
+then 01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor ped_4 defined
+then 01C2: remove_references_to_actor ped_4 // Like turning an actor into a random pedestrian
+end
+ped_1 = -1
+ped_2 = -1
+ped_3 = -1
+ped_4 = -1
+return
+
+:Ped_CReate_2
+repeat
+wait 0
+04ED: load_animation  "PedEventsMod"
+until 04EE:   animation "PedEventsMod" loaded
+
+if
+    056E:   car 0@ defined
+then
+
+    0376: ped_11 = create_random_actor_at 0.0 0.0 0.0
+    0464: put_actor ped_11 into_turret_on_car 0@ at_car_offset x1 y1 z1 position 0 shooting_angle_limit 0.0 with_weapon 0 // лево перед
+    0E24: fix_char ped_11 ground 0 brightness 1 and_fade_in 0
+
+    0209: 1@ = random_int_in_ranges 1 4
+    if
+        1@ == 1
+    then
+        0812: AS_actor ped_11 perform_animation "TramL1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+    else
+        if
+            1@ == 2
+        then
+            0812: AS_actor ped_11 perform_animation "TramL2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_11 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        else
+            0812: AS_actor ped_11 perform_animation "TramL3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_11 special_model drink bone 34 offset 0.09 0.025 -0.02 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        end
+    end
+
+    0A97: 1@ = car 0@ struct
+    0D4E: 1@ = read_struct 1@ offset 0x5D4 size 4
+
+    if
+        1@ == 0
+    then
+        0376: ped_22 = create_random_actor_at 0.0 0.0 0.0
+        0464: put_actor ped_22 into_turret_on_car 0@ at_car_offset x2 y2 z2 position 0 shooting_angle_limit 0.0 with_weapon 0 // зад
+        0E24: fix_char ped_22 ground 0 brightness 1 and_fade_in 0
+        0209: 1@ = random_int_in_ranges 1 4
+        if
+            1@ == 1
+        then
+            0812: AS_actor ped_22 perform_animation "TramUp1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+        else
+            0812: AS_actor ped_22 perform_animation "TramUp2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+        end
+    else
+        0376: ped_22 = create_random_actor_at 0.0 0.0 0.0
+        0464: put_actor ped_22 into_turret_on_car 0@ at_car_offset x3 y3 z3 position 0 shooting_angle_limit 0.0 with_weapon 0 // зад
+        0E24: fix_char ped_22 ground 0 brightness 1 and_fade_in 0
+        0209: 1@ = random_int_in_ranges 1 4
+        if
+            1@ == 1
+        then
+            0812: AS_actor ped_22 perform_animation "TramR1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+        else
+            if
+                1@ == 2
+            then
+                0812: AS_actor ped_22 perform_animation "TramR2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+                0F02:  ped_22 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+                0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+            else
+                0812: AS_actor ped_22 perform_animation "TramR3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+                0F02:  ped_22 special_model drink bone 34 offset 0.09 0.025 -0.02 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+                0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+            end
+        end
+    end
+
+    0376: ped_33 = create_random_actor_at 0.0 0.0 0.0
+    0464: put_actor ped_33 into_turret_on_car 0@ at_car_offset x4 y4 z4 position 0 shooting_angle_limit 0.0 with_weapon 0 // лево внутри
+    0E24: fix_char ped_33 ground 0 brightness 1 and_fade_in 0
+
+    0209: 1@ = random_int_in_ranges 1 4
+    if
+        1@ == 1
+    then
+        0812: AS_actor ped_33 perform_animation "TramL1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+    else
+        if
+            1@ == 2
+        then
+            0812: AS_actor ped_33 perform_animation "TramL2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_33 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        else
+            0812: AS_actor ped_33 perform_animation "TramL3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_33 special_model drink bone 34 offset 0.09 0.025 -0.02 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        end
+    end
+
+    0376: ped_44 = create_random_actor_at 0.0 0.0 0.0
+    0464: put_actor ped_44 into_turret_on_car 0@ at_car_offset x5 y5 z5 position 0 shooting_angle_limit 0.0 with_weapon 0 // право перед
+    0E24: fix_char ped_44 ground 0 brightness 1 and_fade_in 0
+
+    0209: 1@ = random_int_in_ranges 1 4
+    if
+        1@ == 1
+    then
+        0812: AS_actor ped_44 perform_animation "TramR1" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+    else
+        if
+            1@ == 2
+        then
+            0812: AS_actor ped_44 perform_animation "TramR2" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_44 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        else
+            0812: AS_actor ped_44 perform_animation "TramR3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1
+            0F02:  ped_44 special_model drink bone 34 offset 0.09 0.025 -0.02 rotation 0 180.0 0.0 scale 1@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+            0E37: set_render_object_scale 1@ 0.9 0.9 0.9
+            0E30: set_render_object_auto_hide 1@ dead 1 weapon 1 car 0
+        end
+    end
+
+    0A97: 1@ = car 0@ struct
+    0E28: write_struct 1@ offset Memory_adr size 1 value 3 // Метка что пассажир создан
+
+end
+
+04EF: release_animation "PedEventsMod"
+return
+
+:Destroy_peds_2
+if 056D:   actor ped_11 defined
+then 01C2: remove_references_to_actor ped_11 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor ped_22 defined
+then 01C2: remove_references_to_actor ped_22 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor ped_33 defined
+then 01C2: remove_references_to_actor ped_33 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor ped_44 defined
+then 01C2: remove_references_to_actor ped_44 // Like turning an actor into a random pedestrian
+end
+ped_11 = -1
+ped_22 = -1
+ped_33 = -1
+ped_44 = -1
+return

@@ -1,0 +1,329 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "SEXSELL"
+
+// By ArtemQa146
+
+const
+    ped_1 = 31@
+    ped_2 = 30@
+    progress = 29@
+    panel_act = 28@
+    panel_1 = 27@
+    event = 21@
+end
+
+
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+
+            model.Load(178)
+            if
+                not model.Available(178)
+            then
+                repeat
+                wait 0
+                model.Load(178)
+                until model.Available(178)
+            end
+            038B: load_requested_models
+
+            event = true
+
+            // ped 1
+
+            009A: ped_1 = create_actor_pedtype 5 model 178 at -103.7681 -24.5657 1000.7187
+            0173: set_actor ped_1 Z_angle_to 0.0
+            0E24: fix_char ped_1 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_1 perform_animation "liquor_cas" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+
+            // ped 2
+
+            009A: ped_2 = create_actor_pedtype 5 model 178 at -105.8119 -8.5438 1000.7187
+            0173: set_actor ped_2 Z_angle_to 180.0
+            0E24: fix_char ped_2 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_2 perform_animation "liquor_cas" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+
+            0860: link_actor ped_1 to_interior 3
+            0860: link_actor ped_2 to_interior 3
+
+            model.Destroy(178)
+            04EF: release_animation "PedEventsMod"
+
+            1@ = 0
+            timera = 0
+
+            repeat
+            wait 0
+            if and
+                056D:   actor ped_1 defined
+                056D:   actor ped_2 defined
+            then
+
+                if
+                    not $ACTIVE_INTERIOR == 3
+                then
+                    break
+                end
+
+
+                if or
+                    051A:   actor ped_1 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor ped_2 damaged_by_actor $PLAYER_ACTOR
+                then
+                    break
+                end
+
+
+                if or
+                    not locate_char_distance_to_coordinates $player_actor pos -104.3625 -17.7231 1000.7187 radius 50.0
+                    0118:   actor ped_1 dead
+                    0118:   actor ped_2 dead
+                then
+                    break
+                end
+
+                080E: get_actor ped_1 ped_event_to 1@
+                080E: get_actor ped_2 ped_event_to 2@
+                if or
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                    2@ == 15
+                    2@ == 31
+                    2@ == 59
+                then
+                    break
+                end
+
+
+                080E: get_actor ped_1 ped_event_to 1@
+                080E: get_actor ped_2 ped_event_to 2@
+                if or
+                    1@ == 49
+                    1@ == 9
+                    2@ == 49
+                    2@ == 9
+                then
+                    break
+                end
+
+                if or
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_1
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_2
+                then
+                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                    if or
+                        2@ == 1 // Огнестрельное оружие
+                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                    then
+                        break
+                    end
+                end
+
+
+                gosub @Sell
+
+            else
+                break
+            end
+            until not player.Defined(0)
+            if 056D:   actor ped_1 defined
+            then 01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_2 defined
+            then 01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+            end
+            if
+                progress > 0
+            then
+                03E6: remove_text_box
+                08DA: remove_panel panel_1
+                0581: enable_radar 1
+                01B4: set_player $PLAYER_CHAR can_move true
+                02EB: restore_camera_with_jumpcut
+            end
+            repeat
+            wait 0
+            until not $ACTIVE_INTERIOR == 3
+
+0A93: terminate_this_custom_script
+
+
+:Sell
+    if and
+        progress == 0
+        0EEA: locate_char_distance_to_coordinates $PLAYER_actor pos -103.7084 -22.2458 1000.7187 radius 5.0
+        event == true
+    then
+        if
+            0102:   actor $PLAYER_ACTOR in_sphere -103.7084 -22.2458 1000.7187 radius 0.6 0.6 1.0 sphere 1 stopped_on_foot
+        then
+            progress = 1
+        end
+    end
+
+    if
+        progress == 1
+    then
+        01B4: set_player $PLAYER_CHAR can_move False
+        0512: show_permanent_text_box 'AMMU_H'
+        0581: enable_radar 0
+        08D4: panel_1 = create_panel_with_title 'SEXSLL0' position 29.0 170.0 width 100.0 columns 2 interactive 1 background 1 alignment 1  // Imports
+        08DB: set_panel panel_1 column 0 header 'DUMMY' data 'SEXSLL1' 'SEXSLL2' 'SEXSLL3' 'SEXSLL4' 'DUMMY' 'DUMMY' 'DUMMY' 'DUMMY' 'DUMMY' 'DUMMY' 'DUMMY' 'DUMMY'
+        08EE: set_panel panel_1 column 1 row 0 text_1number GXT 'DOLLAR' number 150
+        08EE: set_panel panel_1 column 1 row 1 text_1number GXT 'DOLLAR' number 100
+        08EE: set_panel panel_1 column 1 row 2 text_1number GXT 'DOLLAR' number 200
+        08EE: set_panel panel_1 column 1 row 3 text_1number GXT 'DOLLAR' number 100
+        panel_act = 0
+        090E: set_panel panel_1 active_row panel_act
+        0173: set_actor $PLAYER_ACTOR Z_angle_to 177.1917
+        015F: set_camera_position -102.7279 -22.1314 1001.7187 rotation 0.0 0.0 0.0
+        0160: set_camera_point_at -104.4762 -24.6035 999.9187 switchstyle 2
+        progress = 2
+    end
+    
+    if and
+        progress > 0
+        not progress == 4
+    then
+        08D7: panel_act = panel panel_1 active_row
+        
+        if
+            00E1:   player 0 pressed_key 16
+        then
+            if
+                panel_act == 0
+            then
+                010B: 1@ = player $PLAYER_CHAR money
+                if
+                    1@ > 149
+                then
+                    model.Load(321)
+                    038B: load_requested_models
+                    0109: player $PLAYER_CHAR money += -150
+                    01B2: give_actor $PLAYER_ACTOR weapon 10 ammo 1  // Load the weapon model before using this
+                    03E6: remove_text_box
+                    wait 10
+                    08DA: remove_panel panel_1
+                    0581: enable_radar 1
+                    01B4: set_player $PLAYER_CHAR can_move true
+                    02EB: restore_camera_with_jumpcut
+                    model.Destroy(321)
+                    progress = 4
+                    return
+                else
+                    00BC: show_text_highpriority GXT 'STFGHQ3' time 2000 flag 1  // Не хватает денег
+                end
+            end
+            if
+                panel_act == 1
+            then
+                010B: 1@ = player $PLAYER_CHAR money
+                if
+                    1@ > 99
+                then
+                    model.Load(322)
+                    038B: load_requested_models
+                    0109: player $PLAYER_CHAR money += -100
+                    01B2: give_actor $PLAYER_ACTOR weapon 11 ammo 1  // Load the weapon model before using this
+                    03E6: remove_text_box
+                    wait 10
+                    08DA: remove_panel panel_1
+                    0581: enable_radar 1
+                    01B4: set_player $PLAYER_CHAR can_move true
+                    02EB: restore_camera_with_jumpcut
+                    model.Destroy(322)
+                    progress = 4
+                    return
+                else
+                    00BC: show_text_highpriority GXT 'STFGHQ3' time 2000 flag 1  // Не хватает денег
+                end
+            end
+            if
+                panel_act == 2
+            then
+                010B: 1@ = player $PLAYER_CHAR money
+                if
+                    1@ > 199
+                then
+                    model.Load(323)
+                    038B: load_requested_models
+                    0109: player $PLAYER_CHAR money += -200
+                    01B2: give_actor $PLAYER_ACTOR weapon 12 ammo 1  // Load the weapon model before using this
+                    03E6: remove_text_box
+                    wait 10
+                    08DA: remove_panel panel_1
+                    0581: enable_radar 1
+                    01B4: set_player $PLAYER_CHAR can_move true
+                    02EB: restore_camera_with_jumpcut
+                    model.Destroy(323)
+                    progress = 4
+                    return
+                else
+                    00BC: show_text_highpriority GXT 'STFGHQ3' time 2000 flag 1  // Не хватает денег
+                end
+            end
+            if
+                panel_act == 3
+            then
+                010B: 1@ = player $PLAYER_CHAR money
+                if
+                    1@ > 99
+                then
+                    model.Load(324)
+                    038B: load_requested_models
+                    0109: player $PLAYER_CHAR money += -100
+                    01B2: give_actor $PLAYER_ACTOR weapon 13 ammo 1  // Load the weapon model before using this
+                    03E6: remove_text_box
+                    wait 10
+                    08DA: remove_panel panel_1
+                    0581: enable_radar 1
+                    01B4: set_player $PLAYER_CHAR can_move true
+                    02EB: restore_camera_with_jumpcut
+                    model.Destroy(324)
+                    progress = 4
+                    return
+                else
+                    00BC: show_text_highpriority GXT 'STFGHQ3' time 2000 flag 1  // Не хватает денег
+                end
+            end
+        end
+        
+        
+        // Выход
+        if
+            00E1:   player 0 pressed_key 15 // RETURN/Выход
+        then
+            03E6: remove_text_box
+            08DA: remove_panel panel_1
+            0581: enable_radar 1
+            01B4: set_player $PLAYER_CHAR can_move true
+            02EB: restore_camera_with_jumpcut
+            progress = 4
+        end
+        
+    end
+
+
+    if
+        progress == 4
+    then
+        if
+            not locate_char_distance_to_coordinates $PLAYER_actor pos -103.7084 -22.2458 1000.7187 radius 2.5
+        then
+            progress = 0
+        end
+    end
+return
+

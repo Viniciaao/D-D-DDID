@@ -1,0 +1,1376 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "News Paper"
+
+// By ArtemQa146
+
+wait 80
+
+if
+    0AA2: 31@ = load_dynamic_library "CLEO+.cleo"
+then
+    if
+        0AA4: 30@ = get_dynamic_library_procedure "GetCleoPlusVersion" library 31@
+    then
+        0AA7: call_function_return 30@ num_params 0 pop 0 29@
+        if
+            not 29@ >= 0x1020000
+        then
+            0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the News Paper mod is disabled" time 15000
+            0AA3: free_dynamic_library 31@
+            0A93: terminate_this_custom_script
+        end
+        0AA3: free_dynamic_library 31@
+    end
+else
+    0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the News Paper mod is disabled" time 15000
+    0AA3: free_dynamic_library 31@
+    0A93: terminate_this_custom_script
+end
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "News Paper"
+if
+    0@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
+if
+    0E2D: is_game_first_start
+then
+    0F00: load_special_model_dff "modelsq\NsPaper1" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_1"
+    0F00: load_special_model_dff "modelsq\NsPaper2" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_2"
+    0F00: load_special_model_dff "modelsq\NsPaper3" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_3"
+    0F00: load_special_model_dff "modelsq\NsPaper4" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_4"
+    0F00: load_special_model_dff "modelsq\NsPaper5" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_5"
+    0F00: load_special_model_dff "modelsq\NsPaper6" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_6"
+    0F00: load_special_model_dff "modelsq\NsPaper7" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_7"
+    0F00: load_special_model_dff "modelsq\NsPaper8" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_8"
+    0F00: load_special_model_dff "modelsq\NsPaper9" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_9"
+    0F00: load_special_model_dff "modelsq\NsPaper10" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_10"
+    0F00: load_special_model_dff "modelsq\NsPaper11" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_11"
+    0F00: load_special_model_dff "modelsq\NsPaper12" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_12"
+    0F00: load_special_model_dff "modelsq\NsPaper13" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_13"
+    0F00: load_special_model_dff "modelsq\NsPaper14" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_14"
+    0F00: load_special_model_dff "modelsq\NsPaper15" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_15"
+    0F00: load_special_model_dff "modelsq\NsPaper16" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_16"
+    0F00: load_special_model_dff "modelsq\NsPaperST" txd "modelsq\NPaperQ" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_ST"
+end
+
+const
+    find = 31@
+    newsstand = 30@
+    render_paper = 29@
+    situation = 28@
+    today = 27@
+    busted_player = 26@
+    wanted_level_1 = 25@
+    ped_read = 24@
+    render_paper_ped = 23@
+    walk_ped = 22@
+    find_ped = 21@
+    percent_gang = 20@
+    mission_check = 19@
+    newsvan = 18@
+    newsvan_work = 17@
+    newsvan_ped = 16@
+    newsvan_ped_2 = 15@
+    money_paper = 14@
+    money_paper_W = 13@
+    soundsqa = 12@
+    newsobject = 11@
+    timeq = 9@
+    process = 8@
+    ped_seller = 10@
+    iBuffer = 7@
+    Busted_city = 1
+    Busted_rural = 2
+    wasted_police = 3
+    away_cops = 4
+    gang_war_1 = 5
+    green_sabre = 6
+    of_pullaski = 7
+    of_tenp = 8
+    riot = 9
+    calligula = 10
+    black_project = 11
+    drive_by = 12
+end
+
+get_label_pointer iBuffer = label @Buffer
+
+// 85-97 beaach
+
+for 2@ = 1 to 16 step 1
+    0AD3: 10@v = string_format "Paper1_%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\News Paper.ini" section "Models" key 10@v
+    3@ = 2@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+0AF0: money_paper = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "News Paper" key "Price"
+0AF0: money_paper_W = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "News Paper" key "Price Weekend"
+ 
+situation = 0
+today = -1
+busted_player = 0
+wanted_level_1 = 0
+timerb = 0
+timera = 0
+walk_ped = 0
+newsvan_work = 0
+ped_seller = -1
+newsobject = -1
+
+08E2: percent_gang = territories_controlled_percentage
+
+repeat
+wait 0
+until player.Defined(0)
+
+// Проверка пройдена ли миссия или нет.
+
+if
+    $RIOT_TOTAL_PASSED_MISSIONS == 5 // 100. End of the line
+then
+    mission_check = 15
+else
+    if
+        $RIOT_TOTAL_PASSED_MISSIONS == 1 // 98. Riot
+    then
+        mission_check = 13
+    else
+        if
+            $HEIST_TOTAL_PASSED_MISSIONS == 6 // 91. Bank calligula
+        then
+            mission_check = 11
+        else
+            if
+                $598 == 2 // 89. High Noon
+            then
+                mission_check = 9
+            else
+                if
+                    $TORENO_TOTAL_PASSED_MISSIONS == 8 // 72. Black project
+                then
+                    mission_check = 7
+                else
+                    if
+                        $LS_FINAL_TOTAL_PASSED_MISSIONS == 2 // 28. Green Sabre
+                    then
+                        mission_check = 5
+                    else
+                        if
+                            $SWEET_TOTAL_PASSED_MISSIONS == 5 // 8. Drive by
+                        then
+                            mission_check = 3
+                        else
+                            mission_check = 1
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+timeq = 250
+
+while true
+wait timeq
+
+    // Миссии
+    
+    // 8. Drive by
+    if and
+        $SWEET_TOTAL_PASSED_MISSIONS == 5
+        mission_check == 1
+    then
+        mission_check = 2
+    end
+
+    if
+        mission_check == 2
+    then
+        situation = drive_by
+        mission_check = 3
+        wanted_level_1 = 0
+        busted_player = 0
+        07D0: today = weekday
+    end
+    
+    // 28. Green Sabre
+    if and
+        $LS_FINAL_TOTAL_PASSED_MISSIONS == 2
+        mission_check == 3
+    then
+        mission_check = 4
+    end
+    
+    if
+        mission_check == 4
+    then
+        situation = green_sabre
+        mission_check = 5
+        wanted_level_1 = 0
+        busted_player = 0
+        07D0: today = weekday
+    end
+    
+    // 72. Black project
+    if and
+        $TORENO_TOTAL_PASSED_MISSIONS == 8
+        mission_check == 5
+    then
+        mission_check = 6
+    end
+
+    if
+        mission_check == 6
+    then
+        situation = black_project
+        mission_check = 7
+        wanted_level_1 = 0
+        busted_player = 0
+        07D0: today = weekday
+    end
+    
+    // 89. High Noon
+    if and
+        $598 == 2
+        mission_check == 7
+    then
+        mission_check = 8
+    end
+
+    if
+        mission_check == 8
+    then
+        situation = of_pullaski
+        mission_check = 9
+        wanted_level_1 = 0
+        busted_player = 0
+        07D0: today = weekday
+    end
+    
+    // 91. Bank calligula
+    if and
+        $HEIST_TOTAL_PASSED_MISSIONS == 6 
+        mission_check == 9
+    then
+        mission_check = 10
+    end
+
+    if
+        mission_check == 10
+    then
+        situation = calligula
+        mission_check = 11
+        wanted_level_1 = 0
+        busted_player = 0
+        07D0: today = weekday
+    end
+    
+    // 98. Riot
+    if and
+        $RIOT_TOTAL_PASSED_MISSIONS == 1
+        mission_check == 11
+    then
+        mission_check = 12
+    end
+
+    if
+        mission_check == 12
+    then
+        situation = riot
+        mission_check = 13
+        wanted_level_1 = 0
+        busted_player = 0
+        07D0: today = weekday
+    end
+    
+    // 100. End of the line
+    if and
+        $RIOT_TOTAL_PASSED_MISSIONS == 5
+        mission_check == 13
+    then
+        mission_check = 14
+    end
+
+    if
+        mission_check == 14
+    then
+        situation = of_tenp
+        mission_check = 15
+        wanted_level_1 = 0
+        busted_player = 0
+        07D0: today = weekday
+    end
+
+    // Арест гг
+    if 
+        0741:   actor $PLAYER_ACTOR busted
+    then
+        busted_player = 1
+        wanted_level_1 = 0
+        
+        repeat
+        wait 0
+        until 03EE:   player $PLAYER_CHAR controllable // Ждем пока время не проматается
+        
+    end
+    
+    if
+        player.Defined(0)
+    then
+    
+    // Очистка если прошел день
+    if
+        situation > 0
+    then
+        07D0: 1@ = weekday
+        if
+            803B:   not 1@ == today  // (int)
+        then
+            situation = 0
+            today = 0
+            wanted_level_1 = 0
+            busted_player = 0
+        end
+    end
+
+    if
+        $ACTIVE_INTERIOR == 0
+    then
+        if and
+            856E:   not car newsvan_ped defined
+            newsvan_work == 0
+            010F:   player $PLAYER_CHAR wanted_level > 1
+            810F:   not player $PLAYER_CHAR wanted_level > 2
+        then
+            0EB2: get_offset_from_camera_in_world_coords 0.0 -50.0 0.0 store_to 1@ 2@ 3@
+            if and
+                02C1: store_to 1@ 2@ 3@ car_path_coords_closest_to 1@ 2@ 3@
+                not  locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 30.0
+                locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 60.0
+            then
+                repeat
+                wait 0
+                model.Load(582)
+                until model.Available(582)
+                
+                repeat
+                wait 0
+                04ED: load_animation  "PedEventsMod"
+                until 04EE:   animation "PedEventsMod" loaded
+                
+                model.Load(250)
+                model.Load(367)
+                if
+                    not model.Available(250)
+                then
+                    repeat
+                    wait 0
+                    model.Load(250)
+                    until model.Available(250)
+                end
+                if
+                    not model.Available(367)
+                then
+                    repeat
+                    wait 0
+                    model.Load(367)
+                    until model.Available(367)
+                end
+                038B: load_requested_models
+                00A5: newsvan = create_car 582 at 1@ 2@ 3@
+                0129: newsvan_ped = create_actor_pedtype 21 model 250 in_car newsvan driverseat
+                01C8: newsvan_ped_2 = create_actor_pedtype 21 model 250 in_car newsvan passenger_seat 0
+                00AD: set_car newsvan max_speed_to 100.0
+                newsvan_work = 1
+                model.Destroy(582)
+                model.Destroy(250)
+                
+                0812: AS_actor newsvan_ped_2 perform_animation "camera_car" IFP "PedEventsMod" framedelta 2.0 loopA 2 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                04EF: release_animation "PedEventsMod"
+                
+                0E2E: create_render_object_to_char_bone newsvan_ped_2 model 367 bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                
+                model.Destroy(367)
+
+            end
+        else
+            if and
+                056E:   car newsvan defined
+                056D:   actor newsvan_ped defined
+                056D:   actor newsvan_ped_2 defined
+            then
+                if and
+                    00DB:   actor newsvan_ped in_car newsvan
+                    00DB:   actor newsvan_ped_2 in_car newsvan
+                then
+                    080E: get_actor newsvan_ped ped_event_to 1@
+                    080E: get_actor newsvan_ped_2 ped_event_to 2@
+                    if or
+                        810F:   not player $PLAYER_CHAR wanted_level > 1
+                        010F:   player $PLAYER_CHAR wanted_level > 2
+                        1@ == 49
+                        2@ == 49
+                    then
+                        if 056D:   actor newsvan_ped_2 defined
+                        then 01C2: remove_references_to_actor newsvan_ped_2 // Like turning an actor into a random pedestrian
+                        end
+                        wait 100
+                        if 056D:   actor newsvan_ped_2 defined
+                        then
+                            if 056E:   car newsvan defined
+                            then 0430: put_actor newsvan_ped_2 into_car newsvan passenger_seat 0
+                            end
+                        end
+                        if 056E:   car newsvan defined
+                        then 01C3: remove_references_to_car newsvan
+                        end
+                        if 056D:   actor newsvan_ped defined
+                        then 01C2: remove_references_to_actor newsvan_ped // Like turning an actor into a random pedestrian
+                        end
+                        newsvan = -1
+                        newsvan_ped = -1
+                        newsvan_ped_2 = -1
+                        continue
+                    end
+
+                    if
+                        locate_char_distance_to_car $PLAYER_ACTOR car newsvan radius 15.0
+                    then
+                        00AE: set_car newsvan traffic_behaviour_to 2 // Не соблюдает трафик
+                        00AF: set_car newsvan driver_behaviour_to 1 // Едет по дорожным путям
+                    else
+                        if and
+                            locate_char_distance_to_car $PLAYER_ACTOR car newsvan radius 35.0
+                            not locate_char_distance_to_car $PLAYER_ACTOR car newsvan radius 30.0
+                        then
+                            00AE: set_car newsvan traffic_behaviour_to 4 // Не нарушает трафик
+                            00AF: set_car newsvan driver_behaviour_to 0 // Никуда не едит
+                        else
+                            if
+                                not locate_char_distance_to_car $PLAYER_ACTOR car newsvan radius 40.0
+                            then
+                                00AE: set_car newsvan traffic_behaviour_to 2 // Не соблюдает трафик
+                                00AF: set_car newsvan driver_behaviour_to 5 // 4+1 едет к игроку и соблюдает пути дорожные
+                            end
+                        end
+                    end
+                end
+                if or
+                    0119:   car newsvan wrecked
+                    not locate_char_distance_to_car $PLAYER_ACTOR car newsvan radius 150.0
+                    80DB:   not actor newsvan_ped in_car newsvan
+                    0118:   actor newsvan_ped dead
+                    80DB:   not actor newsvan_ped_2 in_car newsvan
+                    0118:   actor newsvan_ped_2 dead
+                then
+                    if 056D:   actor newsvan_ped_2 defined
+                    then 01C2: remove_references_to_actor newsvan_ped_2 // Like turning an actor into a random pedestrian
+                    end
+                    if 056E:   car newsvan defined
+                    then 01C3: remove_references_to_car newsvan
+                    end
+                    if 056D:   actor newsvan_ped defined
+                    then 01C2: remove_references_to_actor newsvan_ped // Like turning an actor into a random pedestrian
+                    end
+                    newsvan = -1
+                    newsvan_ped = -1
+                    newsvan_ped_2 = -1
+                end
+            else
+                if or
+                    810F:   not player $PLAYER_CHAR wanted_level > 1
+                    010F:   player $PLAYER_CHAR wanted_level > 2
+                then
+                    newsvan_work = 0
+                end
+            end
+        end
+    else
+        newsvan_work = 0
+        if 056E:   car newsvan defined
+        then 01C3: remove_references_to_car newsvan
+        end
+        if 056D:   actor newsvan_ped defined
+        then 01C2: remove_references_to_actor newsvan_ped // Like turning an actor into a random pedestrian
+        end
+        if 056D:   actor newsvan_ped_2 defined
+        then 01C2: remove_references_to_actor newsvan_ped_2 // Like turning an actor into a random pedestrian
+        end
+        newsvan = -1
+        newsvan_ped = -1
+        newsvan_ped_2 = -1
+    end
+
+
+    // Войны банд, если захватили
+    if
+        087A:   gang_war_in_progress
+    then
+        08E2: 1@ = territories_controlled_percentage
+        if
+            001D:   1@ > percent_gang  // (int)
+        then
+            08E2: percent_gang = territories_controlled_percentage
+            situation = gang_war_1
+            wanted_level_1 = 0
+            07D0: today = weekday
+        end
+    end
+    
+    // Если умер во время полицейского приследования
+    if
+        0118:   actor $PLAYER_ACTOR dead
+    then
+        if and
+            887A:   not gang_war_in_progress
+            010F:   player $PLAYER_CHAR wanted_level > 1
+        then
+        
+            repeat
+            wait 0
+            until 03EE:   player $PLAYER_CHAR controllable // Ждем пока время не проматается
+            
+            situation = wasted_police
+            07D0: today = weekday
+        end
+        wanted_level_1 = 0
+    end
+
+
+    // Если был арестован, то првоеряем в какой местности
+    if
+        busted_player > 0
+    then
+        0842: 1@ = player $PLAYER_CHAR town_number
+            if
+                not 1@ == 0
+            then
+                situation = Busted_city
+                07D0: today = weekday
+            else
+                situation = Busted_rural
+                07D0: today = weekday
+            end
+        busted_player = 0
+        wanted_level_1 = 0
+    end
+    
+    // Если получил уровень
+    if and
+        887A:   not gang_war_in_progress
+        010F:   player $PLAYER_CHAR wanted_level > 1
+    then
+        wanted_level_1 = 1
+    end
+
+    // и потерял его
+    if and
+        887A:   not gang_war_in_progress
+        wanted_level_1 == 1
+    then
+        if
+            810F:   not player $PLAYER_CHAR wanted_level > 0
+        then
+            situation = away_cops
+            07D0: today = weekday
+        end
+    end
+
+    // Поиск обьектов, возможность читать, создавать читающего
+
+        find = 0
+        while 0EA9: get_any_object_no_save_recursive find progress_to find object_to newsstand
+            if or
+                09CC:   object newsstand model_is 1285 // новостные стенды
+                09CC:   object newsstand model_is 1286
+                09CC:   object newsstand model_is 1287
+                09CC:   object newsstand model_is 1288
+                09CC:   object newsstand model_is 1289
+            then
+
+                // Создаем педа читающего
+                
+                if 82CC:   not object newsstand bounding_sphere_visible
+                then 4@ = 15.0
+                else 4@ = 40.0
+                end
+                0E40: get_current_hour 5@
+                if and
+                    timerb > 20000
+                    856D:   not actor ped_read defined
+                    situation > 0
+                    not locate_char_distance_to_object $player_actor object newsstand radius 4@
+                    locate_char_distance_to_object $player_actor object newsstand radius 55.0
+                    5@ > 5
+                    5@ < 21
+                then
+                    gosub @Ped_find
+                    if
+                        056D:   actor ped_read defined
+                    then
+                        if
+                            03CA:   object newsstand exists
+                        then
+                            0208: 4@ = random_float_in_ranges -1.0 1.0
+                            0400: store_coords_to 1@ 2@ 3@ from_object newsstand with_offset 4@ 1.2 0.0
+                            00A1: put_actor ped_read at 1@ 2@ 3@
+                            0E24: fix_char ped_read ground 1 brightness 1 and_fade_in 0
+                            0208: 4@ = random_float_in_ranges 0.0 360.0
+                            0173: set_actor ped_read Z_angle_to 4@
+                        end
+                        
+                        timerb = 0
+                    
+                        repeat
+                        wait 0
+                        04ED: load_animation  "PedEventsMod"
+                        until 04EE:   animation "PedEventsMod" loaded
+                    
+                        0792: disembark_instantly_actor ped_read
+                        0209: 1@ = random_int_in_ranges 20000 60000
+                        0605: actor ped_read perform_animation "picture2" IFP "PedEventsMod" framedelta 4.0 loop 1 lockX 0 lockY 0 lockF 0 time 1@
+                    
+                        gosub @Paper_event
+
+                        0F02: create_render_object_to_char_bone_from_special ped_read special_model 1@ bone 24 offset 0.0 0.0 0.0 rotation 0.0 0.0 0.0 store_to render_paper_ped
+
+                        04EF: release_animation "PedEventsMod"
+                        wait 100
+                        break
+                    end
+                end
+                
+                
+                // Возможность читать самому
+                
+                if and
+                    8366:   not object newsstand damaged
+                    0EE6: locate_char_distance_to_object $player_actor object newsstand radius 10.0
+                then
+                    0400: store_coords_to 1@ 2@ 3@ from_object newsstand with_offset 0.0 0.8 0.0
+                    if and
+                        80DF:   not actor $PLAYER_ACTOR driving
+                        03EE:   player $PLAYER_CHAR controllable
+                        810F:   not player $PLAYER_CHAR wanted_level > 0
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 1@ 2@ 3@ radius 0.5
+                    then
+                        07D0: 5@ = weekday // Сумма в воскресенье 2$
+                        if 5@ == 1
+                        then 0085: 4@ = money_paper_W // (int)
+                        else 0085: 4@ = money_paper // (int)
+                        end
+                        0513: show_text_box_1number 'PPRqa' number 4@  // ~k~~VEHICLE_ENTER_EXIT~ Use Slot Machine $~1~
+
+                        repeat
+                        wait 0
+                        if
+                            03CA:   object newsstand exists
+                        then
+                            if and
+                                02A0:   actor $PLAYER_ACTOR stopped
+                                00E1:   player 0 pressed_key 15
+                                010A:   player $PLAYER_CHAR money > money_paper
+                                80DF:   not actor $PLAYER_ACTOR driving
+                                03EE:   player $PLAYER_CHAR controllable
+                                810F:   not player $PLAYER_CHAR wanted_level > 0
+                            then
+                                03E6: remove_text_box
+                                4@ *= -1
+                                0109: player $PLAYER_CHAR money += 4@
+                                06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 1
+                                0687: clear_actor $PLAYER_ACTOR task
+                                01B4: set_player $PLAYER_CHAR can_move 0
+                                07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 0
+
+                                0400: store_coords_to 1@ 2@ 5@ from_object newsstand with_offset 0.0 0.0 0.0
+                                00A0: store_actor $PLAYER_ACTOR position_to 3@ 4@ 5@
+                                0E27: get_angle_from_two_coords 3@ 4@ and 1@ 2@ to 5@
+                                0173: set_actor $PLAYER_ACTOR Z_angle_to 5@
+                                
+                                0AC1: soundsqa = load_audio_stream_with_3d_support "SQ\buypaper.mp3" // IF and SET
+                                0AC3: link_3d_audio_stream soundsqa to_object newsstand
+
+                                repeat
+                                wait 0
+                                04ED: load_animation  "PedEventsMod"
+                                until 04EE:   animation "PedEventsMod" loaded
+                                
+                                0AAD: set_audio_stream soundsqa state 1
+                                0ABC: set_audio_stream soundsqa volume 0.4
+                                wait 200
+                                0812: AS_actor $player_actor perform_animation "take_paper" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                                wait 1100
+                                0AAE: remove_audio_stream soundsqa
+
+                                0812: AS_actor $player_actor perform_animation "picture" IFP "PedEventsMod" framedelta 2.5 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+                                gosub @Paper_event
+
+                                0F02: create_render_object_to_char_bone_from_special $player_actor special_model 1@ bone 24 offset 0.0 0.0 0.0 rotation 0.0 0.0 0.0 store_to render_paper
+
+                                04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 0.8 -0.5 1.0
+                                04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset -0.5 1.0 0.0
+                                015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                                0160: set_camera_point_at 4@ 5@ 6@ switchstyle 1
+
+                                wait 500
+
+                                0512: show_permanent_text_box 'PPRqaF'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+
+                                repeat
+                                wait 0
+                                if or
+                                    8611:   not actor $PLAYER_ACTOR performing_animation "picture"
+                                    00E1:   player 0 pressed_key 15
+                                    0118:   actor $PLAYER_ACTOR dead
+                                    0741:   actor $PLAYER_ACTOR busted
+                                then
+                                    break
+                                end
+
+
+                                if
+                                    not situation == 0
+                                then
+                                    0AD3: 1@v = string_format "PPRqa%d" situation
+                                    00BC: show_text_highpriority GXT 1@v time 200 flag 1  // Субтитры
+                                end
+
+                                until not player.Defined(0)
+                                03E6: remove_text_box
+                                0E2F: delete_render_object render_paper
+                                0687: clear_actor $PLAYER_ACTOR task
+                                06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 0
+                                015A: restore_camera
+                                01B4: set_player $PLAYER_CHAR can_move 1
+                                wait 300
+                                07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 1
+                                04EF: release_animation "PedEventsMod"
+                                wait 1000
+                                break
+                            end
+                        else
+                            break
+                        end
+                        until not locate_char_distance_to_coordinates $player_actor pos 1@ 2@ 3@ radius 0.5
+                        03E6: remove_text_box
+
+                    end
+                end
+
+            end
+        end
+
+    if and
+        ped_seller == -1
+        newsobject == -1
+    then
+        1@ = 0.0
+        2@ = 0.0
+        3@ = 0.0
+        0E40: get_current_hour 5@
+
+        if 0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 663.2618 -474.6102 16.336 radius 100.0
+        then
+            1@ = 656.5447
+            2@ = -476.0619
+            3@ = 16.3359
+            4@ = 179.2423
+        end
+        
+        if 0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1389.6509 290.7231 19.5469 radius 100.0
+        then
+            1@ = 1389.6509
+            2@ = 290.7231
+            3@ = 19.5469
+            4@ = 152.9216
+        end
+        
+        if 0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 2302.8572 3.506 26.4843 radius 100.0
+        then
+            1@ = 2302.8572
+            2@ = 3.506
+            3@ = 26.4843
+            4@ = 89.2995
+        end
+        
+        if 0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2139.3047 -2427.1873 30.625 radius 100.0
+        then
+            1@ = -2139.3047
+            2@ = -2427.1873
+            3@ = 30.625
+            4@ = 325.1158
+        end
+        
+        if 0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -124.475 1185.9102 19.7422 radius 100.0
+        then
+            1@ = -124.475
+            2@ = 1185.9102
+            3@ = 19.7422
+            4@ = 271.0079
+        end
+        
+        if 0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -1435.2141 2615.5601 55.836 radius 100.0
+        then
+            1@ = -1435.2141
+            2@ = 2615.5601
+            3@ = 55.836
+            4@ = 271.8148
+        end
+
+        if and
+            not  locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 60.0
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 100.0
+            5@ > 6
+            5@ < 20
+            $ACTIVE_INTERIOR == 0
+        then
+            model.Load(161)
+            model.Load(1550)
+            if
+                not model.Available(161)
+            then
+                repeat
+                wait 0
+                model.Load(161)
+                until model.Available(161)
+            end
+            if
+                not model.Available(1550)
+            then
+                repeat
+                wait 0
+                model.Load(1550)
+                until model.Available(1550)
+            end
+            038B: load_requested_models
+            
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+            
+            009A: ped_seller = create_actor_pedtype 21 model 161 at 1@ 2@ 3@
+            0173: set_actor ped_seller Z_angle_to 4@
+            0812: AS_actor ped_seller perform_animation "picture3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            0E24: fix_char ped_seller ground 1 brightness 1 and_fade_in 0
+
+            04C4: store_coords_to 1@ 2@ 3@ from_actor ped_seller with_offset 0.6 0.4 -1.0
+            0E01: create_object_no_save 1550 at 1@ 2@ 3@ offset 0 ground 0 to newsobject
+            08D2: object newsobject scale_model 0.0
+            0177: set_object newsobject Z_angle_to 4@
+            0AF0: 2@ = read_int_from_ini_file "cleo\News Paper.ini" section "Models" key "Paper1_st"
+            0F04: create_render_object_to_object_from_special newsobject special_model 2@ offset 0 0 0 rotation 0 0 0 store_to 3@
+            gosub @Paper_event
+            0F02: create_render_object_to_char_bone_from_special ped_seller special_model 1@ bone 24 offset 0.15 0.2 0.2 rotation 270.0 180.0 0.0 store_to render_paper_ped
+            model.Destroy(1550)
+            model.Destroy(161)
+            0382: set_object newsobject collision_detection 0
+            process = 0
+            04EF: release_animation "PedEventsMod"
+            continue
+        end
+    end
+            
+        if and
+            03CA:   object newsobject exists
+            056D:   actor ped_seller defined
+        then
+            080E: get_actor ped_seller ped_event_to 4@
+            if or
+                0118:   actor ped_seller dead
+                not locate_char_distance_to_char $player_actor char ped_seller radius 110.0
+                not $ACTIVE_INTERIOR == 0
+                051A:   actor ped_seller damaged_by_actor $PLAYER_ACTOR
+                not is_char_script_controlled ped_seller
+                4@ == 49
+                4@ == 9
+            then
+                gosub @ped_seller_remove
+                continue
+            end
+
+            if
+                0457:   player $PLAYER_CHAR aiming_at_actor ped_seller
+            then
+                0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 4@
+                0E89: get_weaponinfo_fire_type 4@ store_to 5@ // Проверяем с каким оружием игрок
+                if or
+                    5@ == 1 // Огнестрельное оружие
+                    5@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                then
+                    gosub @ped_seller_remove
+                    continue
+                end
+            end
+
+            04C4: store_coords_to 1@ 2@ 3@ from_actor ped_seller with_offset 0.25 1.5 0.0
+            if and
+                80DF:   not actor $PLAYER_ACTOR driving
+                03EE:   player $PLAYER_CHAR controllable
+                810F:   not player $PLAYER_CHAR wanted_level > 0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 1@ 2@ 3@ radius 0.5
+            then
+                process = 1
+            else
+                if and
+                    process > 0
+                    not locate_char_distance_to_coordinates $player_actor pos 1@ 2@ 3@ radius 0.5
+                then
+                    process = 0
+                    timeq = 250
+                    03E6: remove_text_box
+                end
+            end
+
+            if
+                process == 1
+            then
+                07D0: 5@ = weekday // Сумма в воскресенье 2$
+                if 5@ == 1
+                then 0085: 4@ = money_paper_W // (int)
+                else 0085: 4@ = money_paper // (int)
+                end
+                0513: show_text_box_1number 'PPRqa' number 4@  // ~k~~VEHICLE_ENTER_EXIT~ Use Slot Machine $~1~
+                process = 2
+            end
+
+            if
+                process == 2
+            then
+                timeq = 0
+                if and
+                    02A0:   actor $PLAYER_ACTOR stopped
+                    00E1:   player 0 pressed_key 15
+                    010A:   player $PLAYER_CHAR money > money_paper
+                    80DF:   not actor $PLAYER_ACTOR driving
+                    03EE:   player $PLAYER_CHAR controllable
+                    810F:   not player $PLAYER_CHAR wanted_level > 0
+                then
+                    03E6: remove_text_box
+                    4@ *= -1
+                    0109: player $PLAYER_CHAR money += 4@
+                    06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 1
+                    0687: clear_actor $PLAYER_ACTOR task
+                    01B4: set_player $PLAYER_CHAR can_move 0
+                    07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 0
+
+                    04C4: store_coords_to 1@ 2@ 5@ from_actor ped_seller with_offset 0.0 0.0 0.0
+                    00A0: store_actor $PLAYER_ACTOR position_to 3@ 4@ 5@
+                    0E27: get_angle_from_two_coords 3@ 4@ and 1@ 2@ to 5@
+                    0173: set_actor $PLAYER_ACTOR Z_angle_to 5@
+                    
+                    repeat
+                    wait 0
+                    04ED: load_animation  "PedEventsMod"
+                    until 04EE:   animation "PedEventsMod" loaded
+                    
+                    if 056D:   actor ped_seller defined
+                    then 0812: AS_actor ped_seller perform_animation "picture4" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                    end
+
+                    wait 200
+                    0812: AS_actor $player_actor perform_animation "take_paper" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                    wait 1000
+                    0812: AS_actor $player_actor perform_animation "picture" IFP "PedEventsMod" framedelta 2.5 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+                    gosub @Paper_event
+
+                    0F02: create_render_object_to_char_bone_from_special $player_actor special_model 1@ bone 24 offset 0.0 0.0 0.0 rotation 0.0 0.0 0.0 store_to render_paper
+
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 0.8 -0.5 1.0
+                    04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset -0.5 1.0 0.0
+                    015F: set_camera_position 1@ 2@ 3@ rotation 0.0 0.0 0.0
+                    0160: set_camera_point_at 4@ 5@ 6@ switchstyle 1
+
+                    wait 500
+
+                    0512: show_permanent_text_box 'PPRqaF'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+
+                    repeat
+                    wait 0
+                    if or
+                        8611:   not actor $PLAYER_ACTOR performing_animation "picture"
+                        00E1:   player 0 pressed_key 15
+                        0118:   actor $PLAYER_ACTOR dead
+                        0741:   actor $PLAYER_ACTOR busted
+                    then
+                        break
+                    end
+
+
+                    if
+                        not situation == 0
+                    then
+                        0AD3: 1@v = string_format "PPRqa%d" situation
+                        00BC: show_text_highpriority GXT 1@v time 200 flag 1  // Субтитры
+                    end
+
+                    until not player.Defined(0)
+                    03E6: remove_text_box
+                    0E2F: delete_render_object render_paper
+                    0687: clear_actor $PLAYER_ACTOR task
+                    06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 0
+                    015A: restore_camera
+                    01B4: set_player $PLAYER_CHAR can_move 1
+                    wait 300
+                    07CC: set_player $PLAYER_CHAR can_enter_exit_vehicles 1
+                    wait 1000
+                    if 056D:   actor ped_seller defined
+                    then 0812: AS_actor ped_seller perform_animation "picture3" IFP "PedEventsMod" framedelta 4.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                    end
+                    04EF: release_animation "PedEventsMod"
+                    continue
+                end
+            end
+        else
+            timeq = 250
+            gosub @ped_seller_remove
+        end
+
+    
+    
+    // Создаем газеты на земле
+    
+    06AC: 1@ = actor $PLAYER_ACTOR movement_speed
+    0E40: get_current_hour 2@
+    if and
+        2@ > 5
+        2@ < 18
+        1@ < 20.0
+        887A:   not gang_war_in_progress
+    then
+        04C4: store_coords_to 1@ 2@ 3@ from_actor $PLAYER_ACTOR with_offset 0.0 20.0 0.0
+        02C0: store_to 1@ 2@ 3@ ped_path_coords_closest_to 1@ 2@ 3@
+        if and
+            0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 40.0
+            not locate_char_distance_to_coordinates $PLAYER_ACTOR pos 1@ 2@ 3@ radius 20.0
+        then
+            if situation == 0
+            then 4@ = 60000 // если ничего не произошло
+            else 4@ = 25000 // если есть событие
+            end
+            if
+                001D:   TIMERA > 4@  // (int)
+            then
+                model.Load(342)
+                if
+                    not model.Available(342)
+                then
+                    repeat
+                    wait 0
+                    model.Load(342)
+                    until model.Available(342)
+                end
+                038B: load_requested_models
+                0208: 4@ = random_float_in_ranges -2.0 2.0
+                0208: 5@ = random_float_in_ranges -2.0 2.0
+                005B: 1@ += 4@  // (float)
+                005B: 2@ += 5@  // (float)
+                3@ += 0.5
+                0E01: create_object_no_save 342 at 1@ 2@ 3@ offset 0 ground 1 to 0@
+                
+                gosub @Paper_event
+                
+                0F04: create_render_object_to_object_from_special 0@ special_model 1@ offset 0.0 0.0 0.2 rotation 5.0 95.0 0.0 store_to 2@
+                0E37: set_render_object_scale 2@ 3.0 1.4 1.4
+                08D2: object 0@ scale_model 0.0
+                0208: 1@ = random_float_in_ranges 0.0 360.0
+                0177: set_object 0@ Z_angle_to 1@
+                01C4: remove_references_to_object 0@ // This object will now disappear when the player looks away
+                model.Destroy(342)
+
+                timera = 0
+            end
+        end
+    end
+        
+    // Читающий пед
+        
+    if
+        056D:   actor ped_read defined
+    then
+
+        if or
+            0118:   actor ped_read dead
+            051A:   actor ped_read damaged_by_actor $PLAYER_ACTOR
+            not  locate_char_distance_to_char $PLAYER_ACTOR char ped_read radius 100.0
+            8611:   not actor ped_read performing_animation "picture2"
+            not is_char_script_controlled ped_read
+        then
+            gosub @Destroy_actor
+            ped_read = -1
+            continue
+        end
+        
+        
+        // Если игрок подошел близко, выбор реакции
+        if and
+            walk_ped == 0
+            locate_char_distance_to_char $PLAYER_ACTOR char ped_read radius 5.0
+        then
+            walk_ped = 1
+            0209: 1@ = random_int_in_ranges 1 4
+            if
+                1@ == 1
+            then
+                repeat
+                wait 0
+                04ED: load_animation  "PedEventsMod"
+                until 04EE:   animation "PedEventsMod" loaded
+
+
+                0A1A: actor ped_read perform_walk_animation "picture2" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 30000 ms // versionC
+                05DE: AS_actor ped_read walk_around_ped_path
+                walk_ped = 1
+
+                04EF: release_animation "PedEventsMod"
+                wait 100
+                continue
+            end
+            if
+                1@ == 2
+            then
+                05BF: AS_actor ped_read look_at_actor $PLAYER_ACTOR 10000 ms
+                walk_ped = 2
+                timerb = 0
+                wait 100
+                continue
+            end
+        end
+        
+        
+        // Если смотрит на гг, выбор реакции
+        if
+            walk_ped == 2
+        then
+            if
+                timerb > 7000
+            then
+                walk_ped = 3
+                0209: 1@ = random_int_in_ranges 1 4
+                if situation >= gang_war_1
+                then 1@ = 3
+                end
+                if
+                    1@ == 1
+                then
+                    gosub @Destroy_actor
+                    if
+                        056D:   actor ped_read defined
+                    then
+                        0751: AS_actor ped_read flee_from_actor $PLAYER_ACTOR run_distance 100.0 time 30000 change_course 1 unknown 3000 5000 away_radius 50.0
+                    end
+                    ped_read = -1
+                    continue
+                end
+                if
+                    1@ == 2
+                then
+                    gosub @Destroy_actor
+                    if
+                        056D:   actor ped_read defined
+                    then
+                        05E2: AS_actor ped_read kill_actor $PLAYER_ACTOR
+                    end
+                    ped_read = -1
+                    continue
+                end
+            end
+        end
+        
+    end
+        
+    end
+end
+
+:Destroy_actor
+0E2F: delete_render_object render_paper_ped
+01C2: remove_references_to_actor ped_read // Like turning an actor into a random pedestrian
+timerb = 0
+walk_ped = 0
+return
+
+:Paper_event
+
+if
+    situation == 0
+then
+    0209: 2@ = random_int_in_ranges 1 5
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == Busted_city
+then
+    2@ = 5
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == Busted_rural
+then
+    2@ = 6
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == wasted_police
+then
+    2@ = 7
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == away_cops
+then
+    2@ = 8
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == gang_war_1
+then
+    2@ = 9
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == green_sabre
+then
+    2@ = 10
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == of_pullaski
+then
+    2@ = 11
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == of_tenp
+then
+    2@ = 12
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == riot
+then
+    2@ = 13
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == calligula
+then
+    2@ = 14
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == black_project
+then
+    2@ = 15
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+
+if
+    situation == drive_by
+then
+    2@ = 16
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+end
+return
+
+:Ped_find
+ped_read = -1
+find_ped = 0
+while 0EA7: get_any_char_no_save_recursive find_ped progress_to find_ped char_to 0@
+    0EFF: get_char_simplest_active_task 0@ id_to 1@ pointer_to 2@
+    if and
+        1@ == 900
+        82CB:   not actor 0@ bounding_sphere_visible
+        not is_char_script_controlled 0@
+        80DF:   not actor 0@ driving
+        0EE4: locate_char_distance_to_char $PLAYER_ACTOR char 0@ radius 15.0
+    then
+        089F: get_actor 0@ pedtype_to 1@
+        if or
+            1@ == 4
+            1@ == 5
+        then
+            0085: ped_read = 0@ // (int)
+            0E0B: mark_char_as_needed ped_read
+            break
+        end
+    end
+end
+return
+
+:ped_seller_remove
+if 056D:   actor ped_seller defined
+then 01C2: remove_references_to_actor ped_seller // Like turning an actor into a random pedestrian
+end
+if 03CA:   object newsobject exists
+then 01C4: remove_references_to_object newsobject // This object will now disappear when the player looks away
+end
+if process > 0
+then
+    03E6: remove_text_box
+    process = 0
+end
+newsobject = -1
+ped_seller = -1
+return
+
+
+:Buffer
+hex
+    00(80)    // 400 bytes - can store 100 int values
+end

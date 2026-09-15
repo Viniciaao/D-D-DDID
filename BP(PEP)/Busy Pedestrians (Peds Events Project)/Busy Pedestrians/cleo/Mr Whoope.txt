@@ -1,0 +1,434 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE Audio}
+{$USE ini}
+
+0000: NOP
+
+script_name "WhoopQa"
+
+// By ArtemQa146
+
+const
+    ped_ice = 31@
+    clown_1 = 30@
+    whoope = 28@
+    render_ice = 29@
+    progress = 27@
+    coords_x = 26@
+    coords_y = 25@
+    coords_z = 24@
+    render_1 = 23@
+    render_clown = 22@
+    find = 21@
+    angle_1 = 20@
+    Again_This_Ped = 19@
+    music = 18@
+    pos_x = 17@
+    pos_y = 16@
+    pos_z = 15@
+end
+
+0087: Coords_x = 0@ // (float)
+0087: Coords_y = 1@ // (float)
+0087: Coords_z = 2@ // (float)
+0087: angle_1 = 3@ // (float)
+0087: pos_x = 4@ // (float)
+0087: pos_y = 5@ // (float)
+0087: pos_z = 6@ // (float)
+
+if
+    0E4D: random_percent 60
+then
+else
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 120.0
+    0A93: terminate_this_custom_script
+end
+
+            
+        if
+            0EEA: locate_char_distance_to_coordinates $PLAYER_actor pos coords_x coords_y coords_z radius 120.0
+        then
+        
+            music = -1
+
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+            
+            repeat
+            wait 0
+            model.Load(423)
+            until model.Available(423)
+            
+            repeat
+            wait 0
+            model.Load(264)
+            until model.Available(264)
+
+            038B: load_requested_models
+
+            00A5: whoope = create_car 423 at Coords_x Coords_y Coords_z
+            009A: clown_1 = create_actor_pedtype 4 model 264 at 0.0 0.0 0.0
+            0175: set_car whoope Z_angle_to angle_1
+            0E24: fix_char clown_1 ground 1 brightness 1 and_fade_in 0
+            0464: put_actor clown_1 into_turret_on_car whoope at_car_offset pos_x pos_y pos_z position 0 shooting_angle_limit 0.0 with_weapon 0
+            0812: AS_actor clown_1 perform_animation "ice_clown_idle" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            020A: set_car whoope door_status_to 2
+            
+            0F02: create_render_object_to_char_bone_from_special clown_1 special_model 7@ bone 34 offset 0.09 0.05 0.01 rotation 0 90.0 180.0  store_to render_clown
+            0E37: set_render_object_scale render_clown 0.8 0.8 0.8
+            0E31: set_render_object_visible render_clown 0
+            
+            0AC1: music = load_audio_stream_with_3d_support "SQ\MrWHoop.mp3"
+            0AC5: link_3d_audio_stream music to_car whoope
+            0ABC: set_audio_stream music volume 0.0
+            0AAD: set_audio_stream music state 1
+            0AC0: audio_stream music looped 1
+
+            
+            model.Destroy(264)
+            model.Destroy(423)
+            
+            progress = 0
+            timera = 0
+            timerb = 0
+
+            repeat
+            wait 0
+            if and
+                056D:   actor clown_1 defined
+                056E:   car whoope defined
+            then
+            
+                if and
+                    progress == 0
+                    0EE5: locate_char_distance_to_car $PLAYER_actor car whoope radius 10.0
+                then
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor clown_1 with_offset -1.3 0.0 0.0
+                    if and
+                        010A:   player $PLAYER_CHAR money > 0
+                        00F0:   actor $PLAYER_actor 1 near_point 1@ 2@ radius 0.7 0.7 stopped_on_foot
+                    then
+                        progress = 1
+                    end
+                end
+                
+                if
+                    progress == 1
+                then
+                    0109: player $PLAYER_CHAR money += -1
+                    0172: 1@ = actor clown_1 Z_angle
+                    1@ -= 90.0
+                    0173: set_actor $PLAYER_ACTOR Z_angle_to 1@
+
+                    0615: define_AS_pack_begin 1@
+                    0812: AS_actor -1 perform_animation "ice_ped" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+                    0812: AS_actor -1 perform_animation "ice_2" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+                    0616: define_AS_pack_end 1@
+                    0618: assign_actor $PLAYER_actor to_AS_pack 1@
+                    061B: remove_references_to_AS_pack 1@
+
+                    0615: define_AS_pack_begin 1@
+                    0812: AS_actor -1 perform_animation "ice_clown" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1
+                    0812: AS_actor -1 perform_animation "ice_clown_idle" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1
+                    0616: define_AS_pack_end 1@
+                    0618: assign_actor clown_1 to_AS_pack 1@
+                    061B: remove_references_to_AS_pack 1@
+                    progress = 2
+                    0E31: set_render_object_visible render_clown 1
+                end
+                
+                if and
+                    progress == 2
+                    0611:   actor $PLAYER_actor performing_animation "ice_2"
+                then
+                    0AF0: 1@ = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "ice"
+                    0F02: create_render_object_to_char_bone_from_special $PLAYER_actor special_model 1@ bone 34 offset 0.09 0.05 0.01 rotation 0 90.0 180.0  store_to render_1
+                    0E37: set_render_object_scale render_1 0.8 0.8 0.8
+                    progress = 3
+                    timera = 0
+                    0226: 1@ = actor $PLAYER_actor health
+                    1@ += 5
+                    0223: set_actor $PLAYER_actor health_to 1@
+                    0E31: set_render_object_visible render_clown 0
+                end
+                
+                if
+                    progress == 3
+                then
+                    if or
+                        timera > 5000
+                        8611:   not actor $PLAYER_actor performing_animation "ice_2"
+                    then
+                        0E2F: delete_render_object render_1
+                        progress = 4
+                    end
+                end
+                
+                if
+                    progress == 4
+                then
+                    04C4: store_coords_to 1@ 2@ 3@ from_actor clown_1 with_offset -1.4 0.0 0.0
+                    if
+                        not locate_char_distance_to_coordinates $PLAYER_actor pos 1@ 2@ 3@ radius 2.5
+                    then
+                        progress = 0
+                    end
+
+                end
+                
+                
+                if and
+                    0EE5: locate_char_distance_to_car $PLAYER_ACTOR car whoope radius 40.0
+                    timerb > 15000
+                then
+                    find = 0
+                    while get_any_char_no_save_recursive find progress_to find char_to ped_ice
+                    089F: get_actor ped_ice pedtype_to 1@
+                        if or
+                            1@ == 4
+                            1@ == 5
+                        then
+                            0EFF: get_char_simplest_active_task ped_ice id_to 4@ pointer_to 5@
+                            04C4: store_coords_to 1@ 2@ 3@ from_actor clown_1 with_offset -5.0 0.0 0.0
+                            if and
+                                80DF:   not actor ped_ice driving
+                                803B:   not Again_This_Ped == ped_ice  // Чтобы повторно не был один и тот же пед
+                                not is_char_script_controlled ped_ice
+                                0EEA: locate_char_distance_to_coordinates ped_ice pos 1@ 2@ 3@ radius 7.0
+                                4@ == 900 // Просто идет
+                                progress == 0
+                            then
+                                04C4: store_coords_to 1@ 2@ 3@ from_actor clown_1 with_offset -1.4 0.0 0.0
+                                0087: 4@ = angle_1 // (float)
+                                4@ -= 90.0
+                                0615: define_AS_pack_begin 5@
+                                0804: AS_actor -1 walk_to 1@ 2@ 3@ angle 4@ radius 0.4 animation "ice_ped" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 1 LY 1 LF 0 LT 0
+                                0812: AS_actor -1 perform_animation "ice_2" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1
+                                0616: define_AS_pack_end 5@
+                                0618: assign_actor ped_ice to_AS_pack 5@
+                                061B: remove_references_to_AS_pack 5@
+                                progress = 100
+                                0085: Again_This_Ped = ped_ice // (int)
+                                timera = 0
+                            end
+                            if
+                                0611:   actor ped_ice performing_animation "ice_ped"
+                            then
+                                progress = 101
+                                0615: define_AS_pack_begin 1@
+                                0812: AS_actor -1 perform_animation "ice_clown" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1
+                                0812: AS_actor -1 perform_animation "ice_clown_idle" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1
+                                0616: define_AS_pack_end 1@
+                                0618: assign_actor clown_1 to_AS_pack 1@
+                                061B: remove_references_to_AS_pack 1@
+                                timera = 0
+                            end
+                            if and
+                                timera > 15000
+                                progress == 100
+                            then
+                                progress = 0
+                                TIMERB = 10000
+                            end
+                        end
+                    end
+                end
+
+                if and
+                    timera > 5000
+                    progress == 101
+                then
+                    if
+                        0611:   actor clown_1 performing_animation "ice_clown_idle"
+                    then
+                        progress = 0
+                        timerb = 0
+                    end
+                end
+
+
+                080E: get_actor clown_1 ped_event_to 1@
+                if or
+                    not locate_char_distance_to_coordinates $player_actor pos coords_x coords_y coords_z radius 120.0
+                    051A:   actor clown_1 damaged_by_actor $PLAYER_ACTOR
+                    0118:   actor clown_1 dead
+                    1@ == 49
+                    1@ == 9
+                    0119:   car whoope wrecked
+                    00DB:   actor $PLAYER_ACTOR in_car whoope
+                then
+                    0465: remove_actor clown_1 from_turret_mode
+                    01C2: remove_references_to_actor clown_1 // Like turning an actor into a random pedestrian
+
+                    if
+                        056D:   actor clown_1 defined
+                    then
+                        072A: put_actor clown_1 into_car whoope driverseat
+                        00AF: set_car whoope driver_behaviour_to 1
+                        00AE: set_car whoope traffic_behaviour_to 4
+                    end
+
+                    01C3: remove_references_to_car whoope
+                    
+                        if not music == -1
+                        then
+                            0AAE: remove_audio_stream music
+                            music = -1
+                        end
+                        
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $player_actor pos coords_x coords_y coords_z radius 120.0
+                    break
+                end
+                
+                080E: get_actor clown_1 ped_event_to 1@
+                if or
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                then
+                    0465: remove_actor clown_1 from_turret_mode
+                    01C2: remove_references_to_actor clown_1 // Like turning an actor into a random pedestrian
+
+                    if
+                        056D:   actor clown_1 defined
+                    then
+                        072A: put_actor clown_1 into_car whoope driverseat
+                        00AF: set_car whoope driver_behaviour_to 1
+                        00AE: set_car whoope traffic_behaviour_to 4
+                    end
+
+                    01C3: remove_references_to_car whoope
+
+                        if not music == -1
+                        then
+                            0AAE: remove_audio_stream music
+                            music = -1
+                        end
+
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $player_actor pos coords_x coords_y coords_z radius 120.0
+                    break
+                end
+                
+                0E40: get_current_hour 1@
+                0D59: get_current_weather_to 2@
+                if or
+                    1@ >= 19
+                    2@ == 8
+                    2@ == 16
+                then
+                    0465: remove_actor clown_1 from_turret_mode
+                    01C2: remove_references_to_actor clown_1 // Like turning an actor into a random pedestrian
+
+                    if
+                        056D:   actor clown_1 defined
+                    then
+                        072A: put_actor clown_1 into_car whoope driverseat
+                        00AF: set_car whoope driver_behaviour_to 1
+                        00AE: set_car whoope traffic_behaviour_to 4
+                    end
+
+                    01C3: remove_references_to_car whoope
+                    
+                        if not music == -1
+                        then
+                            0AAE: remove_audio_stream music
+                            music = -1
+                        end
+
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $player_actor pos coords_x coords_y coords_z radius 120.0
+                    break
+                end
+
+
+                if
+                    0457:   player $PLAYER_CHAR aiming_at_actor clown_1
+                then
+                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                    if or
+                        2@ == 1 // Огнестрельное оружие
+                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                    then
+                        0465: remove_actor clown_1 from_turret_mode
+                        01C2: remove_references_to_actor clown_1 // Like turning an actor into a random pedestrian
+
+                        if
+                            056D:   actor clown_1 defined
+                        then
+                            072A: put_actor clown_1 into_car whoope driverseat
+                            00AF: set_car whoope driver_behaviour_to 1
+                            00AE: set_car whoope traffic_behaviour_to 4
+                        end
+                        
+                        01C3: remove_references_to_car whoope
+                        
+                        if not music == -1
+                        then
+                            0AAE: remove_audio_stream music
+                            music = -1
+                        end
+
+                        repeat
+                        wait 0
+                        until not locate_char_distance_to_coordinates $player_actor pos coords_x coords_y coords_z radius 120.0
+                        break
+                    end
+                end
+                
+                // Настраиваем громкость правильно, так как игровое 3Д аудио все равно работает на большом растоянии, хоть и тихо
+                0407: store_coords_to 1@ 2@ 3@ from_car whoope with_offset 0.0 0.0 0.0
+                0EB2: get_offset_from_camera_in_world_coords 0.0 0.0 0.0 store_to 4@ 5@ 6@
+                050A: 1@ = distance_between_XYZ 1@ 2@ 3@ and_XYZ 4@ 5@ 6@
+                1@ /= 50.0
+                2@ = 0.4
+                0063: 2@ -= 1@  // (float)
+                if
+                    2@ < 0.0
+                then
+                    2@ = 0.0
+                end
+                0ABC: set_audio_stream music volume 2@
+
+
+            else
+                break
+            end
+            until not player.Defined(0)
+            if 056D:   actor clown_1 defined
+            then 01C2: remove_references_to_actor clown_1 // Like turning an actor into a random pedestrian
+            end
+            if 056E:   car whoope defined
+            then 01C3: remove_references_to_car whoope
+            end
+            04EF: release_animation "PedEventsMod"
+            if not music == -1
+            then
+                0AAE: remove_audio_stream music
+                music = -1
+            end
+            repeat
+            wait 0
+            until not locate_char_distance_to_coordinates $player_actor pos 1418.8376 -619.2729 92.1831 radius 120.0
+            0A93: terminate_this_custom_script
+        end
+
+
+
+
+
+0A93: terminate_this_custom_script
+
+
+

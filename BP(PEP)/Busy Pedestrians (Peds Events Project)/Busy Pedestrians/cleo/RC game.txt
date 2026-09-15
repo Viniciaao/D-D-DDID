@@ -1,0 +1,367 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "RCZRQA"
+
+// By ArtemQa146
+
+const
+    player1 = 31@
+    player2 = 30@
+    player1_in = 29@
+    player2_in = 28@
+    rc_car1 = 27@
+    rc_car2 = 26@
+    car1_x = 25@
+    car1_y = 24@
+    car1_z = 23@
+    progress1 = 22@
+    car2_x = 21@
+    car2_y = 20@
+    car2_z = 19@
+    progress2 = 18@
+end
+
+if
+    0E4D: random_percent 1@
+then
+else
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2292.2447 181.4637 35.3056 radius 150.0
+    0A93: terminate_this_custom_script
+end
+
+repeat
+wait 0
+04ED: load_animation  "CRIB"
+until 04EE:   animation "CRIB" loaded
+
+
+model.Load(441)
+if
+    not model.Available(441)
+then
+    repeat
+    wait 0
+    model.Load(441)
+    until model.Available(441)
+end
+038B: load_requested_models
+
+0376: player1 = create_random_actor_at -2292.2447 181.4637 35.3056
+0173: set_actor player1 Z_angle_to 90.0
+0812: AS_actor player1 perform_animation "PED_Console_Loop" IFP "CRIB" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+0E24: fix_char player1 ground 1 brightness 1 and_fade_in 0
+0F02: create_render_object_to_char_bone_from_special player1 special_model 0@ bone 24 offset 0 0 0 rotation 0 0 0 store_to 2@
+0E37: set_render_object_scale 2@ 0.8 0.8 0.8
+
+0376: player2 = create_random_actor_at -2292.2447 182.4637 35.3056
+0173: set_actor player2 Z_angle_to 90.0
+0E24: fix_char player2 ground 1 brightness 1 and_fade_in 0
+0812: AS_actor player2 perform_animation "PED_Console_Loop" IFP "CRIB" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+0F02: create_render_object_to_char_bone_from_special player2 special_model 0@ bone 24 offset 0 0 0 rotation 0 0 0 store_to 3@
+0E37: set_render_object_scale 3@ 0.8 0.8 0.8
+
+0376: player1_in = create_random_actor_at 0.0 0.0 0.0
+04C4: store_coords_to 1@ 2@ 3@ from_actor player1 with_offset 0.0 7.0 0.0
+00A5: rc_car1 = create_car 441 at 1@ 2@ 3@
+072A: put_actor player1_in into_car rc_car1 driverseat
+0337: set_actor player1_in visibility 0
+0175: set_car rc_car1 Z_angle_to 0.0
+
+0376: player2_in = create_random_actor_at 0.0 0.0 0.0
+04C4: store_coords_to 1@ 2@ 3@ from_actor player2 with_offset 0.5 9.5 0.0
+00A5: rc_car2 = create_car 441 at 1@ 2@ 3@
+072A: put_actor player2_in into_car rc_car1 driverseat
+0337: set_actor player2_in visibility 0
+0175: set_car rc_car2 Z_angle_to 150.5136
+
+0407: store_coords_to car1_x car1_y car1_z from_car rc_car1 with_offset 0.0 0.0 0.0
+progress1 = 0
+
+0407: store_coords_to car2_x car2_y car2_z from_car rc_car2 with_offset 0.0 0.0 0.0
+progress2 = 0
+
+00AE: set_car rc_car1 traffic_behaviour_to 3
+00AE: set_car rc_car2 traffic_behaviour_to 3
+
+wait 500
+if and
+    056D:   actor player1 defined
+    056D:   actor player2 defined
+then
+    0614: set_actor player1 animation "PED_Console_Loop" progress_to 0.0 // 0.0 to 1.0
+    0614: set_actor player2 animation "PED_Console_Loop" progress_to 0.5 // 0.0 to 1.0
+end
+
+04EF: release_animation "PED_Console_Loop"
+
+wait 500
+
+repeat
+wait 0
+    if and
+        056D:   actor player1 defined
+        056D:   actor player2 defined
+        056D:   actor player1_in defined
+        056D:   actor player2_in defined
+        056E:   car rc_car1 defined
+        056E:   car rc_car2 defined
+    then
+    
+        if or
+            0119:   car rc_car1 wrecked
+            0119:   car rc_car2 wrecked
+            0118:   actor player1 dead
+            0118:   actor player2 dead
+            0118:   actor player1_in dead
+            0118:   actor player2_in dead
+        then
+            break
+        end
+        
+        // Если целится из огнестрела
+        if or
+            0457:   player $PLAYER_CHAR aiming_at_actor player1
+            0457:   player $PLAYER_CHAR aiming_at_actor player2
+        then
+            0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 2@
+            0E89: get_weaponinfo_fire_type 2@ store_to 3@ // Проверяем с каким оружием игрок
+            if or
+                3@ == 1 // Огнестрельное оружие
+                3@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+            then
+                break
+            end
+        end
+        
+        // Погода и время
+        0E40: get_current_hour 2@
+        if or
+            not 2@ >= 9
+            not 20 >= 2@
+        then
+            break
+        end
+        
+        // Ранен, убит, или стреляет кто то
+        080E: get_actor $PLAYER_ACTOR ped_event_to 2@
+        080E: get_actor player1 ped_event_to 3@
+        if or
+            2@ == 11
+            3@ == 49
+            3@ == 9
+            051A:   actor player1 damaged_by_actor $PLAYER_ACTOR
+            not is_char_script_controlled player1
+            not $ACTIVE_INTERIOR == 0
+        then
+            break
+        end
+        
+        // Ранен, убит, или стреляет кто то
+        080E: get_actor player2 ped_event_to 3@
+        if or
+            3@ == 49
+            3@ == 9
+            051A:   actor player2 damaged_by_actor $PLAYER_ACTOR
+            not is_char_script_controlled player2
+        then
+            break
+        end
+    
+        080E: get_actor player1 ped_event_to 2@
+        080E: get_actor player2 ped_event_to 3@
+        if or
+            3@ == 15
+            3@ == 31
+            3@ == 59
+            2@ == 15
+            2@ == 31
+            2@ == 59
+        then
+            break
+        end
+        
+        if
+            0EEB: locate_car_distance_to_coordinates rc_car1 pos car1_x car1_y car1_z radius 3.0
+        then
+            gosub @go_to
+            00A7: car rc_car1 drive_to car1_x car1_y car1_z
+        end
+        
+        if
+            0EEB: locate_car_distance_to_coordinates rc_car2 pos car2_x car2_y car2_z radius 3.0
+        then
+            gosub @go_to_2
+            00A7: car rc_car2 drive_to car2_x car2_y car2_z
+        end
+
+    else
+        break
+    end
+until not locate_char_distance_to_coordinates $player_actor pos -2292.2447 181.4637 35.3056 radius 120.0
+if
+    0EEA: locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2292.2447 181.4637 35.3056 radius 70.0
+then
+    if 056D:   actor player1 defined
+    then 01C2: remove_references_to_actor player1 // Like turning an actor into a random pedestrian
+    end
+    if 056D:   actor player2 defined
+    then 01C2: remove_references_to_actor player2 // Like turning an actor into a random pedestrian
+    end
+    if 056D:   actor player1_in defined
+    then 009B: destroy_actor player1_in
+    end
+    if 056D:   actor player2_in defined
+    then 009B: destroy_actor player2_in
+    end
+    if 056E:   car rc_car1 defined
+    then 01C3: remove_references_to_car rc_car1
+    end
+    if 056E:   car rc_car2 defined
+    then 01C3: remove_references_to_car rc_car2
+    end
+else
+    if 056D:   actor player1 defined
+    then 009B: destroy_actor player1
+    end
+    if 056D:   actor player2 defined
+    then 009B: destroy_actor player2
+    end
+    if 056D:   actor player1_in defined
+    then 009B: destroy_actor player1_in
+    end
+    if 056D:   actor player2_in defined
+    then 009B: destroy_actor player2_in
+    end
+    if 056E:   car rc_car1 defined
+    then 00A6: destroy_car rc_car1
+    end
+    if 056E:   car rc_car2 defined
+    then 00A6: destroy_car rc_car2
+    end
+end
+repeat
+wait 0
+until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2292.2447 181.4637 35.3056 radius 150.0
+0A93: terminate_this_custom_script
+
+
+:go_to
+if
+    progress1 == 0
+then
+    car1_x = -2299.4644
+    car1_y = 189.1548
+    car1_z = 35.3125
+    progress1 = 1
+    return
+end
+if
+    progress1 == 1
+then
+    car1_x = -2319.5618
+    car1_y = 188.6766
+    car1_z = 35.3125
+    progress1 = 2
+    return
+end
+if
+    progress1 == 2
+then
+    car1_x = -2331.739
+    car1_y = 179.6214
+    car1_z = 35.3125
+    progress1 = 3
+    return
+end
+if
+    progress1 == 3
+then
+    car1_x = -2316.4553
+    car1_y = 163.8553
+    car1_z = 35.3125
+    progress1 = 4
+    return
+end
+if
+    progress1 == 4
+then
+    car1_x = -2301.2217
+    car1_y = 163.0221
+    car1_z = 35.3125
+    progress1 = 5
+    return
+end
+if
+    progress1 == 5
+then
+    car1_x = -2300.6016 179.3053
+    car1_y = 179.3053
+    car1_z = 35.3125
+    progress1 = 0
+    return
+end
+return
+
+:go_to_2
+if
+    progress2 == 0
+then
+    car2_x = -2308.2864
+    car2_y = 169.8
+    car2_z = 35.3125
+    progress2 = 1
+    return
+end
+if
+    progress2 == 1
+then
+    car2_x = -2333.9873
+    car2_y = 173.1422
+    car2_z = 35.3125
+    progress2 = 2
+    return
+end
+if
+    progress2 == 2
+then
+    car2_x = -2321.1184
+    car2_y = 189.0803
+    car2_z = 35.3125
+    progress2 = 3
+    return
+end
+if
+    progress2 == 3
+then
+    car2_x = -2314.4812
+    car2_y = 177.7362
+    car2_z = 35.3125
+    progress2 = 4
+    return
+end
+if
+    progress2 == 4
+then
+    car2_x = -2304.8147 
+    car2_y = 175.0218
+    car2_z = 35.3125
+    progress2 = 5
+    return
+end
+if
+    progress2 == 5
+then
+    car2_x = -2301.7676
+    car2_y = 182.9153
+    car2_z = 35.3125
+    progress2 = 0
+    return
+end
+return

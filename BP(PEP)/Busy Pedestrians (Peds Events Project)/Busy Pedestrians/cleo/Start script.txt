@@ -1,0 +1,441 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "StartBP"
+
+// By ArtemQa146
+
+
+repeat
+wait 500
+0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded1"
+until 1@ == 1
+1@ = 0
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "Loaded1"
+
+timera = 0
+timerb = 0
+
+const
+    pause = 1000
+    umb1 = 5@
+    umb2 = 6@
+    umb3 = 7@
+    iBuffer = 0@
+end
+
+get_label_pointer iBuffer = label @Buffer
+
+// 1-13 case
+
+for 2@ = 1 to 13 step 1
+    0AD3: 10@v = string_format "case%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key 10@v
+    3@ = 2@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+// 15-17 tors
+
+for 2@ = 1 to 3 step 1
+    0AD3: 10@v = string_format "tors%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key 10@v
+    4@ = 14
+    005A: 4@ += 2@  // (int)
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+// 21-33 shop
+
+for 2@ = 1 to 13 step 1
+    0AD3: 10@v = string_format "shop%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key 10@v
+    4@ = 20
+    005A: 4@ += 2@  // (int)
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+// 35-39 woman case
+
+for 2@ = 1 to 5 step 1
+    0AD3: 10@v = string_format "wcase%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key 10@v
+    4@ = 34
+    005A: 4@ += 2@  // (int)
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+// 40-44 drink
+
+for 2@ = 1 to 5 step 1
+    0AD3: 10@v = string_format "drink%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key 10@v
+    4@ = 39
+    005A: 4@ += 2@  // (int)
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+// 50-56 paper, 57 water
+
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "paper"
+    4@ = 50
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "paper2"
+    4@ = 51
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "paper3"
+    4@ = 52
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "book"
+    4@ = 53
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "book2"
+    4@ = 54
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "book3"
+    4@ = 55
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "book4"
+    4@ = 56
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    
+    
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "water"
+    4@ = 57
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    
+    
+// 60-68 drink
+
+for 2@ = 1 to 9 step 1
+    0AD3: 10@v = string_format "cside%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key 10@v
+    4@ = 59
+    005A: 4@ += 2@  // (int)
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+//  bbal 69 59
+
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "bball1"
+    4@ = 69
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "bball2"
+    4@ = 59
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+
+// 70-84 beaach
+
+for 2@ = 1 to 15 step 1
+    0AD3: 10@v = string_format "beach%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key 10@v
+    4@ = 69
+    005A: 4@ += 2@  // (int)
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+// 85-97 beaach
+
+for 2@ = 1 to 15 step 1
+    0AD3: 10@v = string_format "tool%d" 2@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key 10@v
+    4@ = 84
+    005A: 4@ += 2@  // (int)
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+end
+
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat1"
+    4@ = 14
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat2"
+    4@ = 18
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat3"
+    4@ = 19
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat4"
+    4@ = 20
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat5"
+    4@ = 34
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat6"
+    4@ = 45
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat7"
+    4@ = 46
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat8"
+    4@ = 47
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat9"
+    4@ = 48
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "eat10"
+    4@ = 49
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cigar"
+    4@ = 58
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "camera"
+    4@ = 98
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+    1@ = 0
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "camera2"
+    4@ = 99
+    3@ = 4@ * 4
+    write_struct_offset iBuffer offset 3@ size 4 value 1@
+
+
+0AF0: umb1 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "umb1"
+0AF0: umb2 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "umb2"
+0AF0: umb3 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "umb3"
+
+while true
+wait pause
+    if
+        player.Defined(0)
+    then
+        06AC: 1@ = actor $PLAYER_ACTOR movement_speed
+        if or
+            not $ACTIVE_INTERIOR == 0
+            1@ > 50.0
+        then
+            continue
+        end
+
+
+            0842: 2@ = player $PLAYER_CHAR town_number
+            0D59: get_current_weather_to 1@
+            if and
+                not 1@ == 8 // not weather rain
+                not 1@ == 16 // not weather rain 2
+                not 2@ == 0
+            then
+                0AAA: 1@ = get_script_struct_named "WkPeds"
+                if
+                    1@ == 0
+                then
+                    0A92: stream_custom_script "PedsWalk.qa" iBuffer
+                    wait 2000
+                end
+            end
+            
+            wait pause
+            
+
+            0842: 2@ = player $PLAYER_CHAR town_number
+            0D59: get_current_weather_to 1@
+            if and
+                not 1@ == 8 // not weather rain
+                not 1@ == 16 // not weather rain 2
+                2@ == 0
+            then
+                0AAA: 1@ = get_script_struct_named "CsPeds"
+                if
+                    1@ == 0
+                then
+                    0A92: stream_custom_script "PedsCountrySIde.qa" iBuffer
+                    wait 2000
+                end
+            end
+            
+            wait pause
+            
+            
+            0842: 2@ = player $PLAYER_CHAR town_number
+            0D59: get_current_weather_to 1@
+            if and
+                not 1@ == 8 // not weather rain
+                not 1@ == 16 // not weather rain 2
+                $ONMISSION == 0
+            then
+                0AAA: 1@ = get_script_struct_named "Wk2Peds"
+                if
+                    1@ == 0
+                then
+                    0A92: stream_custom_script "PedsWalk2.qa" iBuffer
+                    wait 2000
+                end
+            end
+            
+            wait pause
+            
+
+            0D59: get_current_weather_to 1@
+            if or
+                1@ == 8 // not weather rain
+                1@ == 16 // not weather rain 2
+            then
+                0AAA: 1@ = get_script_struct_named "RnPeds"
+                if
+                    1@ == 0
+                then
+                    0A92: stream_custom_script "PedsRain.qa" umb1 umb2 umb3
+                    wait 2000
+                end
+            end
+            
+            wait pause
+
+            0E40: get_current_hour 2@
+            0D59: get_current_weather_to 1@
+            if and
+                2@ >= 7
+                2@ < 18
+                not 1@ == 8 // not weather rain
+                not 1@ == 16 // not weather rain 2
+            then
+                0AAA: 1@ = get_script_struct_named "WrkPeds"
+                if
+                    1@ == 0
+                then
+                    if or
+                        0154:   actor $PLAYER_ACTOR in_zone 'LDOC'
+                        0154:   actor $PLAYER_ACTOR in_zone 'LAIR'
+                        0154:   actor $PLAYER_ACTOR in_zone 'SFAIR'
+                        0154:   actor $PLAYER_ACTOR in_zone 'EASB'
+                        0154:   actor $PLAYER_ACTOR in_zone 'VAIR'
+                        0154:   actor $PLAYER_ACTOR in_zone 'KACC'
+                    then
+                        0A92: stream_custom_script "PedsWork.qa" iBuffer
+                        wait 2000
+                    end
+                end
+            end
+            
+            wait pause
+            
+
+            0E40: get_current_hour 2@
+            0D59: get_current_weather_to 1@
+            if and
+                2@ >= 5
+                2@ < 23
+                not 1@ == 8 // not weather rain
+                not 1@ == 16 // not weather rain 2
+            then
+                0AAA: 1@ = get_script_struct_named "BchPeds"
+                if
+                    1@ == 0
+                then
+                    if or
+                        0154:   actor $PLAYER_ACTOR in_zone 'SMB'
+                        0154:   actor $PLAYER_ACTOR in_zone 'VERO'
+                        0154:   actor $PLAYER_ACTOR in_zone 'PLS'
+                        0154:   actor $PLAYER_ACTOR in_zone 'OCEAF'
+                    then
+                        0A92: stream_custom_script "PedsBeach.qa" iBuffer
+                        wait 2000
+                    end
+                end
+            end
+
+            
+            wait pause
+
+            if and
+                timera > 15000
+                $ONMISSION == 0
+            then
+                0AAA: 1@ = get_script_struct_named "HmPeds"
+                if
+                    1@ == 0
+                then
+                    timera = 0
+                    0A92: stream_custom_script "PedsHomeless.qa" iBuffer
+                    wait 2000
+                else
+                    timera = 0
+                end
+            end
+            
+            wait pause
+            
+            if
+                timerb > 10000
+            then
+                0AAA: 1@ = get_script_struct_named "StPeds"
+                if
+                    1@ == 0
+                then
+                    timerb = 0
+                    0A92: stream_custom_script "PedsSeat.qa" iBuffer
+                    wait 2000
+                else
+                    timerb = 0
+                end
+            end
+            
+            
+    end
+end
+
+:Buffer
+hex
+    00(420)    // 400 bytes - can store 100 int values
+end

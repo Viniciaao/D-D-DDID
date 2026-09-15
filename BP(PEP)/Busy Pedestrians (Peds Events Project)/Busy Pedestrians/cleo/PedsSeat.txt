@@ -1,0 +1,880 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "StPeds"
+
+// By ArtemQa146
+
+// 20@ ped - 10@ render
+// 21@ ped - 11@ render
+// 22@ ped - 12@ render
+// 23@ ped - 13@ render
+
+const
+    Peds_Find = 19@
+    Ped_Skin = 1@
+    Ped_Select = 17@
+    Bit_sets = 31@
+    Select_Hand = 1
+    Number_Peds = 3
+    iBuffer = 18@
+    Pause_Time = 500
+    Minus_Pause = 400
+    Pause = 500
+end
+
+0085: iBuffer = 0@ // (int)
+0@ = -1
+
+while true
+wait 50
+if
+    Player.Defined($PLAYER_CHAR)
+then
+gosub @Ped_20
+gosub @Realese_animation
+    if
+        not $ACTIVE_INTERIOR == 0
+    then
+        gosub @References_remove
+        continue
+    end
+
+0D59: get_current_weather_to 1@
+if and
+    not 1@ == 8 // not weather rain
+    not 1@ == 16 // not weather rain 2
+then
+    if or
+    856D: not actor 20@ defined
+    856D: not actor 21@ defined
+    856D: not actor 22@ defined
+    856D: not actor 23@ defined
+then
+    Peds_Find = 0
+    while 0EA7: get_any_char_no_save_recursive Peds_Find progress_to Peds_Find char_to 0@
+    4@ = 50.0
+    if 82CB:   not actor 0@ bounding_sphere_visible
+    then 4@ = 15.0
+    end
+    080E: get_actor 0@ ped_event_to 1@
+    0470: 3@ = actor 0@ current_weapon
+    if and
+        3@ == 0 //unarmed
+        Actor.Animation(0@) == "SEAT_IDLE"
+        not 1@ == 9 // ped damaged
+        80DF: not actor 0@ driving
+        not locate_char_distance_to_char 0@ char $PLAYER_ACTOR radius 4@
+        locate_char_distance_to_char 0@ char $PLAYER_ACTOR radius 80.0
+    then
+    
+    
+            // Совместимость с urbanize
+            if
+                is_char_script_controlled 0@
+            then
+                0EFF: get_char_simplest_active_task 0@ id_to 3@ pointer_to 2@
+                0AAA: 1@ = get_script_struct_named "U_BENCH"
+                if and
+                    $ONMISSION == 0
+                    not 1@ == 0
+                    3@ == 401 //named anim
+                then
+                    3@ = false
+                    1@ = 0
+                    while 0EA9: get_any_object_no_save_recursive 1@ progress_to 1@ object_to 2@
+                        if or
+                            09CC:   object 2@ model_is 1256
+                            09CC:   object 2@ model_is 1280
+                            09CC:   object 2@ model_is 1368
+                            09CC:   object 2@ model_is 3657
+                        then
+                            if
+                                056D:   actor 0@ defined
+                            then
+                                if
+                                    0EE6: locate_char_distance_to_object 0@ object 2@ radius 3.0
+                                then
+                                    3@ = true
+                                    break
+                                end
+                            else
+                                break
+                            end
+                        end
+                    end
+                    
+                    if
+                        3@ == true
+                    then
+                        wait 1000
+                        if
+                            056D:   actor 0@ defined
+                        then
+                            if
+                                Actor.Animation(0@) == "SEAT_IDLE"
+                            then
+                                0172: 1@ = actor 0@ Z_angle
+                                01C2: remove_references_to_actor 0@ // Like turning an actor into a random pedestrian
+                                if
+                                    056D:   actor 0@ defined
+                                then
+                                    0792: disembark_instantly_actor 0@
+                                    Actor.LockInCurrentPosition(0@, True)
+                                    0173: set_actor 0@ Z_angle_to 1@
+                                    0605: actor 0@ perform_animation "SEAT_IDLE" IFP "Ped" framedelta 1000.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                                end
+                            else
+                                continue
+                            end
+                        else
+                            continue
+                        end
+                    end
+                end
+            end
+            
+                
+        if
+            056D:   actor 0@ defined
+        then
+            if
+                not is_char_script_controlled 0@
+            then
+            089F: get_actor 0@ pedtype_to 1@
+            if or
+                1@ == 4 //man
+                1@ == 5 //woman
+            then
+                gosub @Ped_skin
+                if
+                    Ped_Skin == true
+                then
+                    gosub @Load_animation
+                    if
+                        056D: actor 0@ defined
+                    then
+                        if
+                            not is_char_script_controlled 0@
+                        then
+
+                            for Ped_Select = 0 to Number_Peds step 1
+                                if
+                                    856D: not actor 20@(Ped_Select,1i) defined
+                                then
+                                    0E40: get_current_hour 2@
+                                    
+                                    if and
+                                        Ped_Select == 0 // Пьющий
+                                        0E4D: random_percent 35
+                                    then
+                                        0085: 20@(Ped_Select,1i) = 0@ // (int)
+                                        0E0B: mark_char_as_needed 20@(Ped_Select,1i)
+
+                                        gosub @drink
+                                        if 2@ < 6
+                                        then gosub @Ped_drink
+                                        else gosub @Ped_drink_standart
+                                        end
+                                        wait Pause
+                                        break
+                                    end
+                                    
+                                    if and
+                                        Ped_Select == 1 // Читающий
+                                        2@ >= 9
+                                        2@ < 17
+                                        0E4D: random_percent 15
+                                    then
+                                        0085: 20@(Ped_Select,1i) = 0@ // (int)
+                                        0E0B: mark_char_as_needed 20@(Ped_Select,1i)
+                                        gosub @Read
+                                        gosub @Ped_Read
+                                        wait Pause
+                                        break
+                                    end
+
+                                    if and
+                                        Ped_Select == 2 // Жрущий
+                                        0E4D: random_percent 35
+                                    then
+                                        0085: 20@(Ped_Select,1i) = 0@ // (int)
+                                        0E0B: mark_char_as_needed 20@(Ped_Select,1i)
+                                        gosub @Eat
+                                        if or
+                                            2@ == 11
+                                            2@ == 12
+                                        then gosub @Ped_Eat_STandart
+                                        else gosub @Ped_Eat
+                                        end
+                                        wait Pause
+                                        break
+                                    end
+                                    
+                                    if
+                                        Ped_Select == 3 // Анимации
+                                    then
+                                        0085: 20@(Ped_Select,1i) = 0@ // (int)
+                                        0E0B: mark_char_as_needed 20@(Ped_Select,1i)
+                                        gosub @Animations
+                                        gosub @Ped_Animations
+                                        wait Pause
+                                        break
+                                    end
+                                    
+                                end
+                            end
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+end
+end
+end
+end
+end
+
+// Выбор модели, анимации и тд
+
+:Animations
+0209: 2@ = random_int_in_ranges 1 4
+if 2@ == 1
+then 05AA: 24@s = "Seat3"
+end
+if 2@ == 2
+then 05AA: 24@s = "Seat6"
+end
+if 2@ == 3
+then 05AA: 24@s = "Seat7"
+end
+return
+
+:drink
+0209: 2@ = random_int_in_ranges 1 11
+if
+    2@ < 6
+then
+    2@ += 39
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    2@ = 1
+end
+4@ = 0.09
+5@ = 0.025
+6@ = -0.02
+7@ = 180.0
+8@ = 0.9
+if
+    2@ == 6
+then
+    1@ = 1455
+end
+if
+    2@ == 7
+then
+    1@ = 2647
+    8@ = 0.5
+end
+if
+    2@ == 8
+then
+    1@ = 1486
+    8@ = 0.8
+end
+if
+    2@ == 9
+then
+    1@ = 2601
+    8@ = 0.8
+end
+if
+    2@ == 10
+then
+    1@ = 1546
+    4@ = 0.08
+    8@ = 0.8
+end
+return
+
+:Eat
+0209: 2@ = random_int_in_ranges 1 13
+if
+    2@ <= 10
+then
+    4@ = 0.09
+    5@ = 0.05
+    6@ = 0.01
+    7@ = 90.0
+    8@ = 0.6
+    9@ = 180.0
+    if 2@ == 1
+    then
+        2@ = 14
+        4@ = 0.07
+        5@ = 0.025
+        6@ = -0.025
+        7@ = 0
+        8@ = 0.9
+        9@ = 90.0
+    end
+    if 2@ == 2
+    then 2@ = 18
+    end
+    if 2@ == 3
+    then 2@ = 19
+    end
+    if 2@ == 4
+    then 2@ = 20
+    end
+    if 2@ == 5
+    then 2@ = 34
+    end
+    if 2@ == 6
+    then 2@ = 45
+    end
+    if 2@ == 7
+    then 2@ = 46
+    end
+    if 2@ == 8
+    then 2@ = 47
+    end
+    if 2@ == 9
+    then 2@ = 48
+    end
+    if 2@ == 10
+    then 2@ = 49
+    end
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    2@ = 1
+end
+
+if and
+    2@ >= 6
+    2@ < 11
+then
+    4@ = 0.07
+    5@ = 0.025
+    6@ = -0.025
+    7@ = 0
+    8@ = 0.9
+    9@ = 90.0
+end
+
+if
+    2@ == 11
+then
+    1@ = 2703
+    4@ = 0.07
+    5@ = 0.025
+    6@ = -0.025
+    7@ = 0
+    8@ = 0.9
+    9@ = 90.0
+end
+if
+    2@ == 12
+then
+    1@ = 2769
+    4@ = 0.09
+    5@ = 0.05
+    6@ = 0.01
+    7@ = 90.0
+    8@ = 0.8
+    9@ = 180.0
+end
+return
+
+:Read
+0209: 2@ = random_int_in_ranges 1 8
+if 2@ == 1
+then 
+    2@ = 50
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    05AA: 27@s = "Seat1"
+    4@ = 0.25
+    5@ = 0.02
+    6@ = 0
+    7@ = 180.0
+    9@ = 0
+end
+if 2@ == 2
+then
+    2@ = 51
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    05AA: 27@s = "Seat1"
+    4@ = 0.25
+    5@ = 0.02
+    6@ = 0
+    7@ = 180.0
+    9@ = 0
+end
+if 2@ == 3
+then 
+    2@ = 52
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    05AA: 27@s = "Seat1"
+    4@ = 0.25
+    5@ = 0.02
+    6@ = 0
+    7@ = 180.0
+    9@ = 0
+end
+if 2@ == 4
+then
+    2@ = 53
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    05AA: 27@s = "Seat2"
+    4@ = 0.15
+    5@ = 0.1
+    6@ = 0
+    7@ = 180.0
+    9@ = 180.0
+end
+if 2@ == 5
+then 
+    2@ = 54
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    05AA: 27@s = "Seat2"
+    4@ = 0.15
+    5@ = 0.1
+    6@ = 0
+    7@ = 180.0
+    9@ = 180.0
+end
+if 2@ == 6
+then 
+    2@ = 55
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    05AA: 27@s = "Seat2"
+    4@ = 0.15
+    5@ = 0.1
+    6@ = 0
+    7@ = 180.0
+    9@ = 180.0
+end
+if 2@ == 7
+then 
+    2@ = 56
+    2@ *= 4
+    read_struct_offset 1@ iBuffer offset 2@ size 4   // Read ID of Model 2
+    05AA: 27@s = "Seat2"
+    4@ = 0.15
+    5@ = 0.1
+    6@ = 0
+    7@ = 180.0
+    9@ = 180.0
+end
+return
+
+
+// Создания рендера
+
+:Ped_Read
+0F02:  20@(Ped_Select,1i) special_model 1@ bone 34 offset 4@ 5@ 6@ rotation 0 7@ 9@ scale 10@(Ped_Select,1i) // bone 34 left hand, 24 right hand, 9 had, 3 tors
+0E37: set_render_object_scale 10@(Ped_Select,1i) 0.9 0.9 0.9
+0E30: set_render_object_auto_hide 10@(Ped_Select,1i) dead 1 weapon 1 car 1
+0209: 4@ = random_int_in_ranges 60000 120000
+0605: actor 20@(Ped_Select,1i) perform_animation 27@s IFP "PedEventsMod" framedelta 1000.0 loop 0 lockX 0 lockY 0 lockF 0 time 4@
+return
+
+:Ped_Animations
+0605: actor 20@(Ped_Select,1i) perform_animation 24@s IFP "PedEventsMod" framedelta 1000.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+wait 200
+return
+
+:Ped_drink
+if
+    08B7:   test Bit_sets bit Select_Hand
+then
+    7@ = 0.0
+    2@ = 24
+else
+    2@ = 34
+end
+0F02:  20@(Ped_Select,1i) special_model 1@ bone 34 offset 4@ 5@ 6@ rotation 0 7@ 0 scale 10@(Ped_Select,1i) // bone 34 left hand, 24 right hand, 9 had, 3 tors
+set_render_object_scale 10@(Ped_Select,1i) 8@ 8@ 8@
+0E30: set_render_object_auto_hide 10@(Ped_Select,1i) dead 1 weapon 1 car 1
+0209: 4@ = random_int_in_ranges 25000 60000
+0605: actor 20@(Ped_Select,1i) perform_animation "Seat4" IFP "PedEventsMod" framedelta 1000.0 loop 0 lockX 0 lockY 0 lockF 0 time 4@
+0393: actor 20@(Ped_Select,1i) perform_animation "Seat4" at 0.8 times_normal_rate
+0006: TIMERA = 0
+return
+
+:Ped_drink_standart
+model.Load(1@)
+if
+    not model.Available(1@)
+then
+    repeat
+    wait 0
+    model.Load(1@)
+    until model.Available(1@)
+end
+038B: load_requested_models
+if
+    08B7:   test Bit_sets bit Select_Hand
+then
+    7@ = 0.0
+    2@ = 24
+else
+    2@ = 34
+end
+
+if
+    056D:   actor 20@(Ped_Select,1i) defined
+then
+    0E2E: create_render_object_to_char_bone 20@(Ped_Select,1i) model 1@ bone 34 offset 4@ 5@ 6@ rotation 0 7@ 0 store_to 10@(Ped_Select,1i)
+    set_render_object_scale 10@(Ped_Select,1i) 8@ 8@ 8@
+    0E30: set_render_object_auto_hide 10@(Ped_Select,1i) dead 1 weapon 1 car 1
+    0209: 4@ = random_int_in_ranges 25000 60000
+    0605: actor 20@(Ped_Select,1i) perform_animation "Seat4" IFP "PedEventsMod" framedelta 1000.0 loop 0 lockX 0 lockY 0 lockF 0 time 4@
+    0393: actor 20@(Ped_Select,1i) perform_animation "Seat4" at 0.8 times_normal_rate
+    0006: TIMERA = 0
+end
+model.Destroy(1@)
+return
+
+:Ped_Eat
+0F02:  20@(Ped_Select,1i) special_model 1@ bone 34 offset 4@ 5@ 6@ rotation 0 7@ 9@ scale 10@(Ped_Select,1i) // bone 34 left hand, 24 right hand, 9 had, 3 tors
+set_render_object_scale 10@(Ped_Select,1i) 8@ 8@ 8@
+0E30: set_render_object_auto_hide 10@(Ped_Select,1i) dead 1 weapon 1 car 1
+0209: 4@ = random_int_in_ranges 25000 60000
+0605: actor 20@(Ped_Select,1i) perform_animation "Seat5" IFP "PedEventsMod" framedelta 1000.0 loop 0 lockX 0 lockY 0 lockF 0 time 4@
+0393: actor 20@(Ped_Select,1i) perform_animation "Seat5" at 0.8 times_normal_rate
+0006: TIMERA = 0
+0006: TIMERB = 0
+return
+
+:Ped_Eat_STandart
+model.Load(1@)
+if
+    not model.Available(1@)
+then
+    repeat
+    wait 0
+    model.Load(1@)
+    until model.Available(1@)
+end
+038B: load_requested_models
+
+if
+    056D:   actor 20@(Ped_Select,1i) defined
+then
+    0E2E: create_render_object_to_char_bone 20@(Ped_Select,1i) model 1@ bone 34 offset 4@ 5@ 6@ rotation 0 7@ 9@ store_to 10@(Ped_Select,1i)
+    set_render_object_scale 10@(Ped_Select,1i) 8@ 8@ 8@
+    0E30: set_render_object_auto_hide 10@(Ped_Select,1i) dead 1 weapon 1 car 1
+    0209: 4@ = random_int_in_ranges 25000 60000
+    0605: actor 20@(Ped_Select,1i) perform_animation "Seat5" IFP "PedEventsMod" framedelta 1000.0 loop 0 lockX 0 lockY 0 lockF 0 time 4@
+    0393: actor 20@(Ped_Select,1i) perform_animation "Seat5" at 0.8 times_normal_rate
+    0006: TIMERA = 0
+end
+model.Destroy(1@)
+return
+
+// Проверка всех актеров
+
+
+:Ped_20
+for Ped_Select = 0 to Number_Peds step 1
+wait 50
+if
+    056D: actor 20@(Ped_Select,1i) defined
+then
+    0A96: 3@ = ped 20@(Ped_Select,1i) struct
+    0D4E: 2@ = read_struct 3@ offset 0x470 size 1
+    if 08B7:   test 2@ bit 3 // если какого то хуя невидимый перс
+    then
+        08C3: clear 2@ bit 3
+        0E28: write_struct 3@ offset 0x470 size 1 value 2@ // рендер становится невидимым какого то хуя
+        10@(Ped_Select,1i) = -1
+        gosub @PedsMod_Delete_Render
+        continue
+    end
+    if and
+        not actor.Dead(20@(Ped_Select,1i))
+        is_char_script_controlled 20@(Ped_Select,1i)
+        locate_char_distance_to_char 20@(Ped_Select,1i) char $PLAYER_ACTOR radius 120.0
+    then
+            // Выпиваха
+            if
+                Ped_Select == 0
+            then
+                if
+                    not Actor.Animation(20@(Ped_Select,1i)) == "Seat4"
+                then
+                    gosub @PedsMod_Delete_Render
+                    continue
+                end
+            end
+
+            // Читающий
+            if
+                Ped_Select == 1
+            then
+                if
+                    not Actor.Animation(20@(Ped_Select,1i)) == 27@s
+                then
+                    gosub @PedsMod_Delete_Render
+                    continue
+                else
+                    0393: actor 20@(Ped_Select,1i) perform_animation 27@s at 0.9 times_normal_rate
+                end
+            end
+
+            // Жрущий
+            if
+                Ped_Select == 2
+            then
+                if
+                    not Actor.Animation(20@(Ped_Select,1i)) == "Seat5"
+                then
+                    gosub @PedsMod_Delete_Render
+                    continue
+                end
+            end
+            
+            // Жрущий
+            if
+                Ped_Select == 3
+            then
+                if
+                    not Actor.Animation(20@(Ped_Select,1i)) == 24@s
+                then
+                    gosub @PedsMod_Delete_Render
+                    continue
+                end
+            end
+            
+            
+            080E: get_actor 20@(Ped_Select,1i) ped_event_to 1@
+            if or
+                1@ == 49 // shoot close ped
+                0E47: is_char_fighting 20@(Ped_Select,1i)
+                actor.Driving(20@(Ped_Select,1i))
+                82D8:   not actor 20@(Ped_Select,1i) current_weapon == 0
+            then
+                gosub @PedsMod_Delete_Render
+            end
+        else
+            gosub @PedsMod_Delete_Render
+        end
+    end
+end
+return
+
+
+// Если что то пошло не так
+:PedsMod_Delete_Render
+if
+    056D: actor 20@(Ped_Select,1i) defined
+then
+    if
+        not locate_char_distance_to_char 20@(Ped_Select,1i) char $PLAYER_ACTOR radius 50.0
+    then
+        if
+            0E0A: is_char_script_controlled 20@(Ped_Select,1i)
+        then
+            01C2: remove_references_to_actor 20@(Ped_Select,1i) // Like turning an actor into a random pedestrian
+        end
+    else
+        if
+            0E0A: is_char_script_controlled 20@(Ped_Select,1i)
+        then
+            if
+                not 10@(Ped_Select,1i) <= -1
+            then
+                0E31: set_render_object_visible 10@(Ped_Select,1i) 0
+            end
+            0EFF: get_char_simplest_active_task 20@(Ped_Select,1i) id_to 1@ pointer_to 2@
+            if and
+                1@ == 401 //named anim
+                not actor.Dead(20@(Ped_Select,1i))
+            then
+                0E97: clear_char_secondary_tasks 20@(Ped_Select,1i)
+            end
+            01C2: remove_references_to_actor 20@(Ped_Select,1i) // Like turning an actor into a random pedestrian
+        end
+    end
+end
+20@(Ped_Select,1i) = -1
+10@(Ped_Select,1i) = -1
+return
+
+// Загрузка анимации
+:Load_animation
+if
+    84EE: not animation "PedEventsMod" loaded
+then
+    repeat
+    wait 0
+    04ED: load_animation  "PedEventsMod"
+    until 04EE:   animation "PedEventsMod" loaded
+end
+return
+
+
+:Ped_skin
+Ped_skin = false
+if and
+    82F2:   not actor 0@ model == 18 // beach visitor
+    82F2:   not actor 0@ model == 45 // beach visitor
+    82F2:   not actor 0@ model == 138 // beach visitor
+    82F2:   not actor 0@ model == 139  // beach visitor
+    82F2:   not actor 0@ model == 140 // beach visitor
+    82F2:   not actor 0@ model == 154 // beach visitor
+    82F2:   not actor 0@ model == 99 // roller
+then
+    Ped_skin = true
+else
+    Ped_skin = false
+    return
+end
+if and
+    82F2:   not actor 0@ model == 77 // homeless
+    82F2:   not actor 0@ model == 78  // homeless
+    82F2:   not actor 0@ model == 79 // homeless
+    82F2:   not actor 0@ model == 134 // homeless
+    82F2:   not actor 0@ model == 135 // homeless
+    82F2:   not actor 0@ model == 137 // homeless
+    82F2:   not actor 0@ model == 212 // homeless
+then
+    Ped_skin = true
+else
+    Ped_skin = false
+    return
+end
+if and
+    82F2:   not actor 0@ model == 230 // homeless
+    82F2:   not actor 0@ model == 239 // homeless
+    82F2:   not actor 0@ model == 92 // roller
+    82F2:   not actor 0@ model == 51 // mountain biker
+    82F2:   not actor 0@ model == 52 // mountain biker
+    82F2:   not actor 0@ model == 16 // worker
+    82F2:   not actor 0@ model == 27 // worker
+then
+    Ped_skin = true
+else
+    Ped_skin = false
+    return
+end
+if and
+    82F2:   not actor 0@ model == 50 // worker mechanik
+    82F2:   not actor 0@ model == 260 // worker
+    82F2:   not actor 0@ model == 153 // worker
+    82F2:   not actor 0@ model == 90 // Jogger
+    82F2:   not actor 0@ model == 96 // Jogger
+    82F2:   not actor 0@ model == 97 // Lifeguard
+    82F2:   not actor 0@ model == 251 // Lifeguard
+then
+    Ped_skin = true
+else
+    Ped_skin = false
+    return
+end
+if and
+    82F2:   not actor 0@ model == 128 // Farm Inhabitant
+    82F2:   not actor 0@ model == 129 // Farm Inhabitant
+    82F2:   not actor 0@ model == 130 // Farm Inhabitant
+    82F2:   not actor 0@ model == 131 // Farm Inhabitant
+    82F2:   not actor 0@ model == 132 // Farm Inhabitant
+    82F2:   not actor 0@ model == 133 // Farm Inhabitant
+    82F2:   not actor 0@ model == 158 // Farmer
+then
+    Ped_skin = true
+else
+    Ped_skin = false
+    return
+end
+if and
+    82F2:   not actor 0@ model == 161 // Farmer
+    82F2:   not actor 0@ model == 201 // Farmer
+    82F2:   not actor 0@ model == 202 // Farmer
+    82F2:   not actor 0@ model == 157 // Hillbilly
+    82F2:   not actor 0@ model == 159 // Hillbilly
+    82F2:   not actor 0@ model == 160 // Hillbilly
+    82F2:   not actor 0@ model == 162 // Hillbilly
+then
+    Ped_skin = true
+else
+    Ped_skin = false
+    return
+end
+if and
+    82F2:   not actor 0@ model == 197 // Hillbilly
+    82F2:   not actor 0@ model == 200 // Hillbilly
+    82F2:   not actor 0@ model == 31 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 32 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 33 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 34 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 196 // Farm-Town inhabitant
+then
+    Ped_skin = true
+else
+    Ped_skin = false
+    return
+end
+if and
+    82F2:   not actor 0@ model == 198 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 199 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 33 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 34 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 196 // Farm-Town inhabitant
+    82F2:   not actor 0@ model == 71 // security
+    82F2:   not actor 0@ model == 26 // Backpacker
+then
+    Ped_skin = true
+else
+    Ped_skin = false
+    return
+end
+return
+
+
+// Если зашли в другйо интерьер
+:References_remove
+for Ped_Select = 0 to Number_Peds step 1
+    if
+        056D:   actor 20@(Ped_Select,1i) defined
+    then
+        01C2: remove_references_to_actor 20@(Ped_Select,1i) // Like turning an actor into a random pedestrian
+        20@(Ped_Select,1i) = -1
+        10@(Ped_Select,1i) = -1
+    end
+end
+return
+
+// Если нет никого то удаялем анимацию, если была загружена
+:Realese_animation
+if and
+    856D: not actor 20@ defined
+    856D: not actor 21@ defined
+    856D: not actor 22@ defined
+    856D: not actor 23@ defined
+then
+    if
+        04EE: animation "PedEventsMod" loaded
+    then
+        04EF: release_animation "PedEventsMod"
+    end
+    if
+        not $ACTIVE_INTERIOR == 0
+    then
+        0A93: terminate_this_custom_script
+    end
+end
+return

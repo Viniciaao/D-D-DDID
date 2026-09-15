@@ -1,0 +1,246 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "PCREEKQ"
+
+// By ArtemQa146
+
+const
+    ped_1 = 31@
+    ped_2 = 30@
+    ped_3 = 29@
+    progress = 28@
+end
+
+// Если ночь
+0E40: get_current_hour 1@
+if or
+    1@ >= 21
+    1@ < 9
+then
+
+    model.Load(5422)
+    if
+        not model.Available(5422)
+    then
+        repeat
+        wait 0
+        model.Load(5422)
+        until model.Available(5422)
+    end
+    038B: load_requested_models
+    0E01: create_object_no_save 5422 at 2333.7033 6.1 26.62 offset 0 ground 0 to 0@
+    0177: set_object 0@ Z_angle_to 0.0
+    08D2: object 0@ scale_model 0.7
+    
+    038B: load_requested_models
+    0E01: create_object_no_save 5422 at 2322.7319 6.6151 26.2 offset 0 ground 0 to 1@
+    0177: set_object 1@ Z_angle_to 0.0
+    08D2: object 1@ scale_model 0.7
+
+    model.Destroy(5422)
+
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $player_actor pos 2333.4033 6.275 26.4926 radius 120.0
+    if 03CA:   object 0@ exists
+    then 0108: destroy_object 0@
+    end
+    if 03CA:   object 1@ exists
+    then 0108: destroy_object 1@
+    end
+    0A93: terminate_this_custom_script
+end
+
+
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+
+            0209: 1@ = random_int_in_ranges 1 3
+
+            if
+                1@ == 1
+            then
+                0376: ped_1 = create_random_actor_at 2332.4456 -1.9614 27.1909
+                0173: set_actor ped_1 Z_angle_to 0.0
+                0E24: fix_char ped_1 ground 1 brightness 1 and_fade_in 0
+                089F: get_actor ped_1 pedtype_to 2@
+                0812: AS_actor ped_1 perform_animation "palo_seat" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+                0376: ped_3 = create_random_actor_at 2328.8398 2.7424 27.1909
+                0173: set_actor ped_3 Z_angle_to 180.9876
+                0E24: fix_char ped_3 ground 1 brightness 1 and_fade_in 0
+                089F: get_actor ped_3 pedtype_to 2@
+                0812: AS_actor ped_3 perform_animation "palo_seat_2" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            else
+                0376: ped_1 = create_random_actor_at 2329.2375 -0.0725 27.1909
+                0173: set_actor ped_1 Z_angle_to 1.9549
+                0E24: fix_char ped_1 ground 1 brightness 1 and_fade_in 0
+                089F: get_actor ped_1 pedtype_to 2@
+                0812: AS_actor ped_1 perform_animation "palo_seat" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+                0376: ped_3 = create_random_actor_at 2332.4954 2.6951 27.1909
+                0173: set_actor ped_3 Z_angle_to 181.4007
+                0E24: fix_char ped_3 ground 1 brightness 1 and_fade_in 0
+                089F: get_actor ped_3 pedtype_to 2@
+                0812: AS_actor ped_3 perform_animation "palo_seat_2" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            end
+
+            model.Load(131)
+            if
+                not model.Available(131)
+            then
+                repeat
+                wait 0
+                model.Load(131)
+                until model.Available(131)
+            end
+            038B: load_requested_models
+            009A: ped_2 = create_actor_pedtype 5 model 131 at 2329.1333 8.1251 26.5228
+            0173: set_actor ped_2 Z_angle_to 180.1217
+            0E24: fix_char ped_2 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_2 perform_animation "liquor_cas" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            model.Destroy(131)
+
+            04EF: release_animation "PedEventsMod"
+
+            1@ = 0
+            timera = 0
+
+            repeat
+            wait 0
+            if and
+                056D:   actor ped_1 defined
+                056D:   actor ped_2 defined
+                056D:   actor ped_3 defined
+            then
+
+                if or
+                    not locate_char_distance_to_coordinates $player_actor pos 2329.1333 8.1251 26.5228 radius 120.0
+                    051A:   actor ped_1 damaged_by_actor $PLAYER_ACTOR
+                    0118:   actor ped_1 dead
+                    051A:   actor ped_2 damaged_by_actor $PLAYER_ACTOR
+                    0118:   actor ped_2 dead
+                then
+                    01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $player_actor pos 2329.1333 8.1251 26.5228 radius 120.0
+                    break
+                end
+
+                if or
+                    051A:   actor ped_3 damaged_by_actor $PLAYER_ACTOR
+                    0118:   actor ped_3 dead
+                then
+                    01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $player_actor pos 2329.1333 8.1251 26.5228 radius 120.0
+                    break
+                end
+
+                080E: get_actor ped_1 ped_event_to 1@
+                080E: get_actor ped_2 ped_event_to 2@
+                080E: get_actor ped_3 ped_event_to 3@
+                if or
+                    1@ == 49
+                    1@ == 9
+                    2@ == 49
+                    2@ == 9
+                    3@ == 49
+                    3@ == 9
+                then
+                    01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $player_actor pos 2329.1333 8.1251 26.5228 radius 120.0
+                    break
+                end
+                
+                080E: get_actor ped_1 ped_event_to 1@
+                080E: get_actor ped_2 ped_event_to 2@
+                if or
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                    2@ == 15
+                    2@ == 31
+                    2@ == 59
+                then
+                    01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $player_actor pos 2329.1333 8.1251 26.5228 radius 120.0
+                    break
+                end
+                
+                080E: get_actor ped_3 ped_event_to 1@
+                if or
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                then
+                    01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+                    repeat
+                    wait 0
+                    until not locate_char_distance_to_coordinates $player_actor pos 2329.1333 8.1251 26.5228 radius 120.0
+                    break
+                end
+
+                if or
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_1
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_2
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_3
+                then
+                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                    if or
+                        2@ == 1 // Огнестрельное оружие
+                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                    then
+                        01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+                        repeat
+                        wait 0
+                        until not locate_char_distance_to_coordinates $player_actor pos 2329.1333 8.1251 26.5228 radius 120.0
+                        break
+                    end
+                end
+
+
+            else
+                break
+            end
+            until not player.Defined(0)
+            if 056D:   actor ped_1 defined
+            then 01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_2 defined
+            then 01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_3 defined
+            then 01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+            end
+            repeat
+            wait 0
+            until not locate_char_distance_to_coordinates $player_actor pos 2329.1333 8.1251 26.5228 radius 120.0
+
+0A93: terminate_this_custom_script
