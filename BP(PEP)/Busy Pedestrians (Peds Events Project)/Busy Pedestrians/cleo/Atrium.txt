@@ -1,0 +1,412 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "ATRIUMQ"
+
+// By ArtemQa146
+
+const
+    ped_1 = 31@
+    ped_2 = 30@
+    ped_3 = 29@
+    ped_4 = 28@
+    ped_5 = 27@
+    ped_6 = 26@
+    ped_7 = 25@
+    ped_8 = 24@
+end
+
+
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+            
+            repeat
+            wait 0
+            04ED: load_animation  "MISC"
+            until 04EE:   animation "MISC" loaded
+
+            model.Load(147)
+            if
+                not model.Available(147)
+            then
+                repeat
+                wait 0
+                model.Load(147)
+                until model.Available(147)
+            end
+            038B: load_requested_models
+
+            // ped 1
+            0209: 1@ = random_int_in_ranges 0 3
+            if 1@ == 0
+            then
+                0376: ped_1 = create_random_actor_at 1722.2594 -1649.4515 20.2286
+                0173: set_actor ped_1 Z_angle_to 177.3835
+            end
+            if 1@ == 1
+            then
+                0376: ped_1 = create_random_actor_at 1716.0629 -1648.8398 20.2263
+                0173: set_actor ped_1 Z_angle_to 217.9606
+            end
+            if 1@ == 2
+            then
+                0376: ped_1 = create_random_actor_at 1715.6102 -1663.2961 20.228
+                0173: set_actor ped_1 Z_angle_to 95.4461
+            end
+
+            0E24: fix_char ped_1 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_1 perform_animation "liquor_ped1" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+
+            // ped 2
+            
+            0209: 1@ = random_int_in_ranges 0 2
+            if 1@ == 0
+            then
+                009A: ped_2 = create_actor_pedtype 4 model 147 at 1726.9177 -1651.3441 20.2283
+                0173: set_actor ped_2 Z_angle_to 128.9263
+            else
+                009A: ped_2 = create_actor_pedtype 4 model 147 at 1723.2889 -1666.2894 20.2291
+                0173: set_actor ped_2 Z_angle_to 8.6052
+            end
+            0E24: fix_char ped_2 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_2 perform_animation "crime_c2" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop3"
+            0F02: create_render_object_to_char_bone_from_special ped_2 special_model 1@ bone 34 offset 0.25 0 0 rotation 0 180.0 350.0 store_to 1@
+
+            0209: 1@ = random_int_in_ranges 0 2
+            0209: 2@ = random_int_in_ranges 0 2
+            0209: 3@ = random_int_in_ranges 0 2
+
+
+            // ped 3
+
+            if 1@ == 1
+            then
+                0376: ped_3 = create_random_actor_at 1732.2894 -1649.7347 23.7328 // вверх
+                0173: set_actor ped_3 Z_angle_to 270.8427
+            else
+                0376: ped_3 = create_random_actor_at 1710.7742 -1659.0717 27.1953
+                0173: set_actor ped_3 Z_angle_to 90.7344
+            end
+
+            0E24: fix_char ped_3 ground 1 brightness 1 and_fade_in 0
+            0209: 1@ = random_int_in_ranges 0 2
+            if
+                1@ == 1
+            then
+                0812: AS_actor ped_3 perform_animation "TramUp3" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            else
+                0812: AS_actor ped_3 perform_animation "TramUp2" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            end
+
+
+            // ped 4
+
+            if 2@ == 1
+            then
+                0376: ped_4 = create_random_actor_at 1716.6497 -1665.1738 20.2271
+                0173: set_actor ped_4 Z_angle_to 220.2637
+            else
+                0376: ped_4 = create_random_actor_at 1728.5447 -1658.9424 20.2383
+                0173: set_actor ped_4 Z_angle_to 22.8619
+            end
+
+            0E24: fix_char ped_4 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_4 perform_animation "IDLE_chat" IFP "Ped" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+
+            // ped 5
+            
+            04C4: store_coords_to 1@ 2@ 3@ from_actor ped_4 with_offset 0.0 1.5 0.0
+            0376: ped_5 = create_random_actor_at 1@ 2@ 3@
+            0172: 1@ = actor ped_4 Z_angle
+            1@ += 180.0
+            0173: set_actor ped_5 Z_angle_to 1@
+    
+            0E24: fix_char ped_5 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_5 perform_animation "Idle_Chat_02" IFP "MISC" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            
+            // ped 6
+
+            if 1@ == 1
+            then
+                0376: ped_6 = create_random_actor_at 1714.5099 -1671.7766 23.6953 // вверх
+                0173: set_actor ped_6 Z_angle_to 181.4451
+            else
+                0376: ped_6 = create_random_actor_at 1712.3682 -1645.3525 23.6925
+                0173: set_actor ped_6 Z_angle_to 44.6737
+            end
+
+            0E24: fix_char ped_6 ground 1 brightness 1 and_fade_in 0
+            0209: 1@ = random_int_in_ranges 0 2
+            if
+                1@ == 1
+            then
+                0812: AS_actor ped_6 perform_animation "TramUp3" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            else
+                0812: AS_actor ped_6 perform_animation "TramUp2" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            end
+            
+            
+            // ped 7
+            
+            0209: 1@ = random_int_in_ranges 0 3
+            if 1@ == 0
+            then
+                0376: ped_7 = create_random_actor_at 1726.8395 -1654.1838 20.231
+                0173: set_actor ped_7 Z_angle_to 248.8006
+            end
+            if 1@ == 1
+            then
+                0376: ped_7 = create_random_actor_at 1727.3171 -1652.734 20.2302
+                0173: set_actor ped_7 Z_angle_to 113.2826
+            end
+            if 1@ == 2
+            then
+                0376: ped_7 = create_random_actor_at 1727.3639 -1646.3823 20.2275
+                0173: set_actor ped_7 Z_angle_to 245.4873
+            end
+
+            0E24: fix_char ped_7 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_7 perform_animation "liquor_ped1" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            
+            // ped 8
+
+            0209: 1@ = random_int_in_ranges 0 2
+            if 1@ == 1
+            then
+                0376: ped_8 = create_random_actor_at 1715.15 -1655.549 20.2228
+                0173: set_actor ped_8 Z_angle_to 91.6392
+            else
+                0376: ped_8 = create_random_actor_at 1723.3679 -1650.2272 20.229
+                0173: set_actor ped_8 Z_angle_to 163.7065
+            end
+
+            0E24: fix_char ped_8 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_8 perform_animation "liquor_cas" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+            0860: link_actor ped_1 to_interior 18
+            0860: link_actor ped_2 to_interior 18
+            0860: link_actor ped_3 to_interior 18
+            0860: link_actor ped_4 to_interior 18
+            0860: link_actor ped_5 to_interior 18
+            0860: link_actor ped_6 to_interior 18
+            0860: link_actor ped_7 to_interior 18
+            0860: link_actor ped_8 to_interior 18
+
+            04EF: release_animation "PedEventsMod"
+            04EF: release_animation "MISC"
+            model.Destroy(147)
+
+            1@ = 0
+            timera = 0
+
+            repeat
+            wait 0
+            if and
+                056D:   actor ped_1 defined
+                056D:   actor ped_2 defined
+                056D:   actor ped_3 defined
+                056D:   actor ped_4 defined
+                056D:   actor ped_5 defined
+                056D:   actor ped_6 defined
+                056D:   actor ped_7 defined
+                056D:   actor ped_8 defined
+            then
+
+                if
+                    not $ACTIVE_INTERIOR == 18
+                then
+                    break
+                end
+
+
+                if or
+                    051A:   actor ped_1 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor ped_2 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor ped_3 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor ped_4 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor ped_5 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor ped_6 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor ped_7 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor ped_8 damaged_by_actor $PLAYER_ACTOR
+                then
+                    break
+                end
+                
+                if
+                    not locate_char_distance_to_coordinates $player_actor pos 1721.7184 -1656.9252 20.9741 radius 100.0
+                then
+                    break
+                end
+
+
+                if or
+                    0118:   actor ped_1 dead
+                    0118:   actor ped_2 dead
+                    0118:   actor ped_3 dead
+                    0118:   actor ped_4 dead
+                    0118:   actor ped_5 dead
+                    0118:   actor ped_6 dead
+                    0118:   actor ped_7 dead
+                    0118:   actor ped_8 dead
+                then
+                    break
+                end
+
+                080E: get_actor ped_1 ped_event_to 1@
+                080E: get_actor ped_2 ped_event_to 2@
+                080E: get_actor ped_3 ped_event_to 3@
+                if or
+                    1@ == 49
+                    1@ == 9
+                    2@ == 49
+                    2@ == 9
+                    3@ == 49
+                    3@ == 9
+                then
+                    break
+                end
+
+                080E: get_actor ped_4 ped_event_to 1@
+                080E: get_actor ped_5 ped_event_to 2@
+                080E: get_actor ped_6 ped_event_to 3@
+                if or
+                    1@ == 49
+                    1@ == 9
+                    2@ == 49
+                    2@ == 9
+                    3@ == 49
+                    3@ == 9
+                then
+                    break
+                end
+                
+                080E: get_actor ped_7 ped_event_to 1@
+                080E: get_actor ped_8 ped_event_to 2@
+                if or
+                    1@ == 49
+                    1@ == 9
+                    2@ == 49
+                    2@ == 9
+                then
+                    break
+                end
+                
+                
+                080E: get_actor ped_1 ped_event_to 1@
+                080E: get_actor ped_2 ped_event_to 2@
+                if or
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                    2@ == 15
+                    2@ == 31
+                    2@ == 59
+                then
+                    break
+                end
+                
+                080E: get_actor ped_3 ped_event_to 1@
+                080E: get_actor ped_4 ped_event_to 2@
+                if or
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                    2@ == 15
+                    2@ == 31
+                    2@ == 59
+                then
+                    break
+                end
+                
+                080E: get_actor ped_5 ped_event_to 1@
+                080E: get_actor ped_6 ped_event_to 2@
+                if or
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                    2@ == 15
+                    2@ == 31
+                    2@ == 59
+                then
+                    break
+                end
+                
+                080E: get_actor ped_7 ped_event_to 1@
+                080E: get_actor ped_8 ped_event_to 2@
+                if or
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                    2@ == 15
+                    2@ == 31
+                    2@ == 59
+                then
+                    break
+                end
+                
+
+                if or
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_1
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_2
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_3
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_4
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_5
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_6
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_7
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_8
+                then
+                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                    if or
+                        2@ == 1 // Огнестрельное оружие
+                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                    then
+                        break
+                    end
+                end
+
+
+            else
+                break
+            end
+            until not player.Defined(0)
+            if 056D:   actor ped_1 defined
+            then 01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_2 defined
+            then 01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_3 defined
+            then 01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_4 defined
+            then 01C2: remove_references_to_actor ped_4 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_5 defined
+            then 01C2: remove_references_to_actor ped_5 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_6 defined
+            then 01C2: remove_references_to_actor ped_6 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_7 defined
+            then 01C2: remove_references_to_actor ped_7 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor ped_8 defined
+            then 01C2: remove_references_to_actor ped_8 // Like turning an actor into a random pedestrian
+            end
+            repeat
+            wait 0
+            until not $ACTIVE_INTERIOR == 18
+
+0A93: terminate_this_custom_script
+
+

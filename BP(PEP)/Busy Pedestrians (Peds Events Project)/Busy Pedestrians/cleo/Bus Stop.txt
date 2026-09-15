@@ -1,0 +1,329 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "BSSTPQA"
+
+// By ArtemQa146
+
+if
+    0AA2: 31@ = load_dynamic_library "CLEO+.cleo"
+then
+    if
+        0AA4: 30@ = get_dynamic_library_procedure "GetCleoPlusVersion" library 31@
+    then
+        0AA7: call_function_return 30@ num_params 0 pop 0 29@
+        if
+            not 29@ >= 0x1020000
+        then
+            0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+            0AA3: free_dynamic_library 31@
+            0A93: terminate_this_custom_script
+        end
+        0AA3: free_dynamic_library 31@
+    end
+else
+    0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+    0AA3: free_dynamic_library 31@
+    0A93: terminate_this_custom_script
+end
+
+repeat
+wait 500
+0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "LoadedST"
+until 1@ == 1
+1@ = 0
+0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "LoadedST"
+
+const
+    find = 31@
+    busstop = 30@
+    ped_1 = 29@
+    ped_2 = 28@
+    ped_3 = 27@
+    ped_4 = 26@
+    paper = 25@
+    book = 24@
+    paper2 = 23@
+    book2 = 22@
+    chance = 21@
+end
+
+0AF0: paper = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "paper2"
+0AF0: paper2 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "paper3"
+0AF0: book = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "book"
+0AF0: book2 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "book2"
+
+0AF0: chance = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Bus Station"
+
+wait 5000
+
+ped_1 = -1
+ped_2 = -1
+ped_3 = -1
+
+while true
+wait 500
+    if
+        player.Defined(0)
+    then
+        if
+            not $ONMISSION == 0
+        then
+            continue
+        end
+
+        find = 0
+        while 0EA9: get_any_object_no_save_recursive find progress_to find object_to busstop
+            if
+                09CC:   object busstop model_is 1257
+            then
+                if and
+                    not locate_char_distance_to_object $player_actor object busstop radius 15.0
+                    locate_char_distance_to_object $player_actor object busstop radius 50.0
+                then
+                    if or
+                        not locate_char_distance_to_object $player_actor object busstop radius 30.0
+                        82CC:   not object busstop bounding_sphere_visible
+                    then
+                        0400: store_coords_to 1@ 2@ 3@ from_object busstop with_offset 0.0 -1.3 -0.4
+                        0400: store_coords_to 4@ 5@ 6@ from_object busstop with_offset 0.0 0.0 -0.4
+                        0400: store_coords_to 7@ 8@ 9@ from_object busstop with_offset 0.0 1.6 0.0
+                        0176: 10@ = object busstop Z_angle
+
+                        if 0E4D: random_percent chance
+                        then
+                        else
+                            repeat
+                            wait 0
+                            until not locate_char_distance_to_coordinates $player_actor pos 7@ 8@ 9@ radius 60.0
+                            break
+                        end
+
+                        repeat
+                        wait 0
+                        04ED: load_animation  "PedEventsMod"
+                        until 04EE:   animation "PedEventsMod" loaded
+
+                        0376: ped_1 = create_random_actor_at 1@ 2@ 3@
+                        0E24: fix_char ped_1 ground 1 brightness 1 and_fade_in 0
+
+                        0376: ped_2 = create_random_actor_at 4@ 5@ 6@
+                        0E24: fix_char ped_2 ground 1 brightness 1 and_fade_in 0
+
+                        0376: ped_3 = create_random_actor_at 7@ 8@ 9@
+                        0E24: fix_char ped_3 ground 1 brightness 1 and_fade_in 0
+
+                        10@ += 90.0
+                        0173: set_actor ped_1 Z_angle_to 10@
+                        0173: set_actor ped_2 Z_angle_to 10@
+                        10@ += 45.0
+                        0173: set_actor ped_3 Z_angle_to 10@
+
+                        0209: 1@ = random_int_in_ranges 1 6
+                        if 1@ == 1
+                        then 0812: AS_actor ped_1 perform_animation "BusSeat1" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 2
+                        then 0812: AS_actor ped_1 perform_animation "BusSeat2" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 3
+                        then 0812: AS_actor ped_1 perform_animation "BusSeat3" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 4
+                        then 0812: AS_actor ped_1 perform_animation "BusSeat4" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 5
+                        then 0812: AS_actor ped_1 perform_animation "BusSeat5" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+
+                        if 1@ == 1
+                        then
+                            0209: 3@ = random_int_in_ranges 1 3
+                            if 3@ == 1
+                            then 0F02:  ped_1 special_model book bone 34 offset 0.15 0.1 0.0 rotation 0 180.0 180.0 scale 2@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                            else 0F02:  ped_1 special_model book2 bone 34 offset 0.15 0.1 0.0 rotation 0 180.0 180.0 scale 2@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                            end
+                            0E37: set_render_object_scale 2@ 0.9 0.9 0.9
+                            0E30: set_render_object_auto_hide 2@ dead 1 weapon 1 car 1
+                        end
+
+                        if 1@ == 5
+                        then
+                            0209: 3@ = random_int_in_ranges 1 3
+                            if 3@ == 1
+                            then 0F02:  ped_1 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0 scale 2@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                            else 0F02:  ped_1 special_model paper2 bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0 scale 2@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                            end
+                            0E37: set_render_object_scale 2@ 0.9 0.9 0.9
+                            0E30: set_render_object_auto_hide 2@ dead 1 weapon 1 car 1
+                        end
+
+                        0209: 1@ = random_int_in_ranges 1 6
+                        if 1@ == 1
+                        then 0812: AS_actor ped_2 perform_animation "BusSeat1" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 2
+                        then 0812: AS_actor ped_2 perform_animation "BusSeat2" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 3
+                        then 0812: AS_actor ped_2 perform_animation "BusSeat3" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 4
+                        then 0812: AS_actor ped_2 perform_animation "BusSeat4" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 5
+                        then 0812: AS_actor ped_2 perform_animation "BusSeat5" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+
+                        if 1@ == 1
+                        then
+                            0209: 3@ = random_int_in_ranges 1 3
+                            if 3@ == 1
+                            then 0F02:  ped_2 special_model book bone 34 offset 0.15 0.1 0.0 rotation 0 180.0 180.0 scale 2@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                            else 0F02:  ped_2 special_model book2 bone 34 offset 0.15 0.1 0.0 rotation 0 180.0 180.0 scale 2@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                            end
+                            0E37: set_render_object_scale 2@ 0.9 0.9 0.9
+                            0E30: set_render_object_auto_hide 2@ dead 1 weapon 1 car 1
+                        end
+
+                        if 1@ == 5
+                        then
+                            0209: 3@ = random_int_in_ranges 1 3
+                            if 3@ == 1
+                            then 0F02:  ped_2 special_model paper bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0 scale 2@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                            else 0F02:  ped_2 special_model paper2 bone 34 offset 0.25 0.02 0.0 rotation 0 180.0 0 scale 2@ // bone 34 left hand, 24 right hand, 9 had, 3 tors
+                            end
+                            0E37: set_render_object_scale 2@ 0.9 0.9 0.9
+                            0E30: set_render_object_auto_hide 2@ dead 1 weapon 1 car 1
+                        end
+
+                        0209: 1@ = random_int_in_ranges 1 3
+                        if 1@ == 1
+                        then 0812: AS_actor ped_3 perform_animation "Pose" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+                        if 1@ == 2
+                        then 0812: AS_actor ped_3 perform_animation "liquor_cas" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        end
+
+                        04EF: release_animation "PedEventsMod"
+                        
+                        wait 300
+                        
+                        repeat
+                        wait 0
+                            if and
+                                056D:   actor ped_1 defined
+                                056D:   actor ped_2 defined
+                                056D:   actor ped_3 defined
+                                03CA:   object busstop exists
+                            then
+
+                                0A98: 1@ = object busstop struct
+                                0D4E: 2@ = read_struct 1@ offset 0x140 size 4
+                                if or
+                                    08B7:   test 2@ bit 10 // The object is broken
+                                    08B7:   test 2@ bit 6 // The object is expl
+                                then
+                                    break
+                                end
+
+
+                                if or
+                                    not  locate_char_distance_to_char $player_actor char ped_1 radius 120.0
+                                    051A:   actor ped_1 damaged_by_actor $PLAYER_ACTOR
+                                    0118:   actor ped_1 dead
+                                    051A:   actor ped_2 damaged_by_actor $PLAYER_ACTOR
+                                    0118:   actor ped_2 dead
+                                    051A:   actor ped_3 damaged_by_actor $PLAYER_ACTOR
+                                    0118:   actor ped_3 dead
+                                then
+                                    break
+                                end
+
+                                080E: get_actor ped_1 ped_event_to 1@
+                                080E: get_actor ped_2 ped_event_to 2@
+                                080E: get_actor ped_3 ped_event_to 3@
+                                if or
+                                    1@ == 49
+                                    1@ == 9
+                                    2@ == 49
+                                    2@ == 9
+                                    3@ == 49
+                                    3@ == 9
+                                then
+                                    break
+                                end
+                                
+                                080E: get_actor ped_1 ped_event_to 1@
+                                080E: get_actor ped_2 ped_event_to 2@
+                                if or
+                                    1@ == 15
+                                    1@ == 31
+                                    1@ == 59
+                                    2@ == 15
+                                    2@ == 31
+                                    2@ == 59
+                                then
+                                    break
+                                end
+                                
+                                080E: get_actor ped_3 ped_event_to 1@
+                                if or
+                                    1@ == 15
+                                    1@ == 31
+                                    1@ == 59
+                                then
+                                    break
+                                end
+
+                                if or
+                                    0457:   player $PLAYER_CHAR aiming_at_actor ped_1
+                                    0457:   player $PLAYER_CHAR aiming_at_actor ped_2
+                                    0457:   player $PLAYER_CHAR aiming_at_actor ped_3
+                                then
+                                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                                    if or
+                                        2@ == 1 // Огнестрельное оружие
+                                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                                    then
+                                        break
+                                    end
+                                end
+
+                            else
+                                break
+                            end
+                        until not player.Defined(0)
+                        gosub @Destroy_peds
+
+                        repeat
+                        wait 0
+                        until not locate_char_distance_to_coordinates $player_actor pos 7@ 8@ 9@ radius 80.0
+                    end
+                end
+            end
+        end
+
+
+    end
+end
+
+
+
+
+:Destroy_peds
+if 056D:   actor ped_1 defined
+then 01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor ped_2 defined
+then 01C2: remove_references_to_actor ped_2 // Like turning an actor into a random pedestrian
+end
+if 056D:   actor ped_3 defined
+then 01C2: remove_references_to_actor ped_3 // Like turning an actor into a random pedestrian
+end
+return

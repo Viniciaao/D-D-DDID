@@ -1,0 +1,300 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "FLOWRQA"
+
+// By ArtemQa146
+
+const
+    ped_1 = 31@
+    progress = 30@
+    coords_x = 29@
+    coords_y = 28@
+    coords_z = 27@
+    angle_1 = 26@
+    obj_1 = 25@
+    obj_FL1 = 24@
+    obj_FL2 = 23@
+    obj_FL3 = 22@
+    Money_render = 21@
+end
+
+0087: coords_x = 0@ // (float)
+0087: coords_y = 1@ // (float)
+0087: coords_z = 2@ // (float)
+0087: angle_1 = 3@ // (float)
+
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+
+            model.Load(225)
+            if
+                not model.Available(225)
+            then
+                repeat
+                wait 0
+                model.Load(225)
+                until model.Available(225)
+            end
+            model.Load(3860)
+            if
+                not model.Available(3860)
+            then
+                repeat
+                wait 0
+                model.Load(3860)
+                until model.Available(3860)
+            end
+            model.Load(325)
+            if
+                not model.Available(325)
+            then
+                repeat
+                wait 0
+                model.Load(325)
+                until model.Available(325)
+            end
+            038B: load_requested_models
+
+            // ped 1
+            
+            coords_z += 0.2
+            0E01: create_object_no_save 3860 at coords_x coords_y coords_z offset 0 ground 0 to obj_1
+            angle_1 += 180.0
+            0177: set_object obj_1 Z_angle_to angle_1
+            
+            0400: store_coords_to 1@ 2@ 3@ from_object obj_1 with_offset -1.025 -0.857 -0.292
+            0E01: create_object_no_save 325 at 1@ 2@ 3@ offset 0 ground 0 to obj_FL1
+            
+            0400: store_coords_to 1@ 2@ 3@ from_object obj_1 with_offset -0.025 -0.857 -0.292
+            0E01: create_object_no_save 325 at 1@ 2@ 3@ offset 0 ground 0 to obj_FL2
+            
+            0400: store_coords_to 1@ 2@ 3@ from_object obj_1 with_offset 1.025 -0.857 -0.292
+            0E01: create_object_no_save 325 at 1@ 2@ 3@ offset 0 ground 0 to obj_FL3
+
+
+            0400: store_coords_to 1@ 2@ 3@ from_object obj_1 with_offset 0.0 0.5 0.0
+            009A: ped_1 = create_actor_pedtype 5 model 225 at 1@ 2@ 3@
+            angle_1 += 180.0
+            0173: set_actor ped_1 Z_angle_to angle_1
+            0E24: fix_char ped_1 ground 1 brightness 1 and_fade_in 0
+            0812: AS_actor ped_1 perform_animation "liquor_cas" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+            model.Destroy(225)
+            model.Destroy(325)
+            model.Destroy(3860)
+
+            1@ = 0
+            timera = 0
+            
+            Money_render = -1
+
+            repeat
+            wait 0
+            if and
+                03CA:   object obj_1 exists
+                056D:   actor ped_1 defined
+            then
+
+                080E: get_actor ped_1 ped_event_to 1@
+                if or
+                    051A:   actor ped_1 damaged_by_actor $PLAYER_ACTOR
+                    not locate_char_distance_to_coordinates $player_actor pos coords_x coords_y coords_z radius 120.0
+                    0118:   actor ped_1 dead
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                    not $ACTIVE_INTERIOR == 0
+                then
+                    break
+                end
+
+
+                080E: get_actor ped_1 ped_event_to 1@
+                if or
+                    1@ == 49
+                    1@ == 9
+                then
+                    break
+                end
+
+                if
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_1
+                then
+                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                    if or
+                        2@ == 1 // Огнестрельное оружие
+                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                    then
+                        break
+                    end
+                end
+
+
+                gosub @Sell
+                if
+                    not progress == 1
+                then
+                    gosub @Text_box_remove
+                end
+
+            else
+                break
+            end
+            until not player.Defined(0)
+            gosub @Text_box_remove
+            if 056D:   actor ped_1 defined
+            then 01C2: remove_references_to_actor ped_1 // Like turning an actor into a random pedestrian
+            end
+            if 03CA:   object obj_1 exists
+            then 01C4: remove_references_to_object obj_1 // This object will now disappear when the player looks away
+            end
+            if 03CA:   object obj_FL1 exists
+            then 01C4: remove_references_to_object obj_FL1 // This object will now disappear when the player looks away
+            end
+            if 03CA:   object obj_FL2 exists
+            then 01C4: remove_references_to_object obj_FL2 // This object will now disappear when the player looks away
+            end
+            if 03CA:   object obj_FL3 exists
+            then 01C4: remove_references_to_object obj_FL3 // This object will now disappear when the player looks away
+            end
+            if and
+                progress >= 2
+                progress < 4
+            then
+                if
+                    progress == 3
+                then
+                    if not Money_render == -1
+                    then 0E2F: delete_render_object Money_render
+                    end
+                end
+                0992: set_player $PLAYER_CHAR weapons_scrollable 1
+            end
+            04EF: release_animation "PedEventsMod"
+            repeat
+            wait 0
+            until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
+
+0A93: terminate_this_custom_script
+
+
+:Sell
+    0400: store_coords_to 1@ 2@ 3@ from_object obj_1 with_offset 0.0 -2.0 0.0
+    if
+        0EEA: locate_char_distance_to_coordinates $PLAYER_actor pos 1@ 2@ 3@ radius 8.0
+    then
+        if
+            progress == 0
+        then
+            if
+                0102:   actor $PLAYER_ACTOR in_sphere 1@ 2@ 3@ radius 0.6 0.6 1.0 sphere 1 stopped_on_foot
+            then
+                progress = 1
+                if
+                    010A:   player $PLAYER_CHAR money > 49
+                then
+                    if
+                        8A2A:   not text_box 'FLWRQA1' displayed
+                    then
+                        0512: show_permanent_text_box 'FLWRQA1'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+                    end
+                else
+                    if
+                        8A2A:   not text_box 'donat2' displayed
+                    then
+                        0512: show_permanent_text_box 'donat2'  // If your health reaches zero, you will pass out and you will be treated at the local medical center.
+                    end
+                end
+            end
+        else
+            if and
+                progress == 1
+                8102:   not actor $PLAYER_ACTOR in_sphere 1@ 2@ 3@ radius 0.6 0.6 1.0 sphere 0 stopped_on_foot
+            then
+                progress = 0
+            end
+        end
+    end
+
+    if
+        progress == 1
+    then
+        if and
+            80DF:   not actor $PLAYER_ACTOR driving
+            03EE:   player $PLAYER_CHAR controllable
+            02A0:   actor $PLAYER_ACTOR stopped
+            00E1:   player 0 pressed_key 15
+            010A:   player $PLAYER_CHAR money > 49
+        then
+            04C4: store_coords_to 1@ 2@ 3@ from_actor ped_1 with_offset 0.0 0.0 0.0
+            04C4: store_coords_to 4@ 5@ 6@ from_actor $PLAYER_ACTOR with_offset 0.0 0.0 0.0
+            0E27: get_angle_from_two_coords 4@ 5@ and 1@ 2@ to 3@
+            0173: set_actor $PLAYER_ACTOR Z_angle_to 3@
+            0812: AS_actor $PLAYER_ACTOR perform_animation "SAX3" IFP "PedEventsMod" framedelta 4.0 loopA 0 lockX 1 lockY 0 lockF 0 time -1
+            06AB: set_actor $PLAYER_ACTOR all_weapons_hidden 1
+            0992: set_player $PLAYER_CHAR weapons_scrollable 0
+            progress = 2
+            timerb = 0
+        end
+    end
+    
+    if
+        progress == 2
+    then
+        if
+            timerb > 500
+        then
+            model.Load(1212)
+            038B: load_requested_models
+            0E2E: create_render_object_to_char_bone $PLAYER_ACTOR model 1212 bone 24 offset 0.08 0.05 -0.04 rotation 0 0 0 store_to Money_render
+            model.Destroy(1212)
+            progress = 3
+            timerb = 0
+        end
+    end
+
+    
+    if and
+        timerb > 3500
+        progress == 3
+    then
+        model.Load(325)
+        038B: load_requested_models
+        0109: player $PLAYER_CHAR money += -50
+        01B2: give_actor $PLAYER_ACTOR weapon 14 ammo 1  // Load the weapon model before using this
+        model.Destroy(324)
+        if not Money_render == -1
+        then 0E2F: delete_render_object Money_render
+        end
+        0992: set_player $PLAYER_CHAR weapons_scrollable 1
+        progress = 4
+    end
+
+
+    if
+        progress == 4
+    then
+        if
+            not locate_char_distance_to_coordinates $PLAYER_actor pos -103.7084 -22.2458 1000.7187 radius 2.5
+        then
+            progress = 0
+        end
+    end
+return
+
+:Text_box_remove
+if or
+    0A2A:   text_box 'FLWRQA1' displayed
+    0A2A:   text_box 'donat2' displayed
+then
+    03E6: remove_text_box
+end
+return

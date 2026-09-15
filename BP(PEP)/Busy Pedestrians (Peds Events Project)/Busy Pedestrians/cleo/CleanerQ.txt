@@ -1,0 +1,147 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE ini}
+
+0000: NOP
+
+script_name "WshIQa"
+
+// By ArtemQa146
+
+const
+    Chef_1 = 31@
+    obj_1 = 30@
+    Ped_ID = 28@
+    render_obj = 0@
+end
+
+if
+    0E4D: random_percent 50
+then
+else
+    repeat
+    wait 0
+    0AAA: 1@ = get_script_struct_named 'JFUD'
+    until 1@ == 0
+    0A93: terminate_this_custom_script
+end
+
+Ped_ID = 155
+
+            if or
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 372.4044 -70.5814 1001.5078 radius 30.0 // Burger
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 374.919 -123.8423 1001.4995 radius 30.0 // Pizza
+            then
+                if 0EEA: locate_char_distance_to_coordinates $player_actor pos 372.4044 -70.5814 1001.5078 radius 30.0 // Burger
+                then gosub @Burger_coords
+                end
+                if 0EEA: locate_char_distance_to_coordinates $player_actor pos 374.919 -123.8423 1001.4995 radius 30.0 // Pizza
+                then gosub @Pizza_coords
+                end
+
+                repeat
+                wait 0
+                04ED: load_animation  "PedEventsMod"
+                until 04EE:   animation "PedEventsMod" loaded
+
+                model.Load(Ped_ID)
+                if
+                    not model.Available(Ped_ID)
+                then
+                    repeat
+                    wait 0
+                    model.Load(Ped_ID)
+                    until model.Available(Ped_ID)
+                end
+                038B: load_requested_models
+
+                if 0EEA: locate_char_distance_to_coordinates $player_actor pos 372.4044 -70.5814 1001.5078 radius 30.0 // Burger
+                then
+                    0209: 1@ = random_int_in_ranges 1 3
+                    if 1@ == 1
+                    then
+                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 366.7459 -66.6893 1001.5078
+                        0173: set_actor Chef_1 Z_angle_to 290.0
+                    else
+                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 372.5242 -66.8011 1001.5151
+                        0173: set_actor Chef_1 Z_angle_to 347.9136
+                    end
+                else
+                    0209: 1@ = random_int_in_ranges 1 3
+                    if 1@ == 1
+                    then
+                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 370.4476 -126.3726 1001.4922
+                        0173: set_actor Chef_1 Z_angle_to 16.0
+                    else
+                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 369.8573 -127.8798 1001.4922
+                        0173: set_actor Chef_1 Z_angle_to 154.6648
+                    end
+                end
+                0F02: create_render_object_to_char_bone_from_special Chef_1 special_model render_obj bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                0605: actor Chef_1 perform_animation "SWEEP" IFP "PedEventsMod" framedelta 100.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                0E24: fix_char Chef_1 ground 1 brightness 1 and_fade_in 0
+                077E: get_active_interior_to 1@
+                0860: link_actor Chef_1 to_interior 1@
+
+                model.Destroy(Ped_ID)
+
+                repeat
+                wait 0
+                if
+                    056D:   actor Chef_1 defined
+                then
+                    080E: get_actor Chef_1 ped_event_to 1@
+                    if or
+                        051A:   actor Chef_1 damaged_by_actor $PLAYER_ACTOR
+                        0118:   actor Chef_1 dead
+                        1@ == 49
+                        1@ == 9
+                        1@ == 15
+                        1@ == 31
+                        1@ == 59
+                    then
+                        01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                        repeat
+                        wait 0
+                        0AAA: 1@ = get_script_struct_named 'JFUD'
+                        until 1@ == 0
+                        break
+                    end
+
+                    if
+                        0457:   player $PLAYER_CHAR aiming_at_actor Chef_1
+                    then
+                        0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                        0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                        if or
+                            2@ == 1 // Огнестрельное оружие
+                            2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                        then
+                            01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                            repeat
+                            wait 0
+                            0AAA: 1@ = get_script_struct_named 'JFUD'
+                            until 1@ == 0
+                            break
+                        end
+                    end
+
+                end
+                0AAA: 1@ = get_script_struct_named 'JFUD'
+                until 1@ == 0
+
+                if 056D:   actor Chef_1 defined
+                then 009B: destroy_actor Chef_1
+                end
+                04EF: release_animation "PedEventsMod"
+            end
+
+0A93: terminate_this_custom_script
+
+:Burger_coords
+0AF0: Ped_ID = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Improved interiors" key "Cleaner BURGER PED ID"
+return
+
+:Pizza_coords
+0AF0: Ped_ID = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Improved interiors" key "Cleaner PIZZA PED ID"
+return

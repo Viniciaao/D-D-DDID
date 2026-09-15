@@ -1,0 +1,234 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE Audio}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "ARMWQA"
+
+// By ArtemQa146
+
+const
+    man_1 = 31@
+    man_2 = 30@
+    progress = 25@
+    coords_x = 24@
+    coords_y = 23@
+    coords_z = 22@
+    angle_1 = 21@
+end
+
+0087: coords_x = 0@ // (float)
+0087: coords_y = 1@ // (float)
+0087: coords_z = 2@ // (float)
+0087: angle_1 = 3@ // (float)
+
+
+if
+    0E4D: random_percent 4@
+then
+else
+    repeat
+    wait 0
+    until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 150.0
+    0A93: terminate_this_custom_script
+end
+
+
+        repeat
+        wait 0
+        04ED: load_animation  "PedEventsMod"
+        until 04EE:   animation "PedEventsMod" loaded
+
+        model.Load(22)
+        model.Load(21)
+        if
+            not model.Available(22)
+        then
+            repeat
+            wait 0
+            model.Load(22)
+            until model.Available(22)
+        end
+        if
+            not model.Available(21)
+        then
+            repeat
+            wait 0
+            model.Load(21)
+            until model.Available(21)
+        end
+        038B: load_requested_models
+
+        009A: man_1 = create_actor_pedtype 21 model 22 at coords_x coords_y coords_z
+        0173: set_actor man_1 Z_angle_to angle_1
+        0E24: fix_char man_1 ground 1 brightness 1 and_fade_in 0
+        0812: AS_actor man_1 perform_animation "armw_idle" IFP "PedEventsMod" framedelta 8.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+        04C4: store_coords_to 1@ 2@ 3@ from_actor man_1 with_offset 0.2 1.15 0.0
+        009A: man_2 = create_actor_pedtype 21 model 21 at 1@ 2@ 3@
+        angle_1 += 180.0
+        0173: set_actor man_2 Z_angle_to angle_1
+        0E24: fix_char man_2 ground 1 brightness 1 and_fade_in 0
+        0812: AS_actor man_2 perform_animation "armw_idle" IFP "PedEventsMod" framedelta 8.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+
+        model.Destroy(22)
+        model.Destroy(21)
+
+        timera = 0
+
+        wait 300
+
+        repeat
+        wait 0
+        if and
+            056D:   actor man_1 defined
+            056D:   actor man_2 defined
+        then
+
+            080E: get_actor man_1 ped_event_to 1@
+            if or
+                0118:   actor man_1 dead
+                not locate_char_distance_to_char $player_actor char man_1 radius 150.0
+                not $ACTIVE_INTERIOR == 0
+                051A:   actor man_1 damaged_by_actor $PLAYER_ACTOR
+                not is_char_script_controlled man_1
+                1@ == 49
+                1@ == 9
+            then
+                break
+            end
+
+            080E: get_actor man_2 ped_event_to 1@
+            if or
+                0118:   actor man_2 dead
+                not locate_char_distance_to_char $player_actor char man_2 radius 150.0
+                051A:   actor man_2 damaged_by_actor $PLAYER_ACTOR
+                not is_char_script_controlled man_2
+                1@ == 49
+                1@ == 9
+            then
+                break
+            end
+            
+            080E: get_actor man_1 ped_event_to 1@
+            080E: get_actor man_2 ped_event_to 2@
+            if or
+                1@ == 15
+                1@ == 31
+                1@ == 59
+                2@ == 15
+                2@ == 31
+                2@ == 59
+            then
+                break
+            end
+            
+            if or
+                0457:   player $PLAYER_CHAR aiming_at_actor man_1
+                0457:   player $PLAYER_CHAR aiming_at_actor man_2
+            then
+                0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                if or
+                    2@ == 1 // Огнестрельное оружие
+                    2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                then
+                    break
+                end
+            end
+
+
+            if
+                0EE4: locate_char_distance_to_char $PLAYER_ACTOR char man_1 radius 15.0
+            then
+                if and
+                    progress == 0
+                    timerb > 5000
+                    02CB:   actor man_1 bounding_sphere_visible
+                then
+                    0209: 4@ = random_int_in_ranges 1 3
+                    if 4@ == 1
+                    then gosub @Win_1
+                    else gosub @fail_1
+                    end
+                    if 4@ == 1
+                    then gosub @fail_2
+                    else gosub @Win_2
+                    end
+                    timerb = 0
+                    progress = 1
+                end
+            else
+                timerb = 0
+            end
+            
+            if
+                progress == 1
+            then
+                0EFF: get_char_simplest_active_task man_1 id_to 1@ pointer_to 2@
+                if
+                    1@ == 203
+                then
+                    break
+                end
+            end
+
+
+        else
+            break
+        end
+
+        until not player.Defined(0)
+
+            if 056D:   actor man_1 defined
+            then 01C2: remove_references_to_actor man_1 // Like turning an actor into a random pedestrian
+            end
+            if 056D:   actor man_2 defined
+            then 01C2: remove_references_to_actor man_2 // Like turning an actor into a random pedestrian
+            end
+        04EF: release_animation "PedEventsMod"
+
+        repeat
+        wait 0
+        until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
+
+0A93: terminate_this_custom_script
+
+:Win_1
+0615: define_AS_pack_begin 1@
+0812: AS_actor -1 perform_animation "armw_idle_w" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+0812: AS_actor -1 perform_animation "armw_celeb" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+0616: define_AS_pack_end 1@
+0618: assign_actor man_1 to_AS_pack 1@
+061B: remove_references_to_AS_pack 1@
+return
+
+:Win_2
+0615: define_AS_pack_begin 1@
+0812: AS_actor -1 perform_animation "armw_idle_w" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+0812: AS_actor -1 perform_animation "armw_celeb" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+0616: define_AS_pack_end 1@
+0618: assign_actor man_2 to_AS_pack 1@
+061B: remove_references_to_AS_pack 1@
+return
+
+:fail_1
+0615: define_AS_pack_begin 2@
+0812: AS_actor -1 perform_animation "armw_idle_f" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+0812: AS_actor -1 perform_animation "armw_fail" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+0616: define_AS_pack_end 2@
+0618: assign_actor man_1 to_AS_pack 2@
+061B: remove_references_to_AS_pack 2@
+return
+
+:fail_2
+0615: define_AS_pack_begin 2@
+0812: AS_actor -1 perform_animation "armw_idle_f" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+0812: AS_actor -1 perform_animation "armw_fail" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 1 lockY 1 lockF 0 time -1
+0616: define_AS_pack_end 2@
+0618: assign_actor man_2 to_AS_pack 2@
+061B: remove_references_to_AS_pack 2@
+return

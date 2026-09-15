@@ -1,0 +1,155 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "FdSellq"
+
+// By ArtemQa146
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Food Vendor Animation"
+if
+    0@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
+const
+    ped_Vend = 0@
+    Vend_Obj = 31@
+end
+
+
+// ЧТобы лишний раз не считывать из ини, помещаем модели в переменные
+//0AF0: Render_Model_Eat1 = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "Eat1"
+//0AF0: Render_Model_Eat2 = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "Eat2"
+//0AF0: Render_Model_Dog = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "dog"
+//0AF0: Render_Model_Ice = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "ice"
+//0AF0: Render_Model_China = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "ChinaEat"
+//0AF0: Render_Model_Chicken = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "chicken"
+//0AF0: Render_Model_Donut = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "donut"
+
+while true
+wait 200
+    if
+        player.Defined(0)
+    then
+
+
+        0AAA: 1@ = get_script_struct_named 'FODVEND'
+        if
+            1@ > 0 // Если игровой скрипт запущен, т.е. продавец стоит
+        then
+            0D2F: ped_Vend = get_script 1@ var 2
+            0D2F: Vend_Obj = get_script 1@ var 0
+            if
+                056D:   actor ped_Vend defined
+            then
+            
+                080E: get_actor ped_Vend ped_event_to 1@
+                if or
+                    051A:   actor ped_Vend damaged_by_actor $PLAYER_ACTOR
+                    1@ == 49
+                    1@ == 9
+                then
+                    0687: clear_actor ped_Vend task
+                    wait 5000
+                    continue
+                end
+
+                if
+                    0457:   player $PLAYER_CHAR aiming_at_actor ped_Vend
+                then
+                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                    if or
+                        2@ == 1 // Огнестрельное оружие
+                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                    then
+                        0687: clear_actor ped_Vend task
+                        wait 5000
+                        continue
+                    end
+                end
+            
+                0EFF: get_char_simplest_active_task ped_Vend id_to 1@ pointer_to 2@
+                if and
+                    0E0A: is_char_script_controlled ped_Vend
+                    1@ == 203
+                then
+                    repeat
+                    wait 0
+                    04ED: load_animation  "PedEventsMod"
+                    until 04EE:   animation "PedEventsMod" loaded
+                    
+                    if
+                        03CA:   object Vend_Obj exists
+                    then
+                        0984: 1@ = object Vend_Obj model
+                        if
+                            1@ == 1341
+                        then
+                            0400: store_coords_to 1@ 2@ 3@ from_object Vend_Obj with_offset -0.7 -0.3 -1.0
+                            00A1: put_actor ped_Vend at 1@ 2@ 3@
+                            0E24: fix_char ped_Vend ground 1 brightness 1 and_fade_in 0
+                            0605: actor ped_Vend perform_animation "vend_p_3" IFP "PedEventsMod" framedelta 1000.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                        else
+                            0605: actor ped_Vend perform_animation "vend_p_1" IFP "PedEventsMod" framedelta 1000.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                        end
+                    end
+
+                    04EF: release_animation "PedEventsMod"
+                    wait 500
+                    continue
+                end
+                
+                if and
+                    0E0A: is_char_script_controlled ped_Vend
+                    1@ == 401
+                then
+                    if and
+                        0EE4: locate_char_distance_to_char $player_actor char ped_Vend radius 5.0
+                        0611:   actor $player_actor performing_animation "VEND_EAT1_P"
+                    then
+                        if or
+                            0611:   actor ped_Vend performing_animation "vend_p_1"
+                            0611:   actor ped_Vend performing_animation "vend_p_3"
+                        then
+                            if
+                                03CA:   object Vend_Obj exists
+                            then
+                                0984: 1@ = object Vend_Obj model
+                                if
+                                    1@ == 1341
+                                then
+                                    0615: define_AS_pack_begin 1@
+                                    0812: AS_actor -1 perform_animation "vend_p_2" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                                    0812: AS_actor -1 perform_animation "vend_p_3" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                                    0616: define_AS_pack_end 1@
+                                    0618: assign_actor ped_Vend to_AS_pack 1@
+                                    061B: remove_references_to_AS_pack 1@
+                                else
+                                    0615: define_AS_pack_begin 1@
+                                    0812: AS_actor -1 perform_animation "vend_p_2" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                                    0812: AS_actor -1 perform_animation "vend_p_1" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                                    0616: define_AS_pack_end 1@
+                                    0618: assign_actor ped_Vend to_AS_pack 1@
+                                    061B: remove_references_to_AS_pack 1@
+                                end
+                                wait 5000
+                                continue
+                            end
+                        end
+                    end
+                end
+                
+            end
+        end
+
+    end
+end
+
+
+

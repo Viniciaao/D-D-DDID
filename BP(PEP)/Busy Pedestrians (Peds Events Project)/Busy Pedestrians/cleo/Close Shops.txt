@@ -1,0 +1,121 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "CLOSESH"
+
+// By ArtemQa146
+
+const
+    Chef_1 = 31@
+    event = 29@
+    coords_x = 28@
+    coords_y = 27@
+    coords_z = 26@
+    angle_1 = 25@
+end
+
+
+                0087: coords_x = 0@ // (float)
+                0087: coords_y = 1@ // (float)
+                0087: coords_z = 2@ // (float)
+                0087: angle_1 = 3@ // (float)
+
+                repeat
+                wait 0
+                04ED: load_animation  "PedEventsMod"
+                until 04EE:   animation "PedEventsMod" loaded
+
+                0376: Chef_1 = create_random_actor_at coords_x coords_y coords_z
+                0173: set_actor Chef_1 Z_angle_to angle_1
+
+                0812: AS_actor Chef_1 perform_animation "Stand_1" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                0E24: fix_char Chef_1 ground 1 brightness 1 and_fade_in 0
+                
+                timera = 0
+                event = 0
+
+                repeat
+                wait 0
+                if
+                    056D:   actor Chef_1 defined
+                then
+
+
+                    080E: get_actor Chef_1 ped_event_to 1@
+                    if or
+                        051A:   actor Chef_1 damaged_by_actor $PLAYER_ACTOR
+                        0118:   actor Chef_1 dead
+                        1@ == 49
+                        1@ == 9
+                        1@ == 15
+                        1@ == 31
+                        1@ == 59
+                        timera > 120000
+                    then
+                        break
+                    end
+
+                    if or
+                        0118:   actor Chef_1 dead
+                        not locate_char_distance_to_char $player_actor char Chef_1 radius 100.0
+                        not $ACTIVE_INTERIOR == 0
+                        051A:   actor Chef_1 damaged_by_actor $PLAYER_ACTOR
+                        not is_char_script_controlled Chef_1
+                    then
+                        break
+                    end
+
+                    if
+                        0457:   player $PLAYER_CHAR aiming_at_actor Chef_1
+                    then
+                        0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                        0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                        if or
+                            2@ == 1 // Огнестрельное оружие
+                            2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                        then
+                            break
+                        end
+                    end
+                    
+                    if and
+                        event == 0
+                        0611:   actor Chef_1 performing_animation "Stand_1"
+                        02CB:   actor Chef_1 bounding_sphere_visible
+                        locate_char_distance_to_char $player_actor char Chef_1 radius 30.0
+                    then
+                        0812: AS_actor Chef_1 perform_animation "DicePlayW" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        event = 1
+                        timera = 0
+                    end
+                    
+                    if and
+                        event == 1
+                        timera > 2000
+                    then
+                        if
+                            8611:   not actor Chef_1 performing_animation "DicePlayW"
+                        then
+                            break
+                        end
+                    end
+
+                end
+                until not player.Defined(0)
+
+                if 056D:   actor Chef_1 defined
+                then 01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                end
+                04EF: release_animation "PedEventsMod"
+                
+                wait 120000
+
+                repeat
+                wait 0
+                until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
+
+0A93: terminate_this_custom_script

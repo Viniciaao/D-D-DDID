@@ -1,0 +1,293 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE ini}
+
+0000: NOP
+
+script_name "AmmoQa"
+
+// By ArtemQa146
+
+const
+    Chef_1 = 31@
+    obj_1 = 30@
+    weapon_hand = 29@
+    Ped_ID = 28@
+    render_obj = 0@
+end
+
+
+            Ped_ID = 155
+            
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+
+            if or
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 293.0401 -33.9067 1001.5156 radius 35.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 290.8328 -106.983 1001.5156 radius 35.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 284.0545 -78.9696 1001.5156 radius 35.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 312.383 -162.5572 999.5937 radius 35.0
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 309.1998 -135.6733 999.6016 radius 35.0
+            then
+                
+                0209: 1@ = random_int_in_ranges 1 6
+                if 1@ == 1
+                then Ped_ID = 20
+                end
+                if 1@ == 2
+                then Ped_ID = 22
+                end
+                if 1@ == 3
+                then Ped_ID = 43
+                end
+                if 1@ == 4
+                then Ped_ID = 48
+                end
+                if 1@ == 5
+                then Ped_ID = 60
+                end
+                
+                0209: 1@ = random_int_in_ranges 1 6
+                if 1@ == 1
+                then render_obj = 346 // colt
+                end
+                if 1@ == 2
+                then render_obj = 349 // shotgun
+                end
+                if 1@ == 3
+                then render_obj = 342 // grenade
+                end
+                if 1@ == 4
+                then render_obj = 352 // uzi
+                end
+                if 1@ == 5
+                then render_obj = 356 // m4
+                end
+
+                model.Load(Ped_ID)
+                if
+                    not model.Available(Ped_ID)
+                then
+                    repeat
+                    wait 0
+                    model.Load(Ped_ID)
+                    until model.Available(Ped_ID)
+                end
+                model.Load(render_obj)
+                if
+                    not model.Available(render_obj)
+                then
+                    repeat
+                    wait 0
+                    model.Load(render_obj)
+                    until model.Available(render_obj)
+                end
+                038B: load_requested_models
+
+                if and
+                    $ACTIVE_INTERIOR == 1
+                    0EEA: locate_char_distance_to_coordinates $player_actor pos 293.0401 -33.9067 1001.5156 radius 35.0
+                then
+                    0209: 1@ = random_int_in_ranges 1 4
+                    if 1@ == 1
+                    then
+                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 293.7193 -34.7265 1001.5156
+                        0173: set_actor Chef_1 Z_angle_to 269.0325
+                    end
+                    if 1@ == 2
+                    then
+                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 288.6927 -35.0115 1001.5156
+                        0173: set_actor Chef_1 Z_angle_to 272.3224
+                    end
+                    if 1@ == 3
+                    then
+                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 290.9472 -34.0708 1001.5156
+                        0173: set_actor Chef_1 Z_angle_to 88.8642
+                    end
+                else
+                    if and
+                        $ACTIVE_INTERIOR == 6
+                        0EEA: locate_char_distance_to_coordinates $player_actor pos 290.8328 -106.983 1001.5156 radius 35.0
+                    then
+                        0209: 1@ = random_int_in_ranges 1 4
+                        if 1@ == 1
+                        then
+                            009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 290.4595 -106.5919 1001.5156
+                            0173: set_actor Chef_1 Z_angle_to 355.5133
+                        end
+                        if 1@ == 2
+                        then
+                            009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 296.7166 -105.0948 1001.5156
+                            0173: set_actor Chef_1 Z_angle_to 268.0925
+                        end
+                        if 1@ == 3
+                        then
+                            009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 293.1848 -109.84 1001.5156
+                            0173: set_actor Chef_1 Z_angle_to 176.4417
+                        end
+                    else
+                        if and
+                            $ACTIVE_INTERIOR == 4
+                            0EEA: locate_char_distance_to_coordinates $player_actor pos 290.5959 -75.831 1001.5156 radius 35.0
+                        then
+                            0209: 1@ = random_int_in_ranges 1 4
+                            if 1@ == 1
+                            then
+                                009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 287.7159 -74.4522 1001.5156
+                                0173: set_actor Chef_1 Z_angle_to 177.2249
+                            end
+                            if 1@ == 2
+                            then
+                                009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 287.4051 -73.1792 1001.5156
+                                0173: set_actor Chef_1 Z_angle_to 358.3333
+                            end
+                            if 1@ == 3
+                            then
+                                009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 291.4313 -84.9814 1001.5156
+                                0173: set_actor Chef_1 Z_angle_to 272.7926
+                            end
+                        else
+                            if and
+                            $ACTIVE_INTERIOR == 6
+                            0EEA: locate_char_distance_to_coordinates $player_actor pos 312.383 -162.5572 999.5937 radius 35.0
+                            then
+                                0209: 1@ = random_int_in_ranges 1 4
+                                if 1@ == 1
+                                then
+                                    009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 310.9096 -166.1415 999.601
+                                    0173: set_actor Chef_1 Z_angle_to 183.6485
+                                end
+                                if 1@ == 2
+                                then
+                                    009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 308.9958 -161.9884 999.5937
+                                    0173: set_actor Chef_1 Z_angle_to 268.3825
+                                end
+                                if 1@ == 3
+                                then
+                                    009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 318.0497 -160.0435 999.5937
+                                    0173: set_actor Chef_1 Z_angle_to 274.6493
+                                end
+                            else
+                                if and
+                                $ACTIVE_INTERIOR == 7
+                                0EEA: locate_char_distance_to_coordinates $player_actor pos 309.1998 -135.6733 999.6016 radius 35.0
+                                then
+                                    0209: 1@ = random_int_in_ranges 1 4
+                                    if 1@ == 1
+                                    then
+                                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 309.1998 -135.6733 999.6016
+                                        0173: set_actor Chef_1 Z_angle_to 5.2267
+                                    end
+                                    if 1@ == 2
+                                    then
+                                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 308.8471 -137.0485 999.6016
+                                        0173: set_actor Chef_1 Z_angle_to 178.7917
+                                    end
+                                    if 1@ == 3
+                                    then
+                                        009A: Chef_1 = create_actor_pedtype 4 model Ped_ID at 314.2539 -133.1313 999.6016
+                                        0173: set_actor Chef_1 Z_angle_to 270.5758
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                0E2E: create_render_object_to_char_bone Chef_1 model render_obj bone 24 offset 0 0 0 rotation 0 0 0 store_to weapon_hand
+                if render_obj == 346
+                then 0605: actor Chef_1 perform_animation "Pistol_Idle" IFP "PedEventsMod" framedelta 100.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                end
+                if render_obj == 349
+                then 0605: actor Chef_1 perform_animation "Shotgun_Idle" IFP "PedEventsMod" framedelta 100.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                end
+                if render_obj == 352
+                then 0605: actor Chef_1 perform_animation "UZI_Idle" IFP "PedEventsMod" framedelta 100.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                end
+                if render_obj == 356
+                then 0605: actor Chef_1 perform_animation "Rifle_Idle" IFP "PedEventsMod" framedelta 100.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                end
+                if render_obj == 342
+                then 0605: actor Chef_1 perform_animation "grenade_Idle" IFP "PedEventsMod" framedelta 100.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                end
+
+                0E24: fix_char Chef_1 ground 1 brightness 1 and_fade_in 0
+                077E: get_active_interior_to 1@
+                0860: link_actor Chef_1 to_interior 1@
+
+                model.Destroy(Ped_ID)
+                model.Destroy(render_obj)
+
+                repeat
+                wait 0
+                if
+                    056D:   actor Chef_1 defined
+                then
+                    
+                    if
+                        051A:   actor Chef_1 damaged_by_actor $PLAYER_ACTOR
+                    then
+                        0E31: set_render_object_visible weapon_hand 0
+                        01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                        if 056D:   actor Chef_1 defined
+                        then 05E2: AS_actor Chef_1 kill_actor $PLAYER_ACTOR
+                        end
+                        repeat
+                        wait 0
+                        0AAA: 1@ = get_script_struct_named 'AMUNAT'
+                        until 1@ == 0
+                        break
+                    end
+
+                    if
+                        0457:   player $PLAYER_CHAR aiming_at_actor Chef_1
+                    then
+                        0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                        0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                        if or
+                            2@ == 1 // Огнестрельное оружие
+                            2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                        then
+                            0E31: set_render_object_visible weapon_hand 0
+                            01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                            if 056D:   actor Chef_1 defined
+                            then 05E2: AS_actor Chef_1 kill_actor $PLAYER_ACTOR
+                            end
+                            repeat
+                            wait 0
+                            0AAA: 1@ = get_script_struct_named 'AMUNAT'
+                            until 1@ == 0
+                            break
+                        end
+                    end
+                    
+                    080E: get_actor Chef_1 ped_event_to 1@
+                    if or
+                        0118:   actor Chef_1 dead
+                        1@ == 49
+                        1@ == 9
+                    then
+                        0E31: set_render_object_visible weapon_hand 0
+                        01C2: remove_references_to_actor Chef_1 // Like turning an actor into a random pedestrian
+                        repeat
+                        wait 0
+                        0AAA: 1@ = get_script_struct_named 'AMUNAT'
+                        until 1@ == 0
+                        break
+                    end
+
+                end
+                0AAA: 1@ = get_script_struct_named 'AMUNAT'
+                until 1@ == 0
+
+                if 056D:   actor Chef_1 defined
+                then 009B: destroy_actor Chef_1
+                end
+            end
+            
+            04EF: release_animation "PedEventsMod"
+
+0A93: terminate_this_custom_script
+

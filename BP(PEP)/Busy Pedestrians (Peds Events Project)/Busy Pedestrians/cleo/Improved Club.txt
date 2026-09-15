@@ -1,0 +1,871 @@
+{$CLEO .qa}
+{$USE CLEO+}
+{$USE ini}
+
+0000: NOP
+
+script_name "ImClub"
+
+// By ArtemQa146
+
+const
+    Ped_1 = 29@
+    Ped_2 = 28@
+    Ped_3 = 27@
+    Ped_4 = 22@
+    Interior_active = 26@
+    Spanner = 25@
+    Sponge = 24@
+    Broom = 23@
+    dj_panel = 21@
+end
+
+0085: Spanner = 0@ // (int)
+0085: Sponge = 1@ // (int)
+0085: Broom = 2@ // (int)
+    
+        // strip
+        0AAA: 1@ = get_script_struct_named "STRIPW"
+        0E40: get_current_hour 2@
+        077E: get_active_interior_to 3@
+        if and
+            1@ > 0
+            2@ >= 7
+            2@ < 18
+            not 3@ == 0
+        then
+            if and
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 1212.697 -5.388 1000.9219 radius 50.0
+                30@ == false
+            then
+                016A: fade 0 time 0
+                wait 100
+                31@ = 0
+                while 0EA7: get_any_char_no_save_recursive 31@ progress_to 31@ char_to 0@
+                    if
+                        0EE4: locate_char_distance_to_char $player_actor char 0@ radius 50.0
+                    then
+                        if
+                            803B:   not $player_actor == 0@  // (int)
+                        then
+                            04C4: store_coords_to 1@ 2@ 3@ from_actor 0@ with_offset 0.0 0.0 70.0
+                            00A1: put_actor 0@ at 1@ 2@ 3@
+                            0575: set_actor 0@ pinned_position 1
+                        end
+                    end
+                end
+                016A: fade 1 time 1000
+                
+                30@ = true
+                077E: get_active_interior_to Interior_active
+
+                if
+                    Interior_active == 2
+                then
+                
+                    repeat
+                    wait 0
+                    04ED: load_animation  "PedEventsMod"
+                    until 04EE:   animation "PedEventsMod" loaded
+
+                    model.Load(171)
+                    model.Load(172)
+                    model.Load(11)
+                    if
+                        not model.Available(171)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(171)
+                        until model.Available(171)
+                    end
+                    if
+                        not model.Available(172)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(172)
+                        until model.Available(172)
+                    end
+                    if
+                        not model.Available(11)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(11)
+                        until model.Available(11)
+                    end
+                    038B: load_requested_models
+
+                    009A: Ped_1 = create_actor_pedtype 21 model 171 at 1210.4847 0.3054 1000.9219
+                    0E24: fix_char Ped_1 ground 1 brightness 0 and_fade_in 0
+                    0173: set_actor Ped_1 Z_angle_to 270.0
+                
+                    009A: Ped_2 = create_actor_pedtype 21 model 172 at 1216.1235 -6.2494 1001.3281
+                    0E24: fix_char Ped_2 ground 1 brightness 0 and_fade_in 0
+                    0173: set_actor Ped_2 Z_angle_to 93.2176
+
+                    009A: Ped_3 = create_actor_pedtype 21 model 11 at 1210.7271 -15.6963 1000.9219
+                    0E24: fix_char Ped_3 ground 1 brightness 0 and_fade_in 0
+                    0173: set_actor Ped_3 Z_angle_to 186.0
+                
+                    009A: Ped_4 = create_actor_pedtype 21 model 171 at 1216.5581 6.9456 1000.9219
+                    0E24: fix_char Ped_4 ground 1 brightness 0 and_fade_in 0
+                    0173: set_actor Ped_4 Z_angle_to 47.9172
+                
+                    0860: link_actor Ped_1 to_interior Interior_active
+                    0860: link_actor Ped_2 to_interior Interior_active
+                    0860: link_actor Ped_3 to_interior Interior_active
+                    0860: link_actor Ped_4 to_interior Interior_active
+                
+                    0F02: create_render_object_to_char_bone_from_special Ped_1 special_model Broom bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                    0F02: create_render_object_to_char_bone_from_special Ped_2 special_model Broom bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                    0F02: create_render_object_to_char_bone_from_special Ped_3 special_model Sponge bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                
+                    model.Destroy(171)
+                    model.Destroy(172)
+                    model.Destroy(11)
+                
+                    0605: actor Ped_1 perform_animation "SWEEP" IFP "PedEventsMod" framedelta 2.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                    0605: actor Ped_2 perform_animation "SWEEP" IFP "PedEventsMod" framedelta 2.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                    0605: actor Ped_3 perform_animation "WASH" IFP "PedEventsMod" framedelta 2.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                    0605: actor Ped_4 perform_animation "REPAIR_2" IFP "PedEventsMod" framedelta 2.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+                
+                    wait 100
+
+                    repeat
+                    wait 0
+                    
+                    if and
+                        056D:   actor Ped_1 defined
+                        056D:   actor Ped_2 defined
+                        056D:   actor Ped_3 defined
+                        056D:   actor Ped_4 defined
+                    then
+                    else
+                        repeat
+                        wait 0
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+                        break
+                    end
+
+                    0EFF: get_char_simplest_active_task Ped_1 id_to 1@ pointer_to 2@
+                    if and
+                        1@ == 203
+                        timera > 2000
+                        8611:   not actor Ped_1 performing_animation "SWEEP"
+                    then
+                        0209: 1@ = random_int_in_ranges 1 6
+                        if 1@ == 1
+                        then 0804: AS_actor Ped_1 walk_to 1210.4847 0.3054 1000.9219 angle 90.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 2
+                        then 0804: AS_actor Ped_1 walk_to 1210.63 -4.3238 1000.9219 angle 180.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 3
+                        then 0804: AS_actor Ped_1 walk_to 1210.7566 -8.5428 1000.9219 angle 270.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 4
+                        then 0804: AS_actor Ped_1 walk_to 1209.4469 -12.1008 1000.9219 angle 0.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 5
+                        then 0804: AS_actor Ped_1 walk_to 1213.9277 0.3677 1000.9219 angle 0.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        timera = 0
+                    end
+
+                    0EFF: get_char_simplest_active_task Ped_2 id_to 1@ pointer_to 2@
+                    if and
+                        1@ == 203
+                        timera > 2000
+                        8611:   not actor Ped_2 performing_animation "SWEEP"
+                    then
+                        0209: 1@ = random_int_in_ranges 1 3
+                        if 1@ == 1
+                        then 0804: AS_actor Ped_2 walk_to 1216.1235 -6.2494 1001.3281 angle 90.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 2
+                        then 0804: AS_actor Ped_2 walk_to 1222.0422 -6.6503 1001.3281 angle 270.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        timera = 0
+                    end
+                
+                    0EFF: get_char_simplest_active_task Ped_3 id_to 1@ pointer_to 2@
+                    if and
+                        1@ == 203
+                        timera > 2000
+                        8611:   not actor Ped_3 performing_animation "WASH"
+                    then
+                        0209: 1@ = random_int_in_ranges 1 4
+                        if 1@ == 1
+                        then 0804: AS_actor Ped_3 walk_to 1210.7271 -15.6963 1000.9219 angle 186.0 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 2
+                        then 0804: AS_actor Ped_3 walk_to 1216.819 -15.4786 1000.9219 angle 186.0 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 3
+                        then 0804: AS_actor Ped_3 walk_to 1214.361 -15.2629 1000.9219 angle 4.0 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        timera = 0
+                    end
+                
+                    if timera > 3000
+                    then timera = 0
+                    end
+                    
+                    if or
+                        0457:   player $PLAYER_CHAR aiming_at_actor Ped_1
+                        0457:   player $PLAYER_CHAR aiming_at_actor Ped_2
+                        0457:   player $PLAYER_CHAR aiming_at_actor Ped_3
+                        0457:   player $PLAYER_CHAR aiming_at_actor Ped_4
+                    then
+                        0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                        0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                        if or
+                            2@ == 1 // Огнестрельное оружие
+                            2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                        then
+                            01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                            01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+                            01C2: remove_references_to_actor Ped_3 // Like turning an actor into a random pedestrian
+                            01C2: remove_references_to_actor Ped_4 // Like turning an actor into a random pedestrian
+
+                            repeat
+                            wait 0
+
+                            077E: get_active_interior_to 1@
+                            until 803B:   not Interior_active == 1@  // (int)
+                            break
+                        end
+                    end
+                    
+                    080E: get_actor ped_1 ped_event_to 1@
+                    080E: get_actor ped_2 ped_event_to 2@
+                    if or
+                        1@ == 15
+                        1@ == 31
+                        1@ == 59
+                        2@ == 15
+                        2@ == 31
+                        2@ == 59
+                    then
+                        01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_3 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_4 // Like turning an actor into a random pedestrian
+
+                        repeat
+                        wait 0
+
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+                    end
+                    
+                    080E: get_actor ped_3 ped_event_to 1@
+                    080E: get_actor ped_4 ped_event_to 2@
+                    if or
+                        1@ == 15
+                        1@ == 31
+                        1@ == 59
+                        2@ == 15
+                        2@ == 31
+                        2@ == 59
+                    then
+                        01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_3 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_4 // Like turning an actor into a random pedestrian
+
+                        repeat
+                        wait 0
+
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+                    end
+                    
+                    080E: get_actor Ped_1 ped_event_to 1@
+                    080E: get_actor Ped_2 ped_event_to 2@
+                    080E: get_actor Ped_3 ped_event_to 3@
+                    if or
+                        1@ == 49
+                        1@ == 9
+                        2@ == 49
+                        2@ == 9
+                        3@ == 49
+                        3@ == 9
+                    then
+                        01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_3 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_4 // Like turning an actor into a random pedestrian
+
+                        repeat
+                        wait 0
+
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+                        break
+                    end
+                
+                    080E: get_actor Ped_4 ped_event_to 1@
+                    if or
+                        051A:   actor Ped_1 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor Ped_2 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor Ped_3 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor Ped_4 damaged_by_actor $PLAYER_ACTOR
+                        1@ == 49
+                        1@ == 9
+                    then
+                        01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_3 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_4 // Like turning an actor into a random pedestrian
+                    
+                        repeat
+                        wait 0
+                    
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+                    
+                        break
+                    end
+                
+                    077E: get_active_interior_to 1@
+                    until 803B:   not Interior_active == 1@  // (int)
+                
+                    04EF: release_animation "PedEventsMod"
+
+                    if 056D:   actor Ped_1 defined
+                    then 009B: destroy_actor Ped_1
+                    end
+                    if 056D:   actor Ped_2 defined
+                    then 009B: destroy_actor Ped_2
+                    end
+                    if 056D:   actor Ped_3 defined
+                    then 009B: destroy_actor Ped_3
+                    end
+                    if 056D:   actor Ped_4 defined
+                    then 009B: destroy_actor Ped_4
+                    end
+                    
+                else
+                
+                    repeat
+                    wait 0
+                    04ED: load_animation  "PedEventsMod"
+                    until 04EE:   animation "PedEventsMod" loaded
+
+                    model.Load(172)
+                    model.Load(11)
+                    if
+                        not model.Available(11)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(11)
+                        until model.Available(11)
+                    end
+                    if
+                        not model.Available(172)
+                    then
+                        repeat
+                        wait 0
+                        model.Load(172)
+                        until model.Available(172)
+                    end
+                    038B: load_requested_models
+
+                    009A: Ped_1 = create_actor_pedtype 21 model 11 at 1208.8704 -32.0575 1000.9531
+                    0E24: fix_char Ped_1 ground 1 brightness 0 and_fade_in 0
+                    0173: set_actor Ped_1 Z_angle_to 270.0
+
+                    009A: Ped_2 = create_actor_pedtype 21 model 172 at 1205.7076 -40.0561 1000.9531
+                    0E24: fix_char Ped_2 ground 1 brightness 0 and_fade_in 0
+                    0173: set_actor Ped_2 Z_angle_to 90.2176
+
+                    0860: link_actor Ped_1 to_interior Interior_active
+                    0860: link_actor Ped_2 to_interior Interior_active
+
+                    0F02: create_render_object_to_char_bone_from_special Ped_1 special_model Broom bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                    0F02: create_render_object_to_char_bone_from_special Ped_2 special_model Sponge bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+
+                    model.Destroy(172)
+                    model.Destroy(11)
+
+                    0605: actor Ped_1 perform_animation "SWEEP" IFP "PedEventsMod" framedelta 2.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                    0605: actor Ped_2 perform_animation "WASH" IFP "PedEventsMod" framedelta 2.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+
+                    wait 100
+
+                    repeat
+                    wait 0
+                    
+                    if and
+                        056D:   actor Ped_1 defined
+                        056D:   actor Ped_2 defined
+                    then
+                    else
+                        repeat
+                        wait 0
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+                        break
+                    end
+
+                    0EFF: get_char_simplest_active_task Ped_1 id_to 1@ pointer_to 2@
+                    if and
+                        1@ == 203
+                        timera > 2000
+                        8611:   not actor Ped_1 performing_animation "SWEEP"
+                    then
+                        0209: 1@ = random_int_in_ranges 1 3
+                        if 1@ == 1
+                        then 0804: AS_actor Ped_1 walk_to 1208.8704 -32.0575 1000.9531 angle 90.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 2
+                        then 0804: AS_actor Ped_1 walk_to 1212.6848 -34.9043 1000.9531 angle 180.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        timera = 0
+                    end
+
+                    0EFF: get_char_simplest_active_task Ped_2 id_to 1@ pointer_to 2@
+                    if and
+                        1@ == 203
+                        timera > 2000
+                        8611:   not actor Ped_2 performing_animation "WASH"
+                    then
+                        0209: 1@ = random_int_in_ranges 1 4
+                        if 1@ == 1
+                        then 0804: AS_actor Ped_2 walk_to 1205.7076 -40.0561 1000.9531 angle 90.0 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 2
+                        then 0804: AS_actor Ped_2 walk_to 1205.7042 -35.3032 1000.9531 angle 90.0 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        if 1@ == 3
+                        then 0804: AS_actor Ped_2 walk_to 1206.0809 -32.3796 1000.9531 angle 356.0717 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                        end
+                        timera = 0
+                    end
+
+                    if timera > 3000
+                    then timera = 0
+                    end
+                    
+                    if or
+                        0457:   player $PLAYER_CHAR aiming_at_actor Ped_1
+                        0457:   player $PLAYER_CHAR aiming_at_actor Ped_2
+                    then
+                        0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                        0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                        if or
+                            2@ == 1 // Огнестрельное оружие
+                            2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                        then
+                            01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                            01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+
+                            repeat
+                            wait 0
+
+                            077E: get_active_interior_to 1@
+                            until 803B:   not Interior_active == 1@  // (int)
+                            break
+                        end
+                    end
+                    
+                080E: get_actor Ped_1 ped_event_to 1@
+                080E: get_actor Ped_2 ped_event_to 2@
+                if or
+                    1@ == 49
+                    1@ == 9
+                    2@ == 49
+                    2@ == 9
+                then
+                    01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+
+                    repeat
+                    wait 0
+
+                    077E: get_active_interior_to 1@
+                    until 803B:   not Interior_active == 1@  // (int)
+                    break
+                end
+
+                    if or
+                        051A:   actor Ped_1 damaged_by_actor $PLAYER_ACTOR
+                        051A:   actor Ped_2 damaged_by_actor $PLAYER_ACTOR
+                    then
+                        01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+
+                        repeat
+                        wait 0
+
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+
+                        break
+                    end
+
+                    077E: get_active_interior_to 1@
+                    until 803B:   not Interior_active == 1@  // (int)
+
+                    04EF: release_animation "PedEventsMod"
+
+                    if 056D:   actor Ped_1 defined
+                    then 009B: destroy_actor Ped_1
+                    end
+                    if 056D:   actor Ped_2 defined
+                    then 009B: destroy_actor Ped_2
+                    end
+                    
+                end
+            end
+        else
+            30@ = false
+            if
+                1@ > 0
+            then
+
+                repeat
+                wait 0
+                0AAA: 1@ = get_script_struct_named "STRIPW"
+                until 1@ == 0
+                
+            end
+        end
+
+        
+        // dance
+        0AAA: 1@ = get_script_struct_named "BAR"
+        0E40: get_current_hour 2@
+        077E: get_active_interior_to 3@
+        if and
+            1@ > 0
+            2@ >= 7
+            2@ < 18
+            not 3@ == 0
+        then
+            if and
+                0EEA: locate_char_distance_to_coordinates $player_actor pos 493.391 -22.7228 1000.6797 radius 25.0
+                30@ == false
+            then 
+                $9472 = 1
+                016A: fade 0 time 0
+
+                wait 500
+                31@ = 0
+                while 0EA7: get_any_char_no_save_recursive 31@ progress_to 31@ char_to 0@
+                    if
+                        0EE4: locate_char_distance_to_char $player_actor char 0@ radius 50.0
+                    then
+                        if
+                            803B:   not $player_actor == 0@  // (int)
+                        then
+                            04C4: store_coords_to 1@ 2@ 3@ from_actor 0@ with_offset 0.0 0.0 70.0
+                            00A1: put_actor 0@ at 1@ 2@ 3@
+                            0575: set_actor 0@ pinned_position 1
+                        end
+                    end
+                end
+                016A: fade 1 time 1000
+
+                30@ = true
+                077E: get_active_interior_to Interior_active
+                
+                repeat
+                wait 0
+                04ED: load_animation  "PedEventsMod"
+                until 04EE:   animation "PedEventsMod" loaded
+
+
+                model.Load(171)
+                model.Load(172)
+                model.Load(260)
+                model.Load(19)
+                model.Load(14820)
+                if
+                    not model.Available(171)
+                then
+                    repeat
+                    wait 0
+                    model.Load(171)
+                    until model.Available(171)
+                end
+                if
+                    not model.Available(19)
+                then
+                    repeat
+                    wait 0
+                    model.Load(19)
+                    until model.Available(19)
+                end
+                if
+                    not model.Available(172)
+                then
+                    repeat
+                    wait 0
+                    model.Load(172)
+                    until model.Available(172)
+                end
+                if
+                    not model.Available(260)
+                then
+                    repeat
+                    wait 0
+                    model.Load(260)
+                    until model.Available(260)
+                end
+                if
+                    not model.Available(14820)
+                then
+                    repeat
+                    wait 0
+                    model.Load(14820)
+                    until model.Available(14820)
+                end
+                038B: load_requested_models
+
+                009A: Ped_1 = create_actor_pedtype 21 model 171 at 481.4362 -13.1732 1000.6797
+                0E24: fix_char Ped_1 ground 1 brightness 0 and_fade_in 0
+                0173: set_actor Ped_1 Z_angle_to 270.0
+
+                009A: Ped_2 = create_actor_pedtype 21 model 260 at 482.2838 -4.99 1002.0781
+                0E24: fix_char Ped_2 ground 1 brightness 0 and_fade_in 0
+                0173: set_actor Ped_2 Z_angle_to 93.2176
+
+                009A: Ped_3 = create_actor_pedtype 21 model 172 at 502.7359 -18.2154 1000.6797
+                0E24: fix_char Ped_3 ground 1 brightness 0 and_fade_in 0
+                0173: set_actor Ped_3 Z_angle_to 270.0
+
+                009A: Ped_4 = create_actor_pedtype 21 model 19 at 475.8606 -14.9744 1003.6953
+                0E24: fix_char Ped_4 ground 1 brightness 0 and_fade_in 0
+                0173: set_actor Ped_4 Z_angle_to 282.5364
+
+                0860: link_actor Ped_1 to_interior Interior_active
+                0860: link_actor Ped_2 to_interior Interior_active
+                0860: link_actor Ped_3 to_interior Interior_active
+                0860: link_actor Ped_4 to_interior Interior_active
+
+                0F02: create_render_object_to_char_bone_from_special Ped_1 special_model Broom bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                0F02: create_render_object_to_char_bone_from_special Ped_2 special_model Spanner bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                0F02: create_render_object_to_char_bone_from_special Ped_3 special_model Sponge bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+
+
+                0E01: create_object_no_save 14820 at 476.549 -14.9356 1003.58 offset 0 ground 0 to dj_panel
+                0177: set_object dj_panel Z_angle_to 270.0
+                07F7: set_object dj_panel destructible 0
+                0382: set_object dj_panel collision_detection 0
+                0566: link_object dj_panel to_interior Interior_active
+
+
+                model.Destroy(14820)
+                model.Destroy(171)
+                model.Destroy(172)
+                model.Destroy(260)
+                model.Destroy(19)
+
+                0605: actor Ped_1 perform_animation "SWEEP" IFP "PedEventsMod" framedelta 2.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                0605: actor Ped_2 perform_animation "REPAIR" IFP "PedEventsMod" framedelta 2.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                0605: actor Ped_3 perform_animation "WASH" IFP "PedEventsMod" framedelta 2.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                0605: actor Ped_4 perform_animation "REPAIR_2" IFP "PedEventsMod" framedelta 2.0 loop 1 lockX 0 lockY 0 lockF 0 time -1
+
+                wait 100
+
+                repeat
+                wait 0
+                
+                    if and
+                        056D:   actor Ped_1 defined
+                        056D:   actor Ped_2 defined
+                        056D:   actor Ped_3 defined
+                        056D:   actor Ped_4 defined
+                    then
+                    else
+                        repeat
+                        wait 0
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+                        break
+                    end
+
+                0EFF: get_char_simplest_active_task Ped_1 id_to 1@ pointer_to 2@
+                if and
+                    1@ == 203
+                    timera > 2000
+                    8611:   not actor Ped_1 performing_animation "SWEEP"
+                then
+                    0209: 1@ = random_int_in_ranges 1 6
+                    if 1@ == 1
+                    then 0804: AS_actor Ped_1 walk_to 482.2858 -17.2959 1000.6797 angle 90.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    if 1@ == 2
+                    then 0804: AS_actor Ped_1 walk_to 490.2717 -17.6743 1000.6797 angle 180.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    if 1@ == 3
+                    then 0804: AS_actor Ped_1 walk_to 490.6999 -10.0679 1000.6797 angle 270.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    if 1@ == 4
+                    then 0804: AS_actor Ped_1 walk_to 485.1348 -8.3042 1000.6719 angle 0.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    if 1@ == 5
+                    then 0804: AS_actor Ped_1 walk_to 479.6674 -13.1616 1000.6828 angle 0.0 radius 0.0 animation "SWEEP" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    timera = 0
+                end
+
+                0EFF: get_char_simplest_active_task Ped_2 id_to 1@ pointer_to 2@
+                if and
+                    1@ == 203
+                    timera > 2000
+                    8611:   not actor Ped_2 performing_animation "REPAIR"
+                then
+                    0209: 1@ = random_int_in_ranges 1 4
+                    if 1@ == 1
+                    then 0804: AS_actor Ped_2 walk_to 481.6174 -5.1369 1002.0781 angle 90.0 radius 0.0 animation "REPAIR" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    if 1@ == 2
+                    then 0804: AS_actor Ped_2 walk_to 494.0626 -5.3824 1002.0781 angle 270.0 radius 0.0 animation "REPAIR" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    if 1@ == 3
+                    then 0804: AS_actor Ped_2 walk_to 493.8855 -3.4304 1002.0707 angle 350.0 radius 0.0 animation "REPAIR" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    timera = 0
+                end
+
+                0EFF: get_char_simplest_active_task Ped_3 id_to 1@ pointer_to 2@
+                if and
+                    1@ == 203
+                    timera > 2000
+                    8611:   not actor Ped_3 performing_animation "WASH"
+                then
+                    0209: 1@ = random_int_in_ranges 1 4
+                    if 1@ == 1
+                    then 0804: AS_actor Ped_3 walk_to 502.7359 -18.2154 1000.6797 angle 270.0 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    if 1@ == 2
+                    then 0804: AS_actor Ped_3 walk_to 502.7346 -21.851 1000.6797 angle 270.0 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    if 1@ == 3
+                    then 0804: AS_actor Ped_3 walk_to 501.6995 -20.3808 1000.6797 angle 90.0 radius 0.0 animation "WASH" IFP_file "PedEventsMod" rate 2.0 LA 0 LX 0 LY 0 LF 0 LT -1
+                    end
+                    timera = 0
+                end
+
+                if timera > 3000
+                then timera = 0
+                end
+                
+                if or
+                    0457:   player $PLAYER_CHAR aiming_at_actor Ped_1
+                    0457:   player $PLAYER_CHAR aiming_at_actor Ped_2
+                    0457:   player $PLAYER_CHAR aiming_at_actor Ped_3
+                    0457:   player $PLAYER_CHAR aiming_at_actor Ped_4
+                then
+                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                    if or
+                        2@ == 1 // Огнестрельное оружие
+                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                    then
+                        01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_3 // Like turning an actor into a random pedestrian
+                        01C2: remove_references_to_actor Ped_4 // Like turning an actor into a random pedestrian
+
+                        repeat
+                        wait 0
+
+                        077E: get_active_interior_to 1@
+                        until 803B:   not Interior_active == 1@  // (int)
+                        break
+                    end
+                end
+                
+                080E: get_actor Ped_1 ped_event_to 1@
+                080E: get_actor Ped_2 ped_event_to 2@
+                080E: get_actor Ped_3 ped_event_to 3@
+                if or
+                    1@ == 49
+                    1@ == 9
+                    2@ == 49
+                    2@ == 9
+                    3@ == 49
+                    3@ == 9
+                then
+                    01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor Ped_3 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor Ped_4 // Like turning an actor into a random pedestrian
+
+                    repeat
+                    wait 0
+
+                    077E: get_active_interior_to 1@
+                    until 803B:   not Interior_active == 1@  // (int)
+                    break
+                end
+
+                080E: get_actor Ped_4 ped_event_to 1@
+                if or
+                    051A:   actor Ped_1 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor Ped_2 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor Ped_3 damaged_by_actor $PLAYER_ACTOR
+                    051A:   actor Ped_4 damaged_by_actor $PLAYER_ACTOR
+                    1@ == 49
+                    1@ == 9
+                then
+                    01C2: remove_references_to_actor Ped_1 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor Ped_2 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor Ped_3 // Like turning an actor into a random pedestrian
+                    01C2: remove_references_to_actor Ped_4 // Like turning an actor into a random pedestrian
+
+                    repeat
+                    wait 0
+
+                    077E: get_active_interior_to 1@
+                    until 803B:   not Interior_active == 1@  // (int)
+
+                    break
+                end
+
+                077E: get_active_interior_to 1@
+                until 803B:   not Interior_active == 1@  // (int)
+
+                04EF: release_animation "PedEventsMod"
+
+                if 056D:   actor Ped_1 defined
+                then 009B: destroy_actor Ped_1
+                end
+                if 056D:   actor Ped_2 defined
+                then 009B: destroy_actor Ped_2
+                end
+                if 056D:   actor Ped_3 defined
+                then 009B: destroy_actor Ped_3
+                end
+                if 056D:   actor Ped_4 defined
+                then 009B: destroy_actor Ped_4
+                end
+                
+                if 03CA:   object dj_panel exists
+                then 0108: destroy_object dj_panel
+                end
+                
+            end
+        else
+            30@ = false
+            if
+                1@ > 0
+            then
+
+                repeat
+                wait 0
+                0AAA: 1@ = get_script_struct_named "BAR"
+                until 1@ == 0
+
+            end
+        end
+        
+0A93: terminate_this_custom_script

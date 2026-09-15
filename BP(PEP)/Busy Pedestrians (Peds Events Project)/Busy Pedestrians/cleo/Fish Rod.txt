@@ -1,0 +1,485 @@
+{$CLEO .cs}
+{$USE CLEO+}
+{$USE newOpcodes}
+{$USE ini}
+
+0000: NOP
+
+script_name "Fish_rod"
+
+// By ArtemQa146
+
+const
+    fish_rod = 31@
+    boat_rod = 30@
+    render_model = 29@
+    find_boat = 28@
+    render_rod = 27@
+    render_fish = 26@
+    render_fish_model = 21@
+    Coords_X = 25@
+    Coords_Y = 24@
+    Coords_Z = 23@
+    random_fish = 22@
+    angle_actor = 20@
+end
+
+wait 400
+
+0AF0: 0@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Fish Rod"
+if
+    0@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
+if
+    0AA2: 31@ = load_dynamic_library "CLEO+.cleo"
+then
+    if
+        0AA4: 30@ = get_dynamic_library_procedure "GetCleoPlusVersion" library 31@
+    then
+        0AA7: call_function_return 30@ num_params 0 pop 0 29@
+        if
+            not 29@ >= 0x1020000
+        then
+            0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+            0AA3: free_dynamic_library 31@
+            0A93: terminate_this_custom_script
+        end
+        0AA3: free_dynamic_library 31@
+    end
+else
+    0AD1: show_formatted_text_highpriority "Cleo+ 1.2.0 (or higher) version is required, the Busy Pedestrians mod is disabled" time 15000
+    0AA3: free_dynamic_library 31@
+    0A93: terminate_this_custom_script
+end
+
+if
+    0E2D: is_game_first_start
+then
+    0F00: load_special_model_dff "modelsq\Fish_rod" txd "modelsq\OtherQa" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Fish_rod.ini" section "Models" key "Fish_rod"
+    0F00: load_special_model_dff "modelsq\Fish_qa" txd "modelsq\OtherQa" store_to 0@
+    0AF1: write_int 0@ to_ini_file "cleo\Fish_rod.ini" section "Models" key "Fish_qa"
+end
+
+0AF0: render_model = read_int_from_ini_file "cleo\Fish_rod.ini" section "Models" key "Fish_rod"
+0AF0: render_fish_model = read_int_from_ini_file "cleo\Fish_rod.ini" section "Models" key "Fish_qa"
+
+0AF2: 7@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Reefer X"
+0AF2: 8@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Reefer Y"
+0AF2: 9@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Reefer Z"
+
+0AF2: 10@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Marquis X"
+0AF2: 11@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Marquis Y"
+0AF2: 12@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Marquis Z"
+
+0AF2: 13@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Dinghy X"
+0AF2: 14@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Dinghy Y"
+0AF2: 15@ = read_float_from_ini_file "cleo\Busy Pedestrians.ini" section "Fish Rod" key "Dinghy Z"
+
+
+while true
+wait 500
+    if
+        player.Defined(0)
+    then
+        if
+            not $ONMISSION == 0
+        then
+            continue
+        end
+        // Просто рыбак
+        if or
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 2235.4229 398.0295 1.1569 radius 100.0
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -935.4364 2645.1992 42.2851 radius 100.0
+            0EEA: locate_char_distance_to_coordinates $player_actor pos 957.9365 -2169.7715 13.0937 radius 100.0
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -757.0518 233.9582 1.4081 radius 100.0
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -74.5669 -577.3393 1.2455 radius 100.0
+            0EEA: locate_char_distance_to_coordinates $player_actor pos -1894.0117 2165.7932 1.0594 radius 100.0
+        then
+            0E40: get_current_hour 1@
+            if or
+                1@ < 4
+                1@ > 21
+            then
+                continue
+            end
+            if 0EEA: locate_char_distance_to_coordinates $player_actor pos 2235.4229 398.0295 1.1569 radius 100.0
+            then
+                Coords_X = 2235.4229
+                Coords_Y = 398.0295
+                Coords_Z = 1.1569
+                angle_actor = 61.7273
+            end
+            if 0EEA: locate_char_distance_to_coordinates $player_actor pos -935.4364 2645.1992 42.2851 radius 100.0
+            then
+                Coords_X = -935.4364
+                Coords_Y = 2645.1992
+                Coords_Z = 42.2851
+                angle_actor = 313.725
+            end
+            if 0EEA: locate_char_distance_to_coordinates $player_actor pos 957.9365 -2169.7715 13.0937 radius 100.0
+            then
+                Coords_X = 957.9365
+                Coords_Y = -2169.7715
+                Coords_Z = 13.0937
+                angle_actor = 204.1644
+            end
+            if 0EEA: locate_char_distance_to_coordinates $player_actor pos -757.0518 233.9582 1.4081 radius 100.0
+            then
+                Coords_X = -757.0518
+                Coords_Y = 233.9582
+                Coords_Z = 1.4081
+                angle_actor = 127.0603
+            end
+            if 0EEA: locate_char_distance_to_coordinates $player_actor pos -74.5669 -577.3393 1.2455 radius 100.0
+            then
+                Coords_X = -74.5669
+                Coords_Y = -577.3393
+                Coords_Z = 1.2455
+                angle_actor = 244.9239
+            end
+            if 0EEA: locate_char_distance_to_coordinates $player_actor pos -1894.0117 2165.7932 1.0594 radius 100.0
+            then
+                Coords_X = -1894.0117
+                Coords_Y = 2165.7932
+                Coords_Z = 1.0594
+                angle_actor = 230.5337
+            end
+            if
+                0EEA: locate_char_distance_to_coordinates $player_actor pos Coords_X Coords_Y Coords_Z radius 50.0
+            then
+                continue
+            end
+            0209: 2@ = random_int_in_ranges 1 4
+            if 2@ == 1
+            then 1@ = 133
+            end
+            if 2@ == 2
+            then 1@ = 158
+            end
+            if 2@ == 3
+            then 1@ = 161
+            end
+            
+            repeat
+            wait 0
+            04ED: load_animation  "PedEventsMod"
+            until 04EE:   animation "PedEventsMod" loaded
+            
+            model.Load(1@)
+            if
+                not model.Available(1@)
+            then
+                repeat
+                wait 0
+                model.Load(1@)
+                until model.Available(1@)
+            end
+            038B: load_requested_models
+            009A: fish_rod = create_actor_pedtype 4 model 1@ at Coords_X Coords_Y Coords_Z
+            0173: set_actor fish_rod Z_angle_to angle_actor
+            0E24: fix_char fish_rod ground 1 brightness 1 and_fade_in 0
+            model.Destroy(1@)
+            
+            gosub @Actor_render
+
+            0812: AS_actor fish_rod perform_animation "fish" IFP "PedEventsMod" framedelta 1000.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+            timera = 0
+            
+            repeat
+            wait 0
+            if
+                056D:   actor fish_rod defined
+            then
+            
+                080E: get_actor fish_rod ped_event_to 1@
+                if or
+                    051A:   actor fish_rod damaged_by_actor $PLAYER_ACTOR
+                    0118:   actor fish_rod dead
+                    not locate_char_distance_to_char $player_actor char fish_rod radius 120.0
+                    1@ == 49
+                    1@ == 9
+                    1@ == 15
+                    1@ == 31
+                    1@ == 59
+                then
+                    break
+                end
+                
+                if
+                    0457:   player $PLAYER_CHAR aiming_at_actor fish_rod
+                then
+                    0E83: get_current_char_weaponinfo $PLAYER_ACTOR store_to 1@
+                    0E89: get_weaponinfo_fire_type 1@ store_to 2@ // Проверяем с каким оружием игрок
+                    if or
+                        2@ == 1 // Огнестрельное оружие
+                        2@ == 3 // Тяжелое оружие (Огнемет и т.д.)
+                    then
+                        break
+                    end
+                end
+            
+                gosub @Fishing
+                
+            else
+                break
+            end
+            until not player.Defined(0)
+            if 056D:   actor fish_rod defined
+            then 01C2: remove_references_to_actor fish_rod // Like turning an actor into a random pedestrian
+            end
+            04EF: release_animation "PedEventsMod"
+            
+            repeat
+            wait 0
+            until not locate_char_distance_to_coordinates $player_actor pos Coords_X Coords_Y Coords_Z radius 120.0
+            continue
+        end
+
+
+        // Лодка
+        find_boat = 0
+        while 0EA8: get_any_car_no_save_recursive find_boat progress_to find_boat car_to boat_rod
+            0E12: get_vehicle boat_rod subclass_to 1@
+            if or
+                1@ == 5
+                0137:   car boat_rod model == 453
+                0137:   car boat_rod model == 484
+                0137:   car boat_rod model == 473
+            then
+                046C: fish_rod = car boat_rod driver
+                if 02CA:   car boat_rod bounding_sphere_visible
+                then 1@ = 100.0
+                else 1@ = 30.0
+                end
+                if and
+                    not locate_char_distance_to_car $player_actor car boat_rod radius 1@
+                    not: is_car_script_controlled boat_rod
+                    056D:   actor fish_rod defined
+                    8137:   not car boat_rod model == 430
+                then
+                    if
+                        0E0A: is_char_script_controlled fish_rod
+                    then
+                        break
+                    end
+                    0E0B: mark_char_as_needed fish_rod
+                    0E09: mark_car_as_needed boat_rod
+                    04D8: set_actor fish_rod drowns_in_water 0
+                    09C9: disembark_actor fish_rod from_car boat_rod and_freeze_actor_position
+
+                    0441: 1@ = car boat_rod model
+                    if and
+                        not 1@ == 453
+                        not 1@ == 484
+                        not 1@ == 473
+                    then
+                        00AA: store_car boat_rod position_to 3@ 4@ 5@
+                        0174: 6@ = car boat_rod Z_angle
+                        00A6: destroy_car boat_rod
+                        0209: 2@ = random_int_in_ranges 1 4
+                        if 2@ == 1
+                        then 1@ = 453
+                        end
+                        if 2@ == 2
+                        then 1@ = 484
+                        end
+                        if 2@ == 3
+                        then 1@ = 473
+                        end
+                        repeat
+                        wait 0
+                        model.Load(1@)
+                        until 0248:   model 1@ available
+                        038B: load_requested_models
+                        00A5: boat_rod = create_car 1@ at 3@ 4@ 5@
+                        0175: set_car boat_rod Z_angle_to 6@
+                        model.Destroy(1@)
+                    end
+                    
+                    0441: 1@ = car boat_rod model
+                    if 1@ == 453 // Reefer
+                    then
+                        0087: Coords_X = 7@ // (float)
+                        0087: Coords_Y = 8@ // (float)
+                        0087: Coords_Z = 9@ // (float)
+                    end
+                    if 1@ == 484 // Marquis
+                    then
+                        0087: Coords_X = 10@ // (float)
+                        0087: Coords_Y = 11@ // (float)
+                        0087: Coords_Z = 12@ // (float)
+                    end
+                    if 1@ == 473 // Dinghy
+                    then
+                        0087: Coords_X = 13@ // (float)
+                        0087: Coords_Y = 14@ // (float)
+                        0087: Coords_Z = 15@ // (float)
+                    end
+
+                    0464: put_actor fish_rod into_turret_on_car boat_rod at_car_offset Coords_X Coords_Y Coords_Z position 0 shooting_angle_limit 0.0 with_weapon 0
+                    gosub @Actor_render
+
+                    repeat
+                    wait 0
+                    04ED: load_animation  "PedEventsMod"
+                    until 04EE:   animation "PedEventsMod" loaded
+
+                    if 056D:   actor fish_rod defined
+                    then 0812: AS_actor fish_rod perform_animation "fish" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                    end
+                    timera = 0
+
+                    repeat
+                    wait 0
+                    if and
+                        056D:   actor fish_rod defined
+                        056E:   car boat_rod defined
+                    then
+
+                        0819: 1@ = actor fish_rod distance_from_ground
+                        if or
+                            051A:   actor fish_rod damaged_by_actor $PLAYER_ACTOR
+                            0118:   actor fish_rod dead
+                            0119:   car boat_rod wrecked
+                            1@ < 5.0
+                            not locate_char_distance_to_char $player_actor char fish_rod radius 300.0
+                        then
+                            0465: remove_actor fish_rod from_turret_mode
+                            break
+                        end
+
+                        02E3: 1@ = car boat_rod speed
+                        if
+                            1@ > 10.0
+                        then
+                            if
+                                8611:   not actor fish_rod performing_animation "fish5"
+                            then
+                                0812: AS_actor fish_rod perform_animation "fish5" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 1 time -1  // version
+                                0E31: set_render_object_visible render_fish 0
+                                wait 300
+                            end
+                            continue
+                        end
+
+                        gosub @Fishing
+                
+                    else
+                        break
+                    end
+                    until not player.Defined(0)
+                    if 056D:   actor fish_rod defined
+                    then 01C2: remove_references_to_actor fish_rod // Like turning an actor into a random pedestrian
+                    end
+                    if 056E:   car boat_rod defined
+                    then 01C3: remove_references_to_car boat_rod
+                    end
+                    04EF: release_animation "PedEventsMod"
+                    wait 10000
+                end
+            end
+        end
+    end
+end
+
+
+:Fishing
+          if
+                locate_char_distance_to_char $player_actor char fish_rod radius 70.0
+            then
+                if and
+                    0611:   actor fish_rod performing_animation "fish"
+                    8611:   not actor fish_rod performing_animation "fish2"
+                    8611:   not actor fish_rod performing_animation "fish3"
+                    8611:   not actor fish_rod performing_animation "fish4"
+                    timera > 10000
+                then
+                    0209: 1@ = random_int_in_ranges 1 5
+                    if or
+                        1@ == 1
+                        1@ == 2
+                    then
+                        0812: AS_actor fish_rod perform_animation "fish2" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1  // versionB
+                        0209: random_fish = random_int_in_ranges 1 4
+                    end
+                    if 1@ == 3
+                    then 0812: AS_actor fish_rod perform_animation "fish3" IFP "PedEventsMod" framedelta 2.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1  // versionB
+                    end
+                    timera = 0
+                    wait 100
+                    return
+                end
+                if
+                    0611:   actor fish_rod performing_animation "fish2"
+                then
+                    0613: 1@ = actor fish_rod animation "fish2" time
+                    if and
+                        random_fish > 1
+                        1@ > 0.95
+                    then
+                        0812: AS_actor fish_rod perform_animation "fish" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        random_fish = 0
+                        wait 100
+                        return
+                    end
+                    if and
+                        1@ > 0.55
+                        random_fish == 1
+                    then
+                        0812: AS_actor fish_rod perform_animation "fish4" IFP "PedEventsMod" framedelta 4.0 loopA 0 lockX 0 lockY 0 lockF 1 time -1  // versionB
+                        0E31: set_render_object_visible render_fish 1
+                        random_fish = 0
+                        wait 100
+                        return
+                    end
+                end
+                if
+                    0611:   actor fish_rod performing_animation "fish3"
+                then
+                    0613: 1@ = actor fish_rod animation "fish3" time
+                    if
+                        1@ > 0.95
+                    then
+                        0812: AS_actor fish_rod perform_animation "fish" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        wait 100
+                        return
+                    end
+                end
+                if
+                    0611:   actor fish_rod performing_animation "fish4"
+                then
+                    0613: 1@ = actor fish_rod animation "fish4" time
+                    if
+                        1@ > 0.95
+                    then
+                        0812: AS_actor fish_rod perform_animation "fish" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        0E31: set_render_object_visible render_fish 0
+                        wait 100
+                        return
+                    end
+                end
+                if
+                    0611:   actor fish_rod performing_animation "fish5"
+                then
+                    0613: 1@ = actor fish_rod animation "fish5" time
+                    if
+                        1@ > 0.95
+                    then
+                        0812: AS_actor fish_rod perform_animation "fish" IFP "PedEventsMod" framedelta 2.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
+                        wait 100
+                        return
+                    end
+                end
+            end
+return
+
+
+:Actor_render
+0F02: create_render_object_to_char_bone_from_special fish_rod special_model render_model bone 24 offset 0.0 0.0 0.0 rotation 0.0 0.0 0.0 store_to render_rod
+0F02: create_render_object_to_char_bone_from_special fish_rod special_model render_fish_model bone 34 offset 0.0 0.0 0.0 rotation 0.0 0.0 0.0 store_to render_fish
+0E31: set_render_object_visible render_fish 0
+return
