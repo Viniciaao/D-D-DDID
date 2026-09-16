@@ -33,45 +33,77 @@ else
     0A93: terminate_this_custom_script
 end
 
+// [OTIM-MEM] Gate por 'Percent Chance' (txd OtherQa). Cada grupo so e carregado
+// se o evento que o consome tiver chance > 0:
+//   Graffity Gang      -> tagqa1..3, tagqab1..3, tagqav1..3 (Graffiti Gang.qa)
+//   Parachute Ped      -> PedPara, PedPara2 (Para Jumper.qa)
+//   Hunter             -> birdq (Rural Hunter.qa)
+//   Police Crime Scene -> flshlightq (Police Crime Scene.qa)
+//   Tourist            -> maph (Tourists.qa)
+// SportQa/SportQa2 nao tem toggle no INI (Sport Peds sempre ativo) -> sem gate.
+// 8@ e 6@ estao livres neste script e sao usados so aqui, antes do const.
+0AF0: 8@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Graffity Gang"
+0AF0: 6@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Parachute Ped"
+
 if
     0E2D: is_game_first_start
 then
-    0F00: load_special_model_dff "modelsq\tagqa1" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa1"
-    0F00: load_special_model_dff "modelsq\tagqa2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa2"
-    0F00: load_special_model_dff "modelsq\tagqa3" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa3"
-    
-    0F00: load_special_model_dff "modelsq\tagqab1" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab1"
-    0F00: load_special_model_dff "modelsq\tagqab2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab2"
-    0F00: load_special_model_dff "modelsq\tagqab3" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab3"
-    
-    0F00: load_special_model_dff "modelsq\tagqav1" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav1"
-    0F00: load_special_model_dff "modelsq\tagqav2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav2"
-    0F00: load_special_model_dff "modelsq\tagqav3" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav3"
-    
-    0F00: load_special_model_dff "modelsq\PedPara" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "PedPara"
-    0F00: load_special_model_dff "modelsq\PedPara2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "PedPara2"
-    
+    if
+        8@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\tagqa1" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa1"
+        0F00: load_special_model_dff "modelsq\tagqa2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa2"
+        0F00: load_special_model_dff "modelsq\tagqa3" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa3"
+        0F00: load_special_model_dff "modelsq\tagqab1" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab1"
+        0F00: load_special_model_dff "modelsq\tagqab2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab2"
+        0F00: load_special_model_dff "modelsq\tagqab3" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab3"
+        0F00: load_special_model_dff "modelsq\tagqav1" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav1"
+        0F00: load_special_model_dff "modelsq\tagqav2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav2"
+        0F00: load_special_model_dff "modelsq\tagqav3" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav3"
+    end
+    if
+        6@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\PedPara" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "PedPara"
+        0F00: load_special_model_dff "modelsq\PedPara2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "PedPara2"
+    end
     0F00: load_special_model_dff "modelsq\SportQa" txd "modelsq\OtherQa" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "SportQa"
     0F00: load_special_model_dff "modelsq\SportQa2" txd "modelsq\OtherQa" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "SportQa2"
-    0F00: load_special_model_dff "modelsq\birdq" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "bird"
-    0F00: load_special_model_dff "modelsq\flshlightq" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "flshlight"
-    0F00: load_special_model_dff "modelsq\maph" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "maph"
+
+    0AF0: 8@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Hunter"
+    if
+        8@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\birdq" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "bird"
+    end
+    0AF0: 8@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Police Crime Scene"
+    if
+        8@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\flshlightq" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "flshlight"
+    end
+    0AF0: 8@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Tourist"
+    if
+        8@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\maph" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "maph"
+    end
 end
 
 // [OTIM-MEM] "modelsq\cops_peds2" ja e carregado por ModelLoad.cs na chave "cop2".
