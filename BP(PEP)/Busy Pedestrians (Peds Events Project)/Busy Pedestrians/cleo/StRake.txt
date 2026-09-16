@@ -840,6 +840,8 @@ wait 0
                 then 01C2: remove_references_to_actor 1@ // Like turning an actor into a random pedestrian
                 end
                 04EF: release_animation "PedEventsMod"
+                // [OTIM-MEM] Libera tambem o model do ped, recarregado a cada ciclo.
+                model.Destroy(6@)
                 jump @Rake
             end
             
@@ -855,6 +857,8 @@ wait 0
                 then 01C2: remove_references_to_actor 1@ // Like turning an actor into a random pedestrian
                 end
                 04EF: release_animation "PedEventsMod"
+                // [OTIM-MEM] Libera tambem o model do ped, recarregado a cada ciclo.
+                model.Destroy(6@)
                 jump @Rake
             end
             
@@ -874,6 +878,8 @@ wait 0
                     then 01C2: remove_references_to_actor 1@ // Like turning an actor into a random pedestrian
                     end
                     04EF: release_animation "PedEventsMod"
+                    // [OTIM-MEM] Libera tambem o model do ped, recarregado a cada ciclo.
+                    model.Destroy(6@)
                     jump @Rake
                 end
             end
@@ -898,6 +904,8 @@ if 056D:   actor 1@ defined
 then 009B: destroy_actor 1@
 end
 04EF: release_animation "PedEventsMod"
+// [OTIM-MEM] Libera tambem o model do ped, recarregado a cada ciclo.
+model.Destroy(6@)
 return
 
 // By ArtemQa146
