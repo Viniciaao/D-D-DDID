@@ -33,41 +33,78 @@ else
     0A93: terminate_this_custom_script
 end
 
+// [OTIM-MEM] Gate por configuracao (txd StWork, 16 modelos).
+// NOTA: 14@..18@ coincidem com nomes do const abaixo (SCr_postman, wndwash,
+// sponge2, Ped_ID_c, Rope), mas este bloco e o primeiro codigo do script e
+// essas variaveis so recebem seus valores definitivos na secao de leitura do
+// INI, bem depois daqui. Uso temporario seguro.
+// Cada grupo so e carregado se a feature que o consome estiver ligada no INI:
+//   Postman        -> Postbag, Postmail, Postpaper
+//   Garbage Mans   -> StopSign
+//   Comm repairers -> spanner, screw, toolbox, toolbox2, rope
+//   WindWash       -> wndwash, sponge2
+//   Street Art     -> standq, stand1..3, paintbrush
+0AF0: 18@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Postman"
+0AF0: 17@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Garbage Mans"
+0AF0: 16@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Communication repairers"
+0AF0: 15@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "WindWash"
+0AF0: 14@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Street Art"
+
 if
     0E2D: is_game_first_start
 then
-    0F00: load_special_model_dff "modelsq\Postbag" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postbag"
-    0F00: load_special_model_dff "modelsq\Postmail" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postmail"
-    0F00: load_special_model_dff "modelsq\Postpaper" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postpaper"
-    0F00: load_special_model_dff "modelsq\StopSign" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "StopSign"
-    0F00: load_special_model_dff "modelsq\spanner" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "spanner"
-    0F00: load_special_model_dff "modelsq\screw" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "screw"
-    0F00: load_special_model_dff "modelsq\toolbox" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "toolbox"
-    0F00: load_special_model_dff "modelsq\toolbox2" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "toolbox2"
-    0F00: load_special_model_dff "modelsq\rope" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "rope"
-    0F00: load_special_model_dff "modelsq\wndwash" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "wndwash"
-    0F00: load_special_model_dff "modelsq\sponge2" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "sponge2"
-    0F00: load_special_model_dff "modelsq\standq" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand"
-    0F00: load_special_model_dff "modelsq\stand1" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_1"
-    0F00: load_special_model_dff "modelsq\stand2" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_2"
-    0F00: load_special_model_dff "modelsq\stand3" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_3"
-    0F00: load_special_model_dff "modelsq\paintbrush" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "paintbrush"
+    if
+        18@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\Postbag" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postbag"
+        0F00: load_special_model_dff "modelsq\Postmail" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postmail"
+        0F00: load_special_model_dff "modelsq\Postpaper" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Postpaper"
+    end
+    if
+        17@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\StopSign" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "StopSign"
+    end
+    if
+        16@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\spanner" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "spanner"
+        0F00: load_special_model_dff "modelsq\screw" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "screw"
+        0F00: load_special_model_dff "modelsq\toolbox" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "toolbox"
+        0F00: load_special_model_dff "modelsq\toolbox2" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "toolbox2"
+        0F00: load_special_model_dff "modelsq\rope" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "rope"
+    end
+    if
+        15@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\wndwash" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "wndwash"
+        0F00: load_special_model_dff "modelsq\sponge2" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "sponge2"
+    end
+    if
+        14@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\standq" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand"
+        0F00: load_special_model_dff "modelsq\stand1" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_1"
+        0F00: load_special_model_dff "modelsq\stand2" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_2"
+        0F00: load_special_model_dff "modelsq\stand3" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Stand_3"
+        0F00: load_special_model_dff "modelsq\paintbrush" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "paintbrush"
+    end
 end
 
 const
@@ -407,7 +444,7 @@ wait pause
 end
 
 
-// Местность
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 :Zone
 Zone_Check = false
 0E40: get_current_hour 2@
@@ -443,7 +480,7 @@ if and
     $ONMISSION == 0
     1@ >= 5
     1@ <= 11
-    not 2@ == 0 // Не в сельской местности. Для того, чтобы попросту не проверять все зоны
+    not 2@ == 0 // пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     887A:   not gang_war_in_progress
 then
     Zone_Check = true

@@ -33,19 +33,73 @@ else
     0A93: terminate_this_custom_script
 end
 
+// [OTIM-MEM] Gate por configuracao. RollBrush so e usado por Roll Brush.qa
+// (Percent Chance/Roller Brush) e StopSign2 so por Bridge Stop.qa
+// (Settings/Bridge Workers). 16@ e 15@ estao livres neste script.
+0AF0: 16@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Roller Brush"
+0AF0: 15@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Bridge Workers"
+
 if
     0E2D: is_game_first_start
 then
+    if
+        16@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\RollBrush" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "RLBrush"
+    end
+    if
+        15@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\StopSign2" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "StopSignB"
+    end
+end
+
+// [OTIM-MEM] Broom1/cops_peds2/camera2_peds ja sao carregados por outros loaders
+// (Start_Interior -> "Broom", ModelLoad -> "cop2" e "camera2"). Reaproveita os handles
+// em vez de criar clumps identicos. Espera ate ~10s; sem resposta, carrega (fallback).
+0@ = 0
+1@ = 0
+2@ = 0
+3@ = 0
+while 3@ < 10000
+    wait 250
+    3@ += 250
+    0AF0: 0@ = read_int_from_ini_file "cleo\Improved interiors.ini" section "Models" key "Broom"
+    0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop2"
+    0AF0: 2@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "camera2"
+    if and
+        0@ > 0
+        1@ > 0
+        2@ > 0
+    then
+        3@ = 10000
+    end
+end
+if
+    0@ > 0
+then
+    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "BroomQ2"
+else
     0F00: load_special_model_dff "modelsq\Broom1" txd "modelsq\ImpInt" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "BroomQ2"
-    0F00: load_special_model_dff "modelsq\RollBrush" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "RLBrush"
-    0F00: load_special_model_dff "modelsq\StopSign2" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "StopSignB"
-    0F00: load_special_model_dff "modelsq\cops_peds2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "copA2"
-    0F00: load_special_model_dff "modelsq\camera2_peds" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cameraB2"
+end
+if
+    1@ > 0
+then
+    0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "copA2"
+else
+    0F00: load_special_model_dff "modelsq\cops_peds2" txd "modelsq\OtherQa" store_to 1@
+    0AF1: write_int 1@ to_ini_file "cleo\PedsModels.ini" section "Models" key "copA2"
+end
+if
+    2@ > 0
+then
+    0AF1: write_int 2@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cameraB2"
+else
+    0F00: load_special_model_dff "modelsq\camera2_peds" txd "modelsq\OtherQa" store_to 2@
+    0AF1: write_int 2@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cameraB2"
 end
 
 

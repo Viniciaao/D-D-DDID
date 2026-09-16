@@ -249,6 +249,9 @@ end
 repeat
 wait 0
 until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos -2292.2447 181.4637 35.3056 radius 150.0
+// [OTIM-MEM] O bloco IFP "CRIB" era carregado no inicio e nunca liberado:
+// os 04EF existentes citam nomes de animacao, nao o bloco carregado por 04ED.
+04EF: release_animation "CRIB"
 0A93: terminate_this_custom_script
 
 

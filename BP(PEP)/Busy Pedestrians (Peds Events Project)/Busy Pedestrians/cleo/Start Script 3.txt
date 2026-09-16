@@ -33,27 +33,71 @@ else
     0A93: terminate_this_custom_script
 end
 
+// [OTIM-MEM] Gate por configuracao (txd OtherQa).
+//   Video News (chance)     -> cameravhs, microvhs
+//   Shopping basket (toggle)-> sh_basket_1..3 (lidos por Shopping Basket.qa)
+//   Rc Car Players (chance) -> rcpadq
+// frsaleq/hammerq (For Sale Qa.qa) e tlscopeq (TlScopeQ.qa) nao tem chave no
+// INI, entao continuam sem gate.
+// 15@, 14@ e 13@ estao livres neste script.
+0AF0: 15@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Video News"
+0AF0: 14@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Shopping basket"
+0AF0: 13@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Rc Car Players"
+
 if
     0E2D: is_game_first_start
 then
-    0F00: load_special_model_dff "modelsq\cameravhs" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cameravhs"
-    0F00: load_special_model_dff "modelsq\microvhs" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "microvhs"
-    0F00: load_special_model_dff "modelsq\sh_basket_1" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "sh_basket_1"
-    0F00: load_special_model_dff "modelsq\sh_basket_2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "sh_basket_2"
-    0F00: load_special_model_dff "modelsq\sh_basket_3" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "sh_basket_3"
-    0F00: load_special_model_dff "modelsq\rcpadq" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "rcpadq"
+    if
+        15@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\cameravhs" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "cameravhs"
+        0F00: load_special_model_dff "modelsq\microvhs" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "microvhs"
+    end
+    if
+        14@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\sh_basket_1" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "sh_basket_1"
+        0F00: load_special_model_dff "modelsq\sh_basket_2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "sh_basket_2"
+        0F00: load_special_model_dff "modelsq\sh_basket_3" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "sh_basket_3"
+    end
+    if
+        13@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\rcpadq" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "rcpadq"
+    end
     0F00: load_special_model_dff "modelsq\frsaleq" txd "modelsq\OtherQa" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "frsaleq"
     0F00: load_special_model_dff "modelsq\hammerq" txd "modelsq\OtherQa" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "hammerq"
     0F00: load_special_model_dff "modelsq\tlscopeq" txd "modelsq\OtherQa" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tlscopeq"
+end
+
+// [OTIM-MEM] "modelsq\ice" ja e carregado por Models loading.cs na chave "ice"
+// (cleo\Peds use Vends.ini). Reaproveita o handle em vez de duplicar o clump.
+0@ = 0
+1@ = 0
+while 1@ < 10000
+    wait 250
+    1@ += 250
+    0AF0: 0@ = read_int_from_ini_file "cleo\Peds use Vends.ini" section "Models" key "ice"
+    if
+        0@ > 0
+    then
+        1@ = 10000
+    end
+end
+if
+    0@ > 0
+then
+    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "iceq"
+else
     0F00: load_special_model_dff "modelsq\ice" txd "modelsq\PedsVndQ" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "iceq"
 end

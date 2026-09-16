@@ -33,45 +33,99 @@ else
     0A93: terminate_this_custom_script
 end
 
+// [OTIM-MEM] Gate por 'Percent Chance' (txd OtherQa). Cada grupo so e carregado
+// se o evento que o consome tiver chance > 0:
+//   Graffity Gang      -> tagqa1..3, tagqab1..3, tagqav1..3 (Graffiti Gang.qa)
+//   Parachute Ped      -> PedPara, PedPara2 (Para Jumper.qa)
+//   Hunter             -> birdq (Rural Hunter.qa)
+//   Police Crime Scene -> flshlightq (Police Crime Scene.qa)
+//   Tourist            -> maph (Tourists.qa)
+// SportQa/SportQa2 nao tem toggle no INI (Sport Peds sempre ativo) -> sem gate.
+// 8@ e 6@ estao livres neste script e sao usados so aqui, antes do const.
+0AF0: 8@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Graffity Gang"
+0AF0: 6@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Parachute Ped"
+
 if
     0E2D: is_game_first_start
 then
-    0F00: load_special_model_dff "modelsq\tagqa1" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa1"
-    0F00: load_special_model_dff "modelsq\tagqa2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa2"
-    0F00: load_special_model_dff "modelsq\tagqa3" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa3"
-    
-    0F00: load_special_model_dff "modelsq\tagqab1" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab1"
-    0F00: load_special_model_dff "modelsq\tagqab2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab2"
-    0F00: load_special_model_dff "modelsq\tagqab3" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab3"
-    
-    0F00: load_special_model_dff "modelsq\tagqav1" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav1"
-    0F00: load_special_model_dff "modelsq\tagqav2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav2"
-    0F00: load_special_model_dff "modelsq\tagqav3" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav3"
-    
-    0F00: load_special_model_dff "modelsq\PedPara" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "PedPara"
-    0F00: load_special_model_dff "modelsq\PedPara2" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "PedPara2"
-    
+    if
+        8@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\tagqa1" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa1"
+        0F00: load_special_model_dff "modelsq\tagqa2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa2"
+        0F00: load_special_model_dff "modelsq\tagqa3" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqa3"
+        0F00: load_special_model_dff "modelsq\tagqab1" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab1"
+        0F00: load_special_model_dff "modelsq\tagqab2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab2"
+        0F00: load_special_model_dff "modelsq\tagqab3" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqab3"
+        0F00: load_special_model_dff "modelsq\tagqav1" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav1"
+        0F00: load_special_model_dff "modelsq\tagqav2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav2"
+        0F00: load_special_model_dff "modelsq\tagqav3" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "tagqav3"
+    end
+    if
+        6@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\PedPara" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "PedPara"
+        0F00: load_special_model_dff "modelsq\PedPara2" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "PedPara2"
+    end
     0F00: load_special_model_dff "modelsq\SportQa" txd "modelsq\OtherQa" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "SportQa"
     0F00: load_special_model_dff "modelsq\SportQa2" txd "modelsq\OtherQa" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "SportQa2"
-    0F00: load_special_model_dff "modelsq\birdq" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "bird"
-    0F00: load_special_model_dff "modelsq\flshlightq" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "flshlight"
-    0F00: load_special_model_dff "modelsq\maph" txd "modelsq\OtherQa" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "maph"
+
+    0AF0: 8@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Hunter"
+    if
+        8@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\birdq" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "bird"
+    end
+    0AF0: 8@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Police Crime Scene"
+    if
+        8@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\flshlightq" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "flshlight"
+    end
+    0AF0: 8@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Tourist"
+    if
+        8@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\maph" txd "modelsq\OtherQa" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "maph"
+    end
+end
+
+// [OTIM-MEM] "modelsq\cops_peds2" ja e carregado por ModelLoad.cs na chave "cop2".
+// Reaproveita o mesmo special model em vez de carregar um segundo clump identico.
+// Espera ate ~10s pelo loader; se nao vier, carrega como fallback (comportamento antigo).
+0@ = 0
+1@ = 0
+while 1@ < 10000
+    wait 250
+    1@ += 250
+    0AF0: 0@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop2"
+    if
+        0@ > 0
+    then
+        1@ = 10000
+    end
+end
+if
+    0@ > 0
+then
+    0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "copB2"
+else
     0F00: load_special_model_dff "modelsq\cops_peds2" txd "modelsq\OtherQa" store_to 0@
     0AF1: write_int 0@ to_ini_file "cleo\PedsModels.ini" section "Models" key "copB2"
 end
@@ -982,15 +1036,15 @@ wait pause
                     2@ = 0.0
                     3@ = 0.0
                     
-                    // 1498 - белая дефолтная дверь
-                    // 1507 - желтая дом, квартира
-                    // 1504 - красная дом, квартира
-                    // 1505 - синяя дом, квартира
-                    // 1506 - белая дом, квартира
-                    // 1569 - черная с окошком по центру
-                    // 1522 - черная как в магазе
-                    // 1499 - железная задрипанная
-                    // 1497 - деревянная
+                    // 1498 - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+                    // 1507 - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                    // 1504 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                    // 1505 - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                    // 1506 - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                    // 1569 - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+                    // 1522 - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+                    // 1499 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+                    // 1497 - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
                     if
                         0EEA: locate_char_distance_to_coordinates $player_actor pos 2015.3446 -1732.4221 14.2344 radius 100.0 // LS

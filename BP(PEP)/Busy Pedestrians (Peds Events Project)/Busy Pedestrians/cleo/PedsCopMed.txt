@@ -32,6 +32,16 @@ const
     med4 = 30@
 end
 
+// [OTIM-MEM] Toggle novo em [Settings]. Este script era residente e nao podia
+// ser desligado; agora sai do jogo se o usuario nao quiser a feature.
+// Default do INI = 1, entao o comportamento padrao nao muda.
+0AF0: 1@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Cop and Medic Peds"
+if
+    1@ == 0
+then
+    0A93: terminate_this_custom_script
+end
+
 0AF0: cop1 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop1"
 0AF0: cop2 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop2"
 0AF0: cop3 = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop3"

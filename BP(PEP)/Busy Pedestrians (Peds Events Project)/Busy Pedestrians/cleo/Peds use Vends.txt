@@ -220,6 +220,17 @@ wait 250
                                         2@ = 0.0
                                     end
                                     0ABC: set_audio_stream soundsqa volume 2@
+                                    // [OTIM-MEM] Libera o stream assim que ele termina de tocar,
+                                    // em vez de segurar o buffer ate o fim do ciclo do ped.
+                                    // Estado 0 = parado/terminado. soundsqa volta a -1 para que
+                                    // os blocos de disparo possam carregar de novo quando preciso.
+                                    0AB9: get_audio_stream soundsqa state_to 12@
+                                    if
+                                        12@ == 0
+                                    then
+                                        0AAE: remove_audio_stream soundsqa
+                                        soundsqa = -1
+                                    end
                                 end
 
                                     // ≈сли что то пошло не так, то выходим из цикла

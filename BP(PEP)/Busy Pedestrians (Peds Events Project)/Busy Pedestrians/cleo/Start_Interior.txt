@@ -32,17 +32,34 @@ else
     0A93: terminate_this_custom_script
 end
 
+// [OTIM-MEM] Gate por configuracao (txd ImpInt, 4 modelos).
+// Spanner/Sponge/Broom sao compartilhados por Chef, Club e os interiores de
+// restaurante; HairCLipper so pelo Barber (aqui e no ImprB2.qa). Carrega cada um
+// apenas se houver algum consumidor ligado no INI.
+0AF0: 18@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Improved interiors" key "Chef"
+0AF0: 17@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Improved interiors" key "Club"
+0AF0: 16@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Improved interiors" key "Barber"
+
 if
     0E2D: is_game_first_start
 then
-    0F00: load_special_model_dff "modelsq\Spanner1" txd "modelsq\ImpInt" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Improved interiors.ini" section "Models" key "Spanner"
-    0F00: load_special_model_dff "modelsq\Sponge" txd "modelsq\ImpInt" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Improved interiors.ini" section "Models" key "Sponge"
-    0F00: load_special_model_dff "modelsq\Broom1" txd "modelsq\ImpInt" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Improved interiors.ini" section "Models" key "Broom"
-    0F00: load_special_model_dff "modelsq\HairCLipper" txd "modelsq\ImpInt" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Improved interiors.ini" section "Models" key "HairCLipper"
+    if or
+        18@ == 1
+        17@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\Spanner1" txd "modelsq\ImpInt" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Improved interiors.ini" section "Models" key "Spanner"
+        0F00: load_special_model_dff "modelsq\Sponge" txd "modelsq\ImpInt" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Improved interiors.ini" section "Models" key "Sponge"
+        0F00: load_special_model_dff "modelsq\Broom1" txd "modelsq\ImpInt" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Improved interiors.ini" section "Models" key "Broom"
+    end
+    if
+        16@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\HairCLipper" txd "modelsq\ImpInt" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Improved interiors.ini" section "Models" key "HairCLipper"
+    end
 end
 
 const

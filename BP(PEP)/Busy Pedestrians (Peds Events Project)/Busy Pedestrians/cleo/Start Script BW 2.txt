@@ -33,13 +33,21 @@ else
     0A93: terminate_this_custom_script
 end
 
+// [OTIM-MEM] Gate por configuracao: hole e Shvelqa (txd StWork) so sao usados
+// por Road Workers.qa. 26@ e livre (const usa 27@..31@) e temporario.
+0AF0: 26@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Road Workers"
+
 if
     0E2D: is_game_first_start
 then
-    0F00: load_special_model_dff "modelsq\hole" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "hole"
-    0F00: load_special_model_dff "modelsq\Shvelqa" txd "modelsq\StWork" store_to 0@
-    0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Shvelqa"
+    if
+        26@ == 1
+    then
+        0F00: load_special_model_dff "modelsq\hole" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "hole"
+        0F00: load_special_model_dff "modelsq\Shvelqa" txd "modelsq\StWork" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\Busy Workers.ini" section "Models" key "Shvelqa"
+    end
 end
 
 const
