@@ -12,6 +12,7 @@ INI_FILES = ['SASCM.INI', 'SASCM.CLEO.ini', 'SASCM.CLEO+.ini',
              'SASCM.NewOpcodes.ini', 'SASCM.Clipboard.ini']
 
 BY_NUM = {}
+VARIANTS = {}
 MNEMONIC = {}
 ALIAS = {}
 # SB3-era fmt spellings differing from the SB4 data files
@@ -19,6 +20,39 @@ FMT_OVERRIDES = {
     0x0453: 'set_object %1d% XY_rotation %2d% %3d% angle %4d%',
     0x0829: 'actor %1d% perform_animation %2h% IFP_file %3h% rate %4d% time %5h% and_dies',
     0x016F: 'particle %1d% rot %5d% size %6d% intensity %7d% flags %8d% %9d% %10d% at %2d% %3d% %4d%',
+    # 0D59 is commented out in SASCM.CLEO+.ini; NewOpcodes spells it differently
+    0x0D59: 'get_current_weather_to %1d%',
+}
+
+# Opcodes accepting more than one surface form. The .ini can only hold one
+# spelling per opcode, but the SB3 compiler accepts these variants too.
+EXTRA_FORMS = {
+    # CLEO+ 0F02: the trailing "scale x y z" triple is optional, and when it is
+    # omitted the handle goes to the last argument. Param count differs (13/10).
+    # older SB spelling accepted alongside read_*_from_ini_file
+    0x0AF0: [(4, '%4d% = read_int_from_ini_file %1s% section %2s% key %3s%'),
+             (4, '%4d% = get_int_from_ini_file %1s% section %2s% key %3s%')],
+    0x0AF2: [(4, '%4d% = read_float_from_ini_file %1s% section %2s% key %3s%'),
+             (4, '%4d% = get_float_from_ini_file %1s% section %2s% key %3s%')],
+    # 0AC0 is often written without the leading "set_"
+    0x0AC0: [(2, 'set_audio_stream %1d% looped %2d%'),
+             (2, 'audio_stream %1d% looped %2d%')],
+    # "car" is accepted as a synonym of "vehicle"
+    # 0AA7 is frequently written as plain "call_function" (the return var is
+    # then the last vararg). Keep the canonical spelling first.
+    # "read_struct/write_struct" spellings used across this mod
+    0x0D4E: [(4, '%4d% = struct %1d% offset %2d% size %3d%'),
+             (4, '%4d% = read_struct %1d% offset %2d% size %3d%')],
+    0x0D4F: [(4, 'struct %1d% offset %2d% size %3d% = %4d%'),
+             (4, 'write_struct %1d% offset %2d% size %3d% value %4d%')],
+    0x0AA7: [(-1, 'call_function_return %1d% num_params %2h% pop %3h%'),
+             (-1, 'call_function %1d% num_params %2h% pop %3h%')],
+    0x0A97: [(2, '%2d% = vehicle %1d% struct'),
+             (2, '%2d% = car %1d% struct')],
+    0x0F02: [
+        (13, 'create_render_object_to_char_bone_from_special %1d% special_model %2d% bone %3d% offset %4d% %5d% %6d% rotation %7d% %8d% %9d% scale %10d% %11d% %12d% store_to %13d%'),
+        (10, 'create_render_object_to_char_bone_from_special %1d% special_model %2d% bone %3d% offset %4d% %5d% %6d% rotation %7d% %8d% %9d% store_to %10d%'),
+    ],
 }
 
 def norm_fmt(fmt):
@@ -64,6 +98,12 @@ def load_opcodes():
             skel = norm_fmt(fmt)
             for k in skeleton_keys(skel):
                 MNEMONIC.setdefault(k, []).append(op)
+    for op, forms in EXTRA_FORMS.items():
+        VARIANTS[op] = forms
+        for cnt, fmt in forms:
+            for k in skeleton_keys(norm_fmt(fmt)):
+                if op not in MNEMONIC.get(k, []):
+                    MNEMONIC.setdefault(k, []).append(op)
     for line in open(os.path.join(SA, 'keywords.txt'), encoding='cp1251'):
         line = line.strip()
         if not line or line.startswith(';') or '=' not in line:
@@ -98,7 +138,7 @@ class Tok:
 
 TOKEN_RE = re.compile(r"""
     (?P<directive>\{\$[^}]*\})
-  | (?P<ws>[ \t]+)
+  | (?P<ws>[ \t\x0c]+)
   | (?P<comment>//.*)
   | (?P<dq>"(?:[^"\\]|\\.)*")
   | (?P<sq>'(?:[^'\\]|\\.)*')
@@ -109,9 +149,9 @@ TOKEN_RE = re.compile(r"""
   | (?P<int>-?\d+)
   | (?P<labelref>@[A-Za-z_][A-Za-z0-9_]*)
   | (?P<labeldef>:[A-Za-z_][A-Za-z0-9_]*)
-  | (?P<gvar>\$[A-Za-z_][A-Za-z0-9_]*)
+  | (?P<gvar>\$[A-Za-z_0-9][A-Za-z0-9_]*)
   | (?P<ident>[A-Za-z_][A-Za-z0-9_.]*)
-  | (?P<op>==|!=|>=|<=|>|<|\+=|-=|\*=|/=|=|\(|\)|,|:)
+  | (?P<op>==|!=|>=|<=|>|<|\+=|-=|\*=|/=|\+|-|\*|/|=|\(|\)|,|:)
 """, re.X)
 
 def tokenize(text):
@@ -227,16 +267,21 @@ class Compiler:
             if t.kind == 'sq': return ('gxt', self.unquote(t.val))
             if t.kind == 'labelref': return ('label', t.val[1:])
         # array access Name(idx, Ni)  - tokenizer splits '1i' into int + ident
-        if (len(toks) >= 6 and toks[0].kind == 'ident' and toks[1].val == '('
-                and toks[-1].val == ')'):
-            c = self.consts.get(toks[0].val.lower())
-            assert c and c[0] == 'var', toks[0].val
+        if (len(toks) >= 6 and toks[0].kind in ('ident', 'var', 'gvar')
+                and toks[1].val == '(' and toks[-1].val == ')'):
+            # base may be a const name or a variable written directly (0@(...))
+            if toks[0].kind == 'ident':
+                c = self.consts.get(toks[0].val.lower())
+                assert c and c[0] == 'var', toks[0].val
+                base = c[1]
+            else:
+                base = self.resolve_var(toks[0])[1]
             iv = self.resolve_var(toks[2])
             if toks[4].kind == 'int' and len(toks) >= 7 and toks[5].val == 'i':
                 size = int(toks[4].val)
             else:
                 size = int(toks[4].val[:-1])
-            return ('arr', (c[1], iv[1], size))
+            return ('arr', (base, iv[1], size))
         raise SyntaxError('bad value: ' + repr([t.val for t in toks]))
 
     def unquote(self, s):
@@ -355,6 +400,12 @@ class Compiler:
                 self.consts[name] = ('num', int(vt.val))
             elif vt.kind == 'fpnum':
                 self.consts[name] = ('float', float(vt.val))
+            elif vt.kind == 'hex':
+                self.consts[name] = ('num', int(vt.val, 16))
+            elif vt.kind == 'var' or (vt.kind == 'ident' and vt.val.lower() in self.consts):
+                self.consts[name] = self.consts[vt.val.lower()]
+            elif vt.kind == 'gvar':
+                self.consts[name] = ('gvar', vt.val)
             else:
                 raise SyntaxError('const ' + vt.val)
             idx += 1
@@ -404,13 +455,38 @@ class Compiler:
         return idx + 1
 
     def parse_while(self, idx):
-        assert self.lines[idx][1].val.lower() == 'true'
+        """while true ... end  and  while <condition> ... end
+
+        For a real condition SB emits the condition test at the top of the loop
+        followed by a jump-if-false past the tail jump. Multi-line conditions
+        (while and / while or) use the same 00D6 encoding as parse_if."""
+        toks = self.lines[idx]
+        is_true = (len(toks) > 1 and toks[1].kind == 'ident'
+                   and toks[1].val.lower() == 'true')
         top = self.here()
         toplab = self.newlab('wtop')
         cont = self.newlab('wcont')
         brk = self.newlab('wend')
         self.labels[toplab] = top
         self.loops.append((cont, brk))
+        if not is_true:
+            i = 1
+            mode = None
+            if i < len(toks) and toks[i].val.lower() in ('and', 'or'):
+                mode = toks[i].val.lower(); i += 1
+            conds = []
+            if i < len(toks):
+                conds.append(toks[i:])
+            # extra condition lines until the body starts
+            while not conds:
+                idx += 1
+                conds.append(self.lines[idx])
+            n = len(conds)
+            raw = 0 if n == 1 else ((n - 1) + 0x14 if mode == 'or' else n - 1)
+            self.emit_op(0x00D6); self.emit(b'\x04'); self.emit(struct.pack('<B', raw))
+            for c in conds:
+                self.compile_condition(c)
+            self.emit_op(0x004D); self.emit_label(brk)
         idx = self.parse_body(idx + 1, ('end',))
         # SB: 'continue' lands on the backward jump at the loop tail
         self.labels[cont] = self.here()
@@ -606,7 +682,72 @@ class Compiler:
         if head == 'player.defined' and len(toks) >= 4:
             v = self.resolve_value(toks[2:3])
             self.emit_op(0x0256, notflag); self.emit_value(v, 'd'); return True
+        # --- one-argument condition members: Class.Member(x)
+        SIMPLE = {
+            'actor.dead':     (0x0118, 'd'),
+            'actor.driving':  (0x00DF, 'd'),
+            'object.destroy': (0x0108, 'd'),
+            'actor.destroy':  (0x009B, 'd'),
+        }
+        if head in SIMPLE and len(toks) >= 4:
+            op, lt = SIMPLE[head]
+            v = self.resolve_value(toks[2:3])
+            self.emit_op(op, notflag); self.emit_value(v, lt); return True
+        # Actor.Animation(a) == "name"  ->  0611 actor a performing_animation "name"
+        if head == 'actor.animation' and len(toks) >= 4 and toks[1].val == '(':
+            close = next(i for i, t in enumerate(toks) if t.val == ')')
+            rest = toks[close+1:]
+            if rest and rest[0].kind == 'op' and rest[0].val in ('==', '!='):
+                nf = notflag ^ (rest[0].val == '!=')
+                a = self.resolve_value(toks[2:close])
+                self.emit_op(0x0611, nf)
+                self.emit_value(a, 'd'); self.emit_value(self.resolve_value(rest[1:]), 'h')
+                return True
+        # Actor.Angle(a) = v  ->  0173 set_actor a Z_angle_to v
+        if head == 'actor.angle' and toks[1].val == '(':
+            close = next(i for i, t in enumerate(toks) if t.val == ')')
+            rest = toks[close+1:]
+            if rest and rest[0].kind == 'op' and rest[0].val == '=':
+                a = self.resolve_value(toks[2:close])
+                self.emit_op(0x0173, notflag)
+                self.emit_value(a, 'd'); self.emit_value(self.resolve_value(rest[1:]), 'd')
+                return True
+        # v = Actor.CurrentCar(a)  is handled by the assignment path below
+        # Actor.Create(var, pedtype, model, x, y, z) -> 009A
+        if head == 'actor.create' and toks[1].val == '(':
+            close = next(i for i, t in enumerate(toks) if t.val == ')')
+            args = self.split_args(toks[2:close])
+            if len(args) == 6:
+                self.emit_op(0x009A, notflag)
+                self.emit_value(self.resolve_value(args[1]), 'd')
+                self.emit_value(self.resolve_value(args[2]), 'm')
+                for k in (3, 4, 5):
+                    self.emit_value(self.resolve_value(args[k]), 'd')
+                self.emit_target(('var', self.resolve_var(args[0][0])))
+                return True
         return False
+
+    def split_args(self, toks):
+        """split a token list on commas; SB also tolerates space-separated args"""
+        out, cur = [], []
+        for t in toks:
+            if t.kind == 'op' and t.val == ',':
+                if cur:
+                    out.append(cur); cur = []
+            else:
+                cur.append(t)
+        if cur:
+            out.append(cur)
+        # space-separated tail (e.g. "2@ 3@ 4@" as three args)
+        if len(out) < 6:
+            flat = []
+            for grp in out:
+                if len(grp) > 1 and all(x.kind in ('var', 'int', 'fpnum') for x in grp):
+                    flat.extend([[x] for x in grp])
+                else:
+                    flat.append(grp)
+            out = flat
+        return out
 
     def compile_assign(self, lhs, opnd, rhs):
         if len(lhs) == 1:
@@ -748,8 +889,19 @@ class Compiler:
         return seq
 
     def match_opcode(self, op, toks, alias=False):
-        """strict fmt match; returns (params, extra, fmt, vararg) or None"""
+        """strict fmt match; returns (params, extra, fmt, vararg) or None.
+        Opcodes listed in EXTRA_FORMS have several accepted spellings; try each
+        in order and keep the first that consumes the whole token list."""
+        if op in VARIANTS:
+            for cnt, fmt in VARIANTS[op]:
+                r = self._match_one(op, toks, alias, cnt, fmt)
+                if r is not None:
+                    return r
+            return None
         cnt, fmt = BY_NUM[op]
+        return self._match_one(op, toks, alias, cnt, fmt)
+
+    def _match_one(self, op, toks, alias, cnt, fmt):
         vararg = (cnt == -1)
         seq = self.fmt_seq(fmt)
         toks = list(toks)
