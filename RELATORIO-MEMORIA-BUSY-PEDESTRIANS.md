@@ -288,3 +288,88 @@ arquivos no `cleo/`). O 6 muda o modelo de memória do mod e exige teste em jogo
 não estavam presentes no repositório — os números de "quantidade" são exatos, os de
 "quantos MB" dependem dos seus arquivos locais. Se quiser, me passe os tamanhos da pasta
 `modelsq/` e eu converto a tabela da seção 2 em MB reais por grupo.*
+
+---
+
+## 9. Execução do plano — o que foi feito
+
+Todos os passos 1–5 foram implementados. Validação: `python3 tools/bplint.py` →
+**0/120 erros estruturais**, e o conjunto de arquivos que o compilador experimental
+rejeita é **idêntico ao commit original** (92/120, todos por limitações do compilador,
+não por erro nos scripts).
+
+### Passo 1 — deduplicação ✔
+5 `0F00` duplicados viraram leitura da chave já carregada, com fallback dentro de `else`.
+Asset morto `phone` removido. Loads no boot: 212 → 206.
+
+### Passo 2 — render objects ✔
+`Tram Peds.txt` ganhou buffer `:ROBuffer` de 10 slots com cleanup em `:Destroy_peds` e
+`:Destroy_peds_2`. Os 5 handles sobrescritos (`Atrium`, `Golf Peds`, `In Out Peds`,
+`Interior RestQa`, `Street Artist`) receberam variável dedicada e `0E2F` antes do
+`terminate`. Deletes: 82 → 89.
+
+### Passo 3 — gating por INI ✔
+**59 dos 212** `0F00` agora só carregam se a feature estiver ligada:
+
+| Arquivo | Modelos | Chave |
+|---|---|---|
+| `StreetLoad.txt` | 10 | `Street musicians` (fallback: só `guitar2` se `Tourist > 0`) |
+| `StreetCLLoad.txt` | 7 | `Street Cleaners` |
+| `Start_Interior.txt` | 4 | `Chef`/`Club` e `Barber` |
+| `Start Script BW.txt` | 16 | Postman, Garbage Mans, Comm. repairers, WindWash, Street Art |
+| `Start Script BW 2.txt` | 2 | `Road Workers` |
+| `Start Script 4.txt` | 2 | `Roller Brush`, `Bridge Workers` |
+| `Start Script 2.txt` | 12 | Graffity Gang, Parachute Ped, Hunter, Crime Scene, Tourist |
+| `Start Script 3.txt` | 6 | Video News, Shopping basket, Rc Car Players |
+
+Sem gate por não haver chave no INI: `SportQa`/`SportQa2`, `frsaleq`/`hammerq`, `tlscopeq`.
+
+**Correção à seção 2:** `News Paper`, `Fish Rod`, `GangsWithMusic` e `Security Van Heist`
+foram listados como "toggle lido depois do load", mas na verdade fazem
+`terminate_this_custom_script` antes do bloco de load — o gating já era efetivo.
+Nenhuma alteração foi necessária neles.
+
+### Passo 4 — áudio e animações ✔
+- `Peds use Vends.txt`: o stream agora é liberado assim que `0AB9` reporta estado 0,
+  em vez de ficar retido até o fim do ciclo do ped.
+- `Para Jumper.txt` / `RC game.txt`: os `04EF` existentes citavam *nomes de animação*
+  (`PedEventsMod`, `PED_Console_Loop`), não o bloco IFP carregado por `04ED`. Adicionado
+  `release_animation` de `PARACHUTE` e `CRIB`.
+- `StBroom` / `StRake` / `StWaterCan`: `model.Load(6@)` rodava a cada volta do loop sem
+  nenhum `Destroy`. Adicionado `model.Destroy(6@)` nos 4 pontos de cleanup de cada um.
+
+Resultado: **zero** blocos IFP carregados e nunca liberados, e **zero** scripts com
+`0AC1` sem `0AAE`.
+
+**Correção à seção 4:** `Rap Battle.txt` estava correto — o `0AAE` da linha 234 precede
+os dois loads dos ramos exclusivos. Os "gaps longos" entre load e release listados na
+seção 5 também são legítimos: correspondem ao tempo de vida do evento.
+
+### Passo 5 — scripts residentes ✔ (com escopo revisado)
+**A premissa original estava errada.** Os 5 loaders (`ModelLoad`, `Models loading`,
+`StreetLoad`, `StreetCLLoad`, `Start script`) terminam com `004E`/`0A93` logo após
+carregar — **não ficam residentes**. Fundi-los não economizaria memória alguma, então
+essa parte foi descartada. Pelo mesmo motivo, extrair a checagem de versão do CLEO+
+duplicada em 18 arquivos é ganho de manutenção, não de RAM.
+
+O que realmente fica residente são **32 scripts em loop (~740 KB de fonte)**. Destes,
+três não tinham como ser desligados: `Tram Peds.txt` (29 KB), `PedsCopMed.txt` (9 KB) e
+`Water VEnd.txt` (5 KB). Foram adicionadas três chaves novas em `[Settings]` do
+`Busy Pedestrians.ini` — `Tram Peds`, `Cop and Medic Peds`, `Water Vendor` — todas com
+default `1`, de modo que o comportamento padrão não muda. Quem não usa essas features
+agora consegue removê-las da memória.
+
+**Correção à seção 6:** o `:Buffer hex 00(420)` de `Start script.txt` foi descrito como
+tendo ~170 bytes ociosos. Está errado: o script escreve em índices até 99
+(`4@ = 99` → offset 396), então os 420 bytes são necessários. Nada a fazer.
+
+### Passo 6 — não executado
+Carregamento sob demanda com `0F01` + refcount muda o modelo de memória do mod e exige
+teste em jogo. Fica como trabalho futuro.
+
+### Sobre compilar
+O ambiente de análise não tem Sanny Builder nem wine. O `tools/sbcompile.py` (escrito
+para o Random Events Project) compila só 28/120 — as falhas são de opcodes que ele não
+implementa (`0D59`, variáveis `$`, `*`, o formfeed do `0F02`, sintaxe `actor.Dead()`,
+`while <cond>`), **não** erros do mod. Para gerar os `.cs` de verdade, abra os `.txt` no
+Sanny Builder no Windows com CLEO+ 1.2 instalado.
