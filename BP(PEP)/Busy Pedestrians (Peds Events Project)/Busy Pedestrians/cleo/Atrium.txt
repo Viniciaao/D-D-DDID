@@ -19,6 +19,7 @@ const
     ped_7 = 25@
     ped_8 = 24@
 end
+4@ = -1   // [OTIM-MEM] handle do render object (cop3 na mao do ped_2)
 
 
             repeat
@@ -78,7 +79,7 @@ end
             0E24: fix_char ped_2 ground 1 brightness 1 and_fade_in 0
             0812: AS_actor ped_2 perform_animation "crime_c2" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
             0AF0: 1@ = read_int_from_ini_file "cleo\PedsModels.ini" section "Models" key "cop3"
-            0F02: create_render_object_to_char_bone_from_special ped_2 special_model 1@ bone 34 offset 0.25 0 0 rotation 0 180.0 350.0 store_to 1@
+            0F02: create_render_object_to_char_bone_from_special ped_2 special_model 1@ bone 34 offset 0.25 0 0 rotation 0 180.0 350.0 store_to 4@   // [OTIM-MEM] handle em 4@ (antes 1@, era sobrescrito)
 
             0209: 1@ = random_int_in_ranges 0 2
             0209: 2@ = random_int_in_ranges 0 2
@@ -407,6 +408,13 @@ end
             wait 0
             until not $ACTIVE_INTERIOR == 18
 
+// [OTIM-MEM] destroi o render object antes de encerrar
+if
+    4@ > -1
+then
+    0E2F: delete_render_object 4@
+    4@ = -1
+end
 0A93: terminate_this_custom_script
 
 

@@ -22,6 +22,7 @@ const
     left = 1
     right = 2
 end
+4@ = -1   // [OTIM-MEM] handle do render object (bola de golfe (obj))
 
 0087: coords_x = 0@ // (float)
 0087: coords_y = 1@ // (float)
@@ -86,7 +87,7 @@ end
         04C4: store_coords_to 1@ 2@ 3@ from_actor Golf_man with_offset 0.9 0.0 -0.9
         0E01: create_object_no_save 3065 at 1@ 2@ 3@ offset 0 ground 0 to golf_ball
         08D2: object golf_ball scale_model 0.0
-        0F03: create_render_object_to_object golf_ball model 1974 offset 0 0 0 rotation 0 0 0 store_to 1@
+        0F03: create_render_object_to_object golf_ball model 1974 offset 0 0 0 rotation 0 0 0 store_to 4@   // [OTIM-MEM] handle em 4@ (antes 1@, era sobrescrito)
         0172: 1@ = actor Golf_man Z_angle
         0177: set_object golf_ball Z_angle_to 1@
 
@@ -218,5 +219,12 @@ end
         wait 0
         until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 100.0
         
+// [OTIM-MEM] destroi o render object antes de encerrar
+if
+    4@ > -1
+then
+    0E2F: delete_render_object 4@
+    4@ = -1
+end
 0A93: terminate_this_custom_script
 

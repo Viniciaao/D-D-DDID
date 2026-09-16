@@ -31,8 +31,18 @@ else
     0A93: terminate_this_custom_script
 end
 
-if
+// [OTIM-MEM] Gate por configuracao (txd STMusic, 10 modelos).
+//   Street musicians = 1  -> carrega os 10 (Guitar/Piano/Sax/Viol/Band)
+//   senao, Tourist > 0    -> carrega apenas "guitar2" (unico usado por Tourists.qa)
+//   senao                 -> nao carrega nenhum
+// As flags Loaded1..5 seguem sendo escritas no fim em qualquer caso: os consumidores
+// esperam por elas num repeat..until e travariam se nunca fossem setadas.
+0AF0: 28@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Street musicians"
+0AF0: 27@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Percent Chance" key "Tourist"
+
+if and
     is_game_first_start
+    28@ == 1
 then
 
 0F00: load_special_model_dff "modelsq\elguitar" txd "modelsq\STMusic" store_to 0@
@@ -64,6 +74,15 @@ then
 
 0F00: load_special_model_dff "modelsq\pipem" txd "modelsq\STMusic" store_to 0@
 0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "pipem"
+else
+    // Street musicians desligado: carrega so o que Tourists.qa precisa
+    if and
+        is_game_first_start
+        27@ > 0
+    then
+        0F00: load_special_model_dff "modelsq\guitar2" txd "modelsq\STMusic" store_to 0@
+        0AF1: write_int 0@ to_ini_file "cleo\streetmus.ini" section "Models" key "guitar2"
+    end
 end
 
 1@ = 1 //  loaded

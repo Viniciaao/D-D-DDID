@@ -26,6 +26,7 @@ const
     Mode_Go_Out = 2
     Mode_Stay = 3
 end
+6@ = -1   // [OTIM-MEM] handle do render object (objeto na mao)
 
 0087: coords_x = 0@ // (float)
 0087: coords_y = 1@ // (float)
@@ -137,7 +138,7 @@ end
 0E01: create_object_no_save door_model at 1@ 2@ 3@ offset 0 ground 0 to Door_black
 0176: 1@ = object Door_1 Z_angle
 0177: set_object Door_black Z_angle_to 1@
-0F03: create_render_object_to_object Door_black model 2531 offset 0 0 0.0 rotation 0 0 0 store_to 1@
+0F03: create_render_object_to_object Door_black model 2531 offset 0 0 0.0 rotation 0 0 0 store_to 6@   // [OTIM-MEM] handle em 6@ (antes 1@, era sobrescrito)
 0E37: set_render_object_scale 1@ 1.5 0.5 1.1
 08D2: object Door_black scale_model 0.0
 
@@ -429,6 +430,13 @@ repeat
 wait 0
 until not locate_char_distance_to_coordinates $PLAYER_ACTOR pos coords_x coords_y coords_z radius 200.0
 
+// [OTIM-MEM] destroi o render object antes de encerrar
+if
+    6@ > -1
+then
+    0E2F: delete_render_object 6@
+    6@ = -1
+end
 0A93: terminate_this_custom_script
 
 

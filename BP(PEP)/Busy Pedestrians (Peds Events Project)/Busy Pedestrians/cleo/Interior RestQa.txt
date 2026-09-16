@@ -31,6 +31,7 @@ const
     obj_6 = 13@
     obj_7 = 12@
 end
+4@ = -1   // [OTIM-MEM] handle do render object (objeto na mao)
 
 
 0085: sweep = 0@ // (int)
@@ -274,7 +275,7 @@ end
                 
                 0E24: fix_char ped_2 ground 1 brightness 1 and_fade_in 0
                 0812: AS_actor ped_2 perform_animation "Sweep" IFP "PedEventsMod" framedelta 100.0 loopA 1 lockX 0 lockY 0 lockF 0 time -1  // versionB
-                0F02: create_render_object_to_char_bone_from_special ped_2 special_model sweep bone 24 offset 0 0 0 rotation 0 0 0 store_to 1@
+                0F02: create_render_object_to_char_bone_from_special ped_2 special_model sweep bone 24 offset 0 0 0 rotation 0 0 0 store_to 4@   // [OTIM-MEM] handle em 4@ (antes 1@, era sobrescrito)
                 
                 
                 // ped 3
@@ -549,6 +550,13 @@ end
             wait 0
             until not $ACTIVE_INTERIOR == 4
 
+// [OTIM-MEM] destroi o render object antes de encerrar
+if
+    4@ > -1
+then
+    0E2F: delete_render_object 4@
+    4@ = -1
+end
 0A93: terminate_this_custom_script
 
 

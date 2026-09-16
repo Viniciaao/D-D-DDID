@@ -31,8 +31,15 @@ else
     0A93: terminate_this_custom_script
 end
 
-if
+// [OTIM-MEM] Gate por configuracao: os 7 modelos do txd StreetCL sao usados
+// exclusivamente por StBroom/StRake/StWaterCan/StAxe/StSledge, todos controlados
+// pelo mesmo toggle [Settings] Street Cleaners. Com ele em 0 nada e carregado.
+// As flags Loaded1..5 continuam escritas no fim (os consumidores esperam por elas).
+0AF0: 28@ = read_int_from_ini_file "cleo\Busy Pedestrians.ini" section "Settings" key "Street Cleaners"
+
+if and
     is_game_first_start
+    28@ == 1
 then
 
 0F00: load_special_model_dff "modelsq\broom" txd "modelsq\StreetCL" store_to 0@
